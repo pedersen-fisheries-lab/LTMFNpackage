@@ -1,15 +1,21 @@
 Package: LTMFNpackage
 Type: Package
-Title: What the Package Does (Title Case)
+Title: LTMFTN Data Helper
 Version: 0.1.0
-Author: Who wrote it
-Maintainer: The package maintainer <yourself@somewhere.net>
-Description: More about what it does (maybe more than one line)
-    Use four spaces when indenting paragraphs within the Description.
-License: What license is it under?
+Authors@R: person("Natalie", "Dupont", email = "natalie.dupont@concordia.ca",
+  role = c("aut", "cre"))
+Description: This pacakge contains useful helper functions for formatting and analyzing data for the LTMFTN fish telemetry project.
+    These include packages to format data into standardized and user-friendly formats, as well as helper and wrapper functions to analyze small-scale movement data using the YAPS pacakge.
+License: use_mit_license()
 Encoding: UTF-8
 LazyData: true
-imports:
+Imports:
   dplyr,
   tidyr,
-  lubridate
+  lubridate,
+  yaps
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.2.3
+Suggests: 
+    testthat (>= 3.0.0)
+Config/testthat/edition: 3
