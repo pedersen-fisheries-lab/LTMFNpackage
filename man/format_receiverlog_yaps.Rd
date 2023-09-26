@@ -4,7 +4,11 @@
 \alias{format_receiverlog_yaps}
 \title{Reformats the receiver log into a format that interfaces well with yaps. The receiver log is downloaded from the VUE software database}
 \usage{
-format_receiverlog_yaps(receiverLog)
+format_receiverlog_yaps(
+  receiverLog,
+  starttime = "1970-01-01 00:00:00",
+  endtime = "3000:01:01 00:00:00"
+)
 }
 \arguments{
 \item{receiverLog}{the VUE receiver detections database}
