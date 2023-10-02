@@ -19,3 +19,38 @@
 #' @example
 #' data(vue_det)
 "vue_det"
+
+#' GPS waypoint data frame
+#'
+#' An example of a GPS waypoint data imported from a GPX file using readGPX(). This is used to illustrate GPS data cleaning steps necessary for analysis
+#'
+#' @format A data frame with 82 rows and 8 columns:
+#'
+#' \describe{
+#'   \item{lon, lat}{longitude and latitude in WGS84}
+#'   \item{ele}{elevation from sea level  in meters}
+#'   \item{time}{time of data download in YYYY-MM-DDTHH:MM:SSZ}
+#'   \item{name}{the ID name assigned to each waypoint}
+#'   \item{sym}{symbol type used by GARMIN}
+#'   \item{type, extensions}{GARMIN extra data}
+#' }
+#' @source {From an eTREX device, data imported into GARMIN basecamp, downloaded as a GPX and loaded into R using readGPX()}
+#' @example
+#' data(wpts_gpx)
+"wpts_gpx"
+
+#' GPS track data frame
+#'
+#' An example of  GPS track data imported from a GPX file using readGPX(). This is used to illustrate GPS data cleaning steps necessary for analysis
+#'
+#' @format A data frame with 8323 rows and 4 columns:
+#'
+#' \describe{
+#'   \item{lon, lat}{longitude and latitude in WGS84}
+#'   \item{ele}{elevation from sea level  in meters}
+#'   \item{time}{time of data download in YYYY-MM-DDTHH:MM:SSZ}
+#' }
+#' @source {From an eTREX device, data imported into GARMIN basecamp, downloaded as a GPX and loaded into R using readGPX()}
+#' @example
+#' data(track_gpx)
+"track_gpx"

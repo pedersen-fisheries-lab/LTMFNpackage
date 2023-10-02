@@ -2,20 +2,25 @@
 % Please edit documentation in R/yaps-data.R
 \name{format_receiverlog_yaps}
 \alias{format_receiverlog_yaps}
-\title{Reformats the receiver log into a format that interfaces well with yaps. The receiver log is downloaded from the VUE software database}
+\title{Reformats the receiver log into a format that interfaces well with yaps.}
 \usage{
 format_receiverlog_yaps(
   receiverLog,
+  full = TRUE,
   starttime = "1970-01-01 00:00:00",
   endtime = "3000:01:01 00:00:00"
 )
 }
 \arguments{
-\item{receiverLog}{the VUE receiver detections database}
+\item{receiverLog}{the VUE receiver detections database. The receiver log is downloaded from the VUE software database}
+
+\item{full}{logical TRUE/FALSE statement for stating if you want a full converstion to yaps formatting, or a partial conversion to maintain some extra information (ex: sensor data, etc.). Default set to TRUE}
+
+\item{starttime/endtime}{Character string or POSIXt date and time stamp to filter only a given date range of data}
 }
 \value{
 returns a reformated detections database.
 }
 \description{
-Reformats the receiver log into a format that interfaces well with yaps. The receiver log is downloaded from the VUE software database
+Reformats the receiver log into a format that interfaces well with yaps.
 }
