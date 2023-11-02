@@ -1,0 +1,267 @@
+date,site,equipmentType,objectSerialNo,stationID,action,deplymentType,time,waypoint,latitude,longitude,depth,substrateType,crew,comment
+2023-07-27,JOY,VR2Tx,490690,RT-JOY-01-A,deployed,RT,15:41:00,17,45.369646,-74.797327,1.25,,"AS, ND, EP",
+2023-07-26,lab,VR2Tx,490690,RT-JOY-01-A,configure,RT,14:23:00,,,,,,"AS, ND","Initializing to RT-JOY, no transmission"
+2023-07-27,JOY,VR2Tx,490690,RT-JOY-01-A,retrieved,RT,16:31:00,,,,,,"AS, ND, EP",
+2023-07-27,JOY,VR2Tx,490690,RT-JOY-01-A,configure,RT,18:30:19,,,,,,"AS, ND, EP",TURNED OFF LOGGING AND DIAGNOSTICS
+2023-07-28,lab,VR2Tx,490690,RT-JOY-01-A,dataDownload,RT,13:35:00,,,,,,ND,"data downloaded, remains on receiver, not clock corrected yet"
+2023-08-01,lab,VR2Tx,490690,RT-JOY-01-A,dataDownload,RT,10:16:00,,,,,,"ND, AS",data clock drift corrected
+2023-07-27,JOY,VR2Tx,490687,RT-JOY-02-A,deployed,RT,15:24:00,16,45.369866,-74.797016,1.5,,"AS, ND, EP",
+2023-07-26,lab,VR2Tx,490687,RT-JOY-02-A,configure,RT,14:26:40,,,,,,"AS, ND","Initializing to RT-JOY, no transmission"
+2023-07-27,JOY,VR2Tx,490687,RT-JOY-02-A,retrieved,RT,16:39:00,,,,,,"AS, ND, EP",
+2023-07-27,JOY,VR2Tx,490687,RT-JOY-02-A,configure,RT,19:39:36,,,,,,"AS, ND, EP",TURNED OFF LOGGING AND DIAGNOSTICS
+2023-07-28,lab,VR2Tx,490687,RT-JOY-02-A,dataDownload,RT,13:51:00,,,,,,ND,"data downloaded, remains on receiver, not clock corrected yet"
+2023-08-01,lab,VR2Tx,490687,RT-JOY-02-A,dataDownload,RT,10:16:00,,,,,,"ND, AS",data clock drift corrected
+2023-07-27,JOY,VR2Tx,490682,RT-JOY-03-A,deployed,RT,15:18:00,15,45.369779,-74.797066,2.2,,"AS, ND, EP","LINE BUOYS FLOATING NEAR SURFACE, MAY AFECT TILT"
+2023-07-26,lab,VR2Tx,490682,RT-JOY-03-A,configure,RT,14:29:47,,,,,,"AS, ND","Initializing to RT-JOY, no transmission"
+2023-07-27,JOY,VR2Tx,490682,RT-JOY-03-A,retrieved,RT,16:41:00,,,,,,"AS, ND, EP",
+2023-07-27,JOY,VR2Tx,490382,RT-JOY-03-A,configure,RT,19:28:31,,,,,,"AS, ND, EP",TURNED OFF LOGGING AND DIAGNOSTICS
+2023-07-28,lab,VR2Tx,490682,RT-JOY-03-A,dataDownload,RT,14:01:00,,,,,,ND,"data downloaded, remains on receiver, not clock corrected yet"
+2023-08-01,lab,VR2Tx,490682,RT-JOY-03-A,dataDownload,RT,10:16:00,,,,,,"ND, AS",data clock drift corrected
+2023-07-27,JOY,VR2Tx,490684,RT-JOY-04-A,deployed,RT,15:48:00,18,45.369589,-74.797611,,,"AS, ND, EP","MOORED IN AQUATIC VEGETATION, TIME OF DEPLOYMENT MIGHT BE OFF"
+2023-07-26,lab,VR2Tx,490684,RT-JOY-04-A,configure,RT,14:32:25,,,,,,"AS, ND","Initializing to RT-JOY, no transmission"
+2023-07-27,JOY,VR2Tx,490684,RT-JOY-04-A,retrieved,RT,16:29:00,,,,,,"AS, ND, EP",
+2023-07-27,JOY,VR2Tx,490684,RT-JOY-04-A,configure,RT,19:34:36,,,,,,"AS, ND, EP",TURNED OFF LOGGING AND DIAGNOSTICS
+2023-07-28,lab,VR2Tx,490684,RT-JOY-04-A,dataDownload,RT,14:03:00,,,,,,ND,"data downloaded, remains on receiver, not clock corrected yet"
+2023-08-01,lab,VR2Tx,490684,RT-JOY-04-A,dataDownload,RT,10:16:00,,,,,,"ND, AS",data clock drift corrected
+2023-07-26,lab,VR2Tx,490667,RT-JOY-05-A,configure,RT,14:43:45,,,,,,"AS, ND","Initializing to RT-JOY, no transmission"
+2023-07-27,JOY,VR2Tx,490688,RT-JOY-06-A,deployed,RT,10:54:00,4,45.369778,-74.797118,,,"AS, ND, EP",
+2023-07-26,lab,VR2Tx,490688,RT-JOY-06-A,configure,RT,14:49:12,,,,,,"AS, ND","Initializing to RT-JOY, no transmission"
+2023-07-27,JOY,VR2Tx,490688,RT-JOY-06-A,retrieved,RT,16:42:00,,,,,,"AS, ND, EP",
+2023-07-27,JOY,VR2Tx,490688,RT-JOY-06-A,configure,RT,9:33:00,,,,,,"AS, ND, EP","SYNC TAG LOW, FAST DIAGNOSTICS ON"
+2023-07-27,JOY,VR2Tx,490688,RT-JOY-06-A,configure,RT,18:31:11,,,,,,"AS, ND, EP",TURNED OFF LOGGING AND DIAGNOSTICS
+2023-07-28,lab,VR2Tx,490688,RT-JOY-06-A,dataDownload,RT,14:06:00,,,,,,ND,"data downloaded, remains on receiver, not clock corrected yet"
+2023-08-01,lab,VR2Tx,490688,RT-JOY-06-A,dataDownload,RT,10:16:00,,,,,,"ND, AS",data clock drift corrected
+2023-07-26,lab,VR2W,139345,RT-JOY-07-A,configure,RT,14:53:49,,,,,,"AS, ND","Initializing to RT-JOY, no transmission"
+2023-07-27,JOY,VR2W,139337,RT-JOY-08-A,deployed,RT,15:18:00,15,45.369779,-74.797066,2.2,,"AS, ND, EP","LINE BUOYS FLOATING NEAR SURFACE, MAY AFECT TILT"
+2023-07-26,lab,VR2W,139337,RT-JOY-08-A,configure,RT,14:57:02,,,,,,"AS, ND","Initializing to RT-JOY, no transmission"
+2023-07-27,JOY,VR2W,139337,RT-JOY-08-A,retrieved,RT,16:41:00,,,,,,"AS, ND, EP",
+2023-07-28,lab,VR2W,139337,RT-JOY-08-A,dataDownload,RT,14:09:00,,,,,,ND,"data downloaded, remains on receiver, not clock corrected yet"
+2023-08-01,lab,VR2W,139337,RT-JOY-08-A,dataDownload,RT,10:16:00,,,,,,"ND, AS",data clock drift corrected
+2023-07-26,lab,VR2W,139343,RT-JOY-09-A,configure,RT,14:59:40,,,,,,"AS, ND","Initializing to RT-JOY, no transmission"
+2023-08-04,lab,VR2Tx,490668,RT-LEA-01-A,configure,RT,17:54:28,,,,,,AS,Started new recording and assigned station ID
+2023-08-04,lab,VR2Tx,490672,RT-LEA-02-A,configure,RT,17:50:28,,,,,,AS,Started new recording and assigned station ID
+2023-08-04,lab,VR2Tx,490663,RT-LEA-02-B,configure,RT,17:52:09,,,,,,AS,Started new recording and assigned station ID
+2023-08-04,lab,VR2Tx,490666,RT-LEA-03-A,configure,RT,17:47:56,,,,,,AS,Started new recording and assigned station ID
+2023-08-04,lab,VR2Tx,490675,RT-LEA-04-A,configure,RT,17:45:08,,,,,,AS,Started new recording and assigned station ID
+2023-08-04,lab,VR2Tx,490678,RT-LEA-05-A,configure,RT,17:38:28,,,,,,AS,Started new recording and assigned station ID
+2023-08-04,lab,VR2Tx,490661,RT-LEA-06-A,configure,RT,17:34:47,,,,,,AS,Started new recording and assigned station ID
+2023-08-04,lab,VR2Tx,490679,RT-LEA-07-A,configure,RT,17:32:13,,,,,,AS,Started new recording and assigned station ID
+2023-08-04,lab,VR2Tx,490665,RT-LEA-08-A,configure,RT,17:28:42,,,,,,AS,Started new recording and assigned station ID
+2023-08-04,lab,VR2Tx,490669,RT-LEA-09-A,configure,RT,17:25:47,,,,,,AS,Started new recording and assigned station ID
+2023-08-04,lab,VR2Tx,490676,RT-LEA-10-A,configure,RT,17:21:58,,,,,,AS,Started new recording and assigned station ID
+2023-08-04,lab,VR2Tx,490677,RT-LEA-11-A,configure,RT,17:19:09,,,,,,AS,Started new recording and assigned station ID
+2023-08-04,lab,VR2Tx,490670,RT-LEA-12-A,configure,RT,17:16:47,,,,,,AS,Started new recording and assigned station ID
+2023-08-04,lab,VR2Tx,490664,RT-LEA-13-A,configure,RT,17:12:28,,,,,,AS,Started new recording and assigned station ID
+2023-08-04,lab,VR2Tx,490667,RT-LEA-14-A,configure,RT,16:42:36,,,,,,AS,Started new recording and assigned station ID
+2023-08-04,lab,VR2Tx,490688,RT-LEA-15-A,configure,RT,16:39:30,,,,,,AS,Started new recording and assigned station ID
+2023-08-04,lab,VR2Tx,490682,RT-LEA-16-A,configure,RT,16:30:52,,,,,,AS,Started new recording and assigned station ID
+2023-08-04,lab,VR2Tx,490687,RT-LEA-17-A,configure,RT,16:23:19,,,,,,AS,Started new recording and assigned station ID
+2023-08-04,lab,VR2Tx,490690,RT-LEA-18-A,configure,RT,16:19:55,,,,,,AS,Started new recording and assigned station ID
+2023-08-04,lab,VR2Tx,490684,RT-LEA-19-A,configure,RT,16:11:49,,,,,,AS,Started new recording and assigned station ID
+2023-08-07,base,VR2Tx,490668,RT-LWE-01-A,configure,RT,20:42:55,,,,,,ND,re-initiallize to RT-LWE
+2023-08-07,base,VR2Tx,490672,RT-LWE-02-A,configure,RT,20:38:46,,,,,,ND,re-initiallize to RT-LWE
+2023-08-07,base,VR2Tx,490663,RT-LWE-02-B,configure,RT,20:40:45,,,,,,ND,re-initiallize to RT-LWE
+2023-08-07,base,VR2Tx,490666,RT-LWE-03-A,configure,RT,20:36:43,,,,,,ND,re-initiallize to RT-LWE
+2023-08-07,base,VR2Tx,490675,RT-LWE-04-A,configure,RT,20:35:30,,,,,,ND,re-initiallize to RT-LWE
+2023-08-07,base,VR2Tx,490678,RT-LWE-05-A,configure,RT,20:36:20,,,,,,ND,re-initiallize to RT-LWE
+2023-08-07,base,VR2Tx,490661,RT-LWE-06-A,configure,RT,20:16:34,,,,,,ND,re-initiallize to RT-LWE
+2023-08-07,base,VR2Tx,490679,RT-LWE-07-A,configure,RT,20:18:53,,,,,,ND,re-initiallize to RT-LWE
+2023-08-07,base,VR2Tx,490665,RT-LWE-08-A,configure,RT,20:31:05,,,,,,ND,re-initiallize to RT-LWE
+2023-08-07,base,VR2Tx,490669,RT-LWE-09-A,configure,RT,20:29:02,,,,,,ND,re-initiallize to RT-LWE
+2023-08-07,base,VR2Tx,490676,RT-LWE-10-A,configure,RT,20:23:59,,,,,,ND,re-initiallize to RT-LWE
+2023-08-07,base,VR2Tx,490677,RT-LWE-11-A,configure,RT,20:22:23,,,,,,ND,re-initiallize to RT-LWE
+2023-08-07,base,VR2Tx,490670,RT-LWE-12-A,configure,RT,20:20:43,,,,,,ND,re-initiallize to RT-LWE
+2023-08-07,base,VR2Tx,490664,RT-LWE-13-A,configure,RT,19:58:00,,,,,,ND,re-initiallize to RT-LWE
+2023-08-07,base,VR2Tx,490667,RT-LWE-14-A,configure,RT,19:59:00,,,,,,ND,re-initiallize to RT-LWE
+2023-08-07,base,VR2Tx,490688,RT-LWE-15-A,configure,RT,20:03:42,,,,,,ND,re-initiallize to RT-LWE
+2023-08-07,base,VR2Tx,490682,RT-LWE-16-A,configure,RT,20:05:35,,,,,,ND,re-initiallize to RT-LWE
+2023-08-07,base,VR2Tx,490687,RT-LWE-17-A,configure,RT,20:07:30,,,,,,ND,re-initiallize to RT-LWE
+2023-08-07,base,VR2Tx,490690,RT-LWE-18-A,configure,RT,20:13:22,,,,,,ND,re-initiallize to RT-LWE
+2023-08-07,base,VR2Tx,490684,RT-LWE-19-A,configure,RT,20:14:53,,,,,,ND,re-initiallize to RT-LWE
+2023-07-27,JOY,RTtag,1570052,,deployed,RT,14:10:00,13,45.369824,-74.797119,2.5,,"AS, ND, EP",
+2023-07-27,JOY,RTtag,1570063,,deployed,RT,14:10:00,13,45.369824,-74.797119,2.5,,"AS, ND, EP",
+2023-07-27,JOY,RTtag,1570052,,retrieved,RT,14:32:00,13,45.369824,-74.797119,2.5,,"AS, ND, EP",
+2023-07-27,JOY,RTtag,1570063,,retrieved,RT,14:32:00,13,45.369824,-74.797119,2.5,,"AS, ND, EP",
+2023-07-13,lab,VR2Tx,490667,,On,other,13:49:00,,,,,,"ND, AS, EP",for in-lab practice
+2023-07-13,lab,VR2Tx,490667,,configure,other,13:49:00,,,,,,"ND, AS, EP",for in-lab practice
+2023-07-17,lab,VR2Tx,490690,,On,other,10:24:00,,,,,,"ND, AS",for in-lab practice
+2023-07-17,lab,VR2Tx,490690,,configure,other,10:25:00,,,,,,"ND, AS",for in-lab practice
+2023-07-17,lab,VR2Tx,490688,,On,other,10:38:00,,,,,,"ND, AS",for in-lab practice
+2023-07-17,lab,VR2Tx,490688,,configure,other,10:38:00,,,,,,"ND, AS",for in-lab practice
+2023-07-18,lab,AquaMeasureDO,671333,,On,other,14:46:00,,,,,,"ND, AS",for in-lab practice
+2023-07-18,lab,AquaMeasureDO,671333,,configure,other,15:07:00,,,,,,"ND, AS",for in-lab practice
+2023-07-18,lab,AquaMeasureSal,687084,,On,other,15:09:00,,,,,,"ND, AS",for in-lab practice
+2023-07-18,lab,AquaMeasureSal,687084,,configure,other,15:11:00,,,,,,"ND, AS",for in-lab practice
+2023-07-18,lab,VR2W,139345,,On,other,16:05:00,,,,,,"ND, AS",for in-lab practice
+2023-07-18,lab,VR2W,139345,,configure,other,16:20:00,,,,,,"ND, AS",for in-lab practice
+2023-07-18,lab,VR100,12246,,recharge,other,0:00:00,,,,,,"ND, AS",
+2023-07-21,lab,RTtag,all,,checked,other,10:30:00,,,,,,"ND, AS",check turned off
+2023-07-26,lab,VR2W,139343,,On,RT,14:17:00,,,,,,EP,
+2023-07-26,lab,VR2Tx,490682,,On,RT,14:19:00,,,,,,EP,
+2023-07-26,lab,VR2Tx,490687,,On,RT,14:23:00,,,,,,EP,
+2023-07-26,lab,VR2W,139337,,On,RT,14:24:00,,,,,,EP,
+2023-07-26,lab,VR2Tx,490684,,On,RT,14:26:00,,,,,,EP,
+2023-07-26,lab,AquaMeasureDO,671333,,configure,RT,14:02:53,,,,,,"AS, ND","Resetting clock, erasing log"
+2023-07-26,lab,AquaMeasureSal,687084,,configure,RT,14:12:45,,,,,,"AS, ND","Resetting clock, erasing log"
+2023-07-27,JOY,RTtag,1570052,,On,RT,13:54:00,,,,,,"AS, ND, EP",
+2023-07-27,JOY,RTtag,1570063,,On,RT,13:56:00,,,,,,"AS, ND, EP",
+2023-07-27,JOY,VR2Tx,490684,,configure,RT,15:01:00,,,,,,"AS, ND, EP","SYNC LOW, FAST DIAGNOSTICS TURNED ON"
+2023-07-27,JOY,VR2Tx,490690,,configure,RT,9:37:00,,,,,,"AS, ND, EP","SYNC TAG LOW, FAST DIAGNOSTICS ON"
+2023-07-27,JOY,VR2Tx,490687,,configure,RT,9:38:00,,,,,,"AS, ND, EP","SYNC TAG LOW, FAST DIAGNOSTICS ON"
+2023-07-27,JOY,VR2Tx,490682,,configure,RT,9:40:00,,,,,,"AS, ND, EP","RANGE TEST, 90SEC, FAST DIAGNOSTICS"
+2023-07-27,JOY,RTtag,1570052,,On,RT,11:02:00,,,,,,"AS, ND, EP",
+2023-07-27,JOY,RTtag,1570063,,On,RT,11:04:00,,,,,,"AS, ND, EP",
+2023-07-27,JOY,RTtag,1570052,,Off,RT,12:00:00,,,,,,"AS, ND, EP",
+2023-07-27,JOY,RTtag,1570063,,Off,RT,12:00:00,,,,,,"AS, ND, EP",
+2023-07-27,JOY,RTtag,1570052,,Off,RT,16:43:00,,,,,,"AS, ND, EP",
+2023-07-27,JOY,RTtag,1570063,,Off,RT,16:43:00,,,,,,"AS, ND, EP",
+2023-07-28,lab,VR100,12246,,dataDownload,RT,15:37:00,,,,,,ND,"data downloaded and exported to csv, backed up"
+2023-07-28,lab,RTtag,all,,checked,other,10:30:00,,,,,,"ND, AS",check turned off
+2023-07-28,lab,VR2W,139337,,Off,other,16:22:00,,,,,,"ND, AS",unplugged battery and checked for humidity internally
+2023-07-28,lab,VR2W,139343,,Off,other,16:26:00,,,,,,"ND, AS",unplugged battery and checked for humidity internally
+2023-07-28,lab,VR2Tx,490688,,checked,other,16:30:00,,,,,,"ND, AS","no moisture found within internal cavity, but couple drops found above the o-ring"
+2023-07-28,lab,VR2W,139345,,Off,other,16:31:00,,,,,,"ND, AS",unplugged battery and checked for humidity internally
+2023-07-28,lab,GPS,etrex SE,,dataDownload,other,16:16:27,,,,,,AS,offloaded data to basecamp app
+2023-08-04,lab,RTtag,all,,checked,other,11:25:00,,,,,,AS,ensured all tags were off and not pinging
+2023-08-04,lab,VR2Tx,490668,,On,RT,16:14:09,,,,,,ND,
+2023-08-04,lab,VR2Tx,490663,,On,RT,16:16:20,,,,,,ND,
+2023-08-04,lab,VR2Tx,490666,,On,RT,16:18:14,,,,,,ND,
+2023-08-04,lab,VR2Tx,490675,,On,RT,16:20:40,,,,,,ND,
+2023-08-04,lab,VR2Tx,490665,,On,RT,16:22:25,,,,,,ND,
+2023-08-04,lab,VR2Tx,490679,,On,RT,16:24:30,,,,,,ND,
+2023-08-04,lab,VR2Tx,490676,,On,RT,16:27:15,,,,,,ND,
+2023-08-04,lab,VR2Tx,490669,,On,RT,16:30:05,,,,,,ND,
+2023-08-04,lab,VR2Tx,490672,,On,RT,16:32:15,,,,,,ND,
+2023-08-04,lab,VR2Tx,490677,,On,RT,16:35:05,,,,,,ND,
+2023-08-04,lab,VR2Tx,490661,,On,RT,16:38:50,,,,,,ND,
+2023-08-04,lab,VR2Tx,490678,,On,RT,16:40:50,,,,,,ND,
+2023-08-04,lab,VR2Tx,490664,,On,RT,16:42:30,,,,,,ND,
+2023-08-04,lab,VR2Tx,490670,,On,RT,16:44:05,,,,,,ND,
+2023-08-04,lab,AquaMeasureDO,671333,,configure,RT,18:02:00,,,,,,AS,"set time, erased records, turned off logging and transmitting"
+2023-08-04,lab,AquaMeasureDO,671355,,configure,RT,18:08:09,,,,,,AS,"set time, erased records, turned off logging and transmitting, connected battery"
+2023-08-11,lab,VR2Tx,490663,RT-LWE-02-B,Off,RT,13:23:54,,,,,,ND,
+2023-08-11,lab,VR2Tx,490667,RT-LWE-14-A,Off,RT,13:17:45,,,,,,ND,
+2023-08-11,lab,VR2Tx,490688,RT-LWE-15-A,Off,RT,13:30:33,,,,,,ND,
+2023-08-11,lab,VR2Tx,490682,RT-LWE-16-A,Off,RT,13:34:11,,,,,,ND,
+2023-08-11,lab,VR2Tx,490687,RT-LWE-17-A,Off,RT,13:37:30,,,,,,ND,
+2023-08-11,lab,VR2Tx,490690,RT-LWE-18-A,Off,RT,13:41:10,,,,,,ND,
+2023-08-11,lab,VR2Tx,490684,RT-LWE-19-A,Off,RT,13:44:58,,,,,,ND,
+2023-08-11,lab,RTtag,1570053,,checked,other,13:48:00,,,,,,AS,check turned off
+2023-08-11,lab,RTtag,1570054,,checked,other,13:48:00,,,,,,AS,check turned off
+2023-08-11,lab,RTtag,1570055,,checked,other,13:48:00,,,,,,AS,check turned off
+2023-08-11,lab,RTtag,1570056,,checked,other,13:48:00,,,,,,AS,check turned off
+2023-08-11,lab,RTtag,1570057,,checked,other,13:48:00,,,,,,AS,check turned off
+2023-08-11,lab,RTtag,1570059,,checked,other,13:48:00,,,,,,AS,check turned off
+2023-08-11,lab,RTtag,1570061,,checked,other,13:48:00,,,,,,AS,check turned off
+2023-08-11,lab,RTtag,1570062,,checked,other,13:48:00,,,,,,AS,check turned off
+2023-08-11,lab,RTtag,1570063,,checked,other,13:48:00,,,,,,AS,check turned off
+2023-08-14,lab,VR2Tx,490661,RT-LWE-06-A,checked,RT,14:32:34,,,,,,AS,CHECKED UNRESPONSIVE RECEIVER FOR PRESENCE OF WATER INSIDE CAVITY 
+2023-08-14,lab,VR100,12246,,recharge,other,10:15:00,,,,,,AS,
+2023-08-09,LWE,VR2Tx,490675,RT-LWE-04-A,configure,RT,13:08:00,,,,,,VF,"SYNC TAG HIGH POWER, FAST DIAGNOSTICS"
+2023-08-09,LWE,VR2Tx,490670,RT-LWE-12-A,configure,RT,13:15:00,,,,,,VF,RANGE TEST RANDOM LOW POWER
+2023-08-09,LWE,VR2Tx,490666,RT-LWE-03-A,configure,RT,13:20:00,,,,,,VF,SYNC TAG HIGH POWER
+2023-08-09,LWE,VR2Tx,490679,RT-LWE-07-A,configure,RT,13:25:00,,,,,,VF,SYNC TAG HIGH POWER
+2023-08-09,LWE,VR2Tx,490665,RT-LWE-08-A,configure,RT,12:27:00,,,,,,VF,SYNC TAG HIGH POWER
+2023-08-09,LWE,VR2Tx,490678,RT-LWE-05-A,configure,RT,13:35:00,,,,,,VF,SYNC TAG HIGH POWER
+2023-08-09,LWE,RTtag,1570060,RT-LWE-04-A,On,RT,14:18:02,,,,,,AS,V13 
+2023-08-09,LWE,RTtag,1570058,RT-LWE-04-A,On,RT,14:20:34,,,,,,AS,V7
+2023-08-09,LWE,VR2Tx,490675,RT-LWE-04-A,deployed,RT,15:08:34,"44, 45, 46",,,1.85,,ND,"TILT, 16 DEG, 1.85M DEPTH, DEPLOYEDE TAGS: 1570060, 1570058"
+2023-08-09,LWE,RTtag,1570060,RT-LWE-04-A,deployed,RT,15:08:34,"44, 45, 46",,,,,ND,SEE DEPLOYMENT OF VR2Tx STATION RT-LWE-04-A 2023-08-08
+2023-08-09,LWE,RTtag,1570058,RT-LWE-04-A,deployed,RT,15:08:34,"44, 45, 46",,,,,ND,SEE DEPLOYMENT OF VR2Tx STATION RT-LWE-04-A 2023-08-09
+2023-08-09,LWE,VR2Tx,490678,RT-LWE-05-A,deployed,RT,15:16:59,"47, 48, 49",,,1.85,,ND,"TILT 4 DEG, 1.85M DEPTH"
+2023-08-09,LWE,VR2Tx,490666,RT-LWE-03-A,deployed,RT,15:28:30,"50, 51",,,1.5,,ND,"TILT 1 DEG, 1.5M DEPTH"
+2023-08-09,LWE,VR2Tx,490669,RT-LWE-09-A,deployed,RT,15:44:15,"54, 55",,,1.65,,ND,TILT 8 DEG
+2023-08-09,LWE,AquaMeasureDO,671333,RT-LWE-01-A,configure,RT,16:20:45,,,,,,AS,TURNED ON RECORDING AND SET CLOCK
+2023-08-09,LWE,AquaMeasureDO,671355,RT-LWE-08-A,configure,RT,16:18:30,,,,,,AS,TURNED ON RECORDING AND SET CLOCK
+2023-08-09,LWE,VR2Tx,490679,RT-LWE-07-A,deployed,RT,17:12:21,"56, 57",,,1.75,,"AS, ND",TILT 3 DEG
+2023-08-09,LWE,VR2Tx,490672,RT-LWE-02-A,deployed,RT,17:41:25,60,,,1.25,,"AS, ND",TILT 7 DEG
+2023-08-09,LWE,VR2Tx,490661,RT-LWE-06-A,deployed,RT,17:55:47,"61, 62",,,2,,"AS, ND","UNRESPONSIVE, COULD NOT ESTABLISH COMUNICATION WITH VR100, NOT TRANSPONDING"
+2023-08-09,LWE,AquaMeasureDO,671333,RT-LWE-01-A,deployed,RT,18:27:25,,,,,,"AS, ND",SEE DEPLOYMENT OF VR2Tx STATION RT-LWE-01-A 2023-08-09
+2023-08-09,LWE,VR2Tx,490668,RT-LWE-01-A,deployed,RT,18:27:25,"63, 64",,,1.75,,"AS, ND",TILT 5 DEG
+2023-08-09,LWE,VR2Tx,490664,RT-LWE-13-A,deployed,RT,19:23:54,65,,,2,,"AS, ND, EP","TILT 3 DEG, REPLACED STATION RT-LWE-06-A ON 2023-08-09"
+2023-08-09,LWE,VR2Tx,490676,RT-LWE-10-A,deployed,RT,19:34:00,66,,,1.6,,"AS, ND, EP",TILT 7 DEG
+2023-08-09,LWE,VR2Tx,490677,RT-LWE-11-A,deployed,RT,19:40:33,67,,,1.6,,"AS, ND, EP",TILT 1 DEG
+2023-08-09,LWE,VR2Tx,490670,RT-LWE-12-A,deployed,RT,19:49:10,68,,,1.5,,"AS, ND, EP",TILT 5 DEG
+2023-08-08,LWE,RTtag,1570052,,On,RT,12:41:01,,,,,,"AS, ND",V13
+2023-08-08,LWE,RTtag,1570062,,On,RT,12:43:10,,,,,,"AS, ND",V7
+2023-08-08,LWE,RTtag,1570052,,Off,RT,16:19:01,,,,,,"AS, ND",V13
+2023-08-08,LWE,RTtag,1570062,,Off,RT,16:19:01,,,,,,"AS, ND",V7
+2023-08-10,LWE,VR2Tx,490668,RT-LWE-01-A,retrieved,RT,10:44:35,70,,,,,"AS, ND, T",WITH DO 671333
+2023-08-10,LWE,AquaMeasureDO,671333,RT-LWE-01-A,retrieved,RT,10:44:35,70,,,,,"AS, ND, T",WITH RECEIVER 490668
+2023-08-10,LWE,AquaMeasureDO,671355,RT-LWE-08-A,deployed,RT,10:47:10,70,,,,,"AS, ND, T",WITH RECEIVER 490665
+2023-08-10,LWE,VR2Tx,490665,RT-LWE-08-A,deployed,RT,10:47:10,70,,,1.8,,"AS, ND, T","WITH DO 671355, TILT 1 DEG"
+2023-08-10,LWE,VR2Tx,490668,RT-LWE-01-A,deployed,RT,11:05:00,71,,,1.4,,"AS, ND, T","TILT 3 DEG, WITH DO 671333"
+2023-08-10,LWE,AquaMeasureDO,671333,RT-LWE-01-A,deployed,RT,11:05:00,71,,,,,"AS, ND, T",WITH RECEIVER 490668
+2023-08-10,LWE,RTtag,1570056,,On,RT,11:21:00,,,,,,"AS, ND, T",V8
+2023-08-10,LWE,RTtag,1570056,,Off,RT,12:23:48,,,,,,"AS, ND, T",V8
+2023-08-10,LWE,VR2Tx,490676,RT-LWE-10-A,retrieved,RT,12:40:10,74,,,,,"AS, ND, T",RETREIVED TO EXTEND ARRAY OUT PAST 275M TO A NEW MAXIMA OF 350M
+2023-08-10,LWE,VR2Tx,490670,RT-LWE-12-A,retrieved,RT,12:41:36,75,,,,,"AS, ND, T",RETREIVED TO EXTEND ARRAY OUT PAST 275M TO A NEW MAXIMA OF 350M
+2023-08-10,LWE,VR2Tx,490676,RT-LWE-10-A,deployed,RT,12:44:34,76,,,1.5,,,TILT 4 DEG
+2023-08-10,LWE,VR2Tx,490670,RT-LWE-12-A,deployed,RT,12:51:22,77,,,1.5,,"AS, ND, T",TILT 10 DEG
+2023-08-16,LWE,VR2Tx,490675,RT-LWE-04-A,retrieved,RT,11:18:16,78,,,1.75,,"AS, ND, T",RETREIVED WITH RT TAGS 1570060 & 1570058
+2023-08-16,LWE,RTtag,1570058,RT-LWE-04-A,retrieved,RT,11:18:16,78,,,,,"AS, ND, T","V7, SEE STATION RT-LWE-04-A RETREIVAL 2023-08-16"
+2023-08-16,LWE,RTtag,1570060,RT-LWE-04-A,retrieved,RT,11:18:16,78,,,,,"AS, ND, T","V13, SEE STATION RT-LWE-04-A RETREIVAL 2023-08-17"
+2023-08-16,LWE,VR2Tx,490668,RT-LWE-01-A,retrieved,RT,11:29:02,"79, 80",,,1.3,,"AS, ND, T",RETREIVERD WITH AQUAMEASURE DO 671333
+2023-08-16,LWE,AquaMeasureDO,671333,RT-LWE-01-A,retrieved,RT,11:29:02,"79, 80",,,,,"AS, ND, T",SEE STATION RT-LWE-01-A RETREIVAL 2023-08-16
+2023-08-16,LWE,VR2Tx,490672,RT-LWE-02-A,retrieved,RT,11:38:16,"81, 82",,,1.4,,"AS, ND, T",
+2023-08-16,LWE,VR2Tx,490666,RT-LWE-03-A,retrieved,RT,11:44:10,"83, 84",,,1.5,,"AS, ND, T",
+2023-08-16,LWE,VR2Tx,490679,RT-LWE-07-A,retrieved,RT,11:55:00,"85, 86",,,1.8,,"AS, ND, T",
+2023-08-16,LWE,VR2Tx,490665,RT-LWE-08-A,retrieved,RT,12:01:35,"87, 88",,,1.7,,"AS, ND, T",RETREIVED WITH AQUAMEASURE DO 671355
+2023-08-16,LWE,AquaMeasureDO,671355,RT-LWE-08-A,retrieved,RT,12:01:35,"87, 88",,,,,"AS, ND, T",SEE STATION RT-LWE-08-A RETREIVAL 2023-08-16
+2023-08-16,LWE,RTtag,1570060,RT-LWE-04-A,Off,RT,12:27:33,,,,,,"AS, ND, T",
+2023-08-16,LWE,RTtag,1570058,RT-LWE-04-A,Off,RT,12:30:06,,,,,,"AS, ND, T",
+2023-08-16,LWE,VR2Tx,490664,RT-LWE-13-A,retrieved,RT,13:08:30,"89, 90",,,2,,"AS, ND, T",
+2023-08-16,LWE,VR2Tx,490678,RT-LWE-05-A,retrieved,RT,13:13:50,"91, 92, 93",,,2,,"AS, ND, T",
+2023-08-16,LWE,VR2Tx,490669,RT-LWE-09-A,retrieved,RT,13:20:00,"94, 95",,,1.85,,"AS, ND, T",
+2023-08-16,LWE,VR2Tx,490677,RT-LWE-11-A,retrieved,RT,13:27:05,"96, 97",,,1.6,,"AS, ND, T",
+2023-08-16,LWE,VR2Tx,490676,RT-LWE-10-A,retrieved,RT,13:33:30,"98, 99",,,1.6,,"AS, ND, T",
+2023-08-16,LWE,VR2Tx,490670,RT-LWE-12-A,retrieved,RT,13:41:02,"100, 101",,,1.5,,"AS, ND, T",
+2023-08-17,LWE,VR2Tx,490675,RT-LWE-04-A,dataDownload,RT,11:06:00,,,,,,ND,
+2023-08-17,LWE,VR2Tx,490675,RT-LWE-04-A,checked,,11:07:50,,,,,,ND,"FAST DIAGNOSTICS ON, SYNC TAG VERY HIGH ON, 100% BATTERY REMAINING VOLTAGE 3.32V"
+2023-08-17,LWE,VR2Tx,490675,RT-LWE-04-A,configure,,11:08:20,,,,,,ND,"TURN OFF FAST DIAGNOSTICS, AND SYNC TAG TRANSMISSION"
+2023-08-17,LWE,VR2Tx,490665,RT-LWE-08-A,dataDownload,,11:10:30,,,,,,ND,
+2023-08-17,LWE,VR2Tx,490665,RT-LWE-08-A,checked,,11:11:50,,,,,,ND,"SYNC TAG VERY HIGH ON, 100% BATTERY REMAINING, 3.35V"
+2023-08-17,LWE,VR2Tx,490665,RT-LWE-08-A,configure,,11:11:50,,,,,,ND,TURNED OFF SYNC TAG TRANSMISSION
+2023-08-17,LWE,VR2Tx,490679,RT-LWE-07-A,dataDownload,,11:13:35,,,,,,ND,
+2023-08-17,LWE,VR2Tx,490679,RT-LWE-07-A,checked,,11:15:23,,,,,,ND,"SYNC TAG VERY HIGH ON, 3.36V"
+2023-08-17,LWE,VR2Tx,490679,RT-LWE-07-A,configure,,11:15:23,,,,,,ND,
+2023-08-17,LWE,VR2Tx,490664,RT-LWE-13-A,dataDownload,,11:17:23,,,,,,ND,
+2023-08-17,LWE,VR2Tx,490664,RT-LWE-13-A,checked,,11:18:00,,,,,,ND,3.38V
+2023-08-17,LWE,VR2Tx,490666,RT-LWE-03-A,dataDownload,,11:19:36,,,,,,ND,
+2023-08-17,LWE,VR2Tx,490666,RT-LWE-03-A,checked,,11:19:45,,,,,,ND,"SYNC TAG VERY HIGH ON, 3.38V"
+2023-08-17,LWE,VR2Tx,490666,RT-LWE-03-A,configure,,11:20:30,,,,,,ND,TURNED OFF SYNC TAG TRANSMISSION
+2023-08-17,LWE,VR2Tx,490670,RT-LWE-12-A,dataDownload,,11:22:13,,,,,,ND,
+2023-08-17,LWE,VR2Tx,490670,RT-LWE-12-A,checked,,11:23:00,,,,,,ND,"RANGE TEST RANDOM LOW ON, 3.34V"
+2023-08-17,LWE,VR2Tx,490670,RT-LWE-12-A,configure,,11:23:25,,,,,,ND,TURN OF TRANSMISSION
+2023-08-17,LWE,VR2Tx,490672,RT-LWE-02-A,dataDownload,,11:24:44,,,,,,ND,
+2023-08-17,LWE,VR2Tx,490672,RT-LWE-02-A,checked,,11:25:00,,,,,,ND,3.40V
+2023-08-17,LWE,VR2Tx,490677,RT-LWE-11-A,dataDownload,,11:26:26,,,,,,ND,
+2023-08-17,LWE,VR2Tx,490677,RT-LWE-11-A,checked,,11:26:40,,,,,,ND,3.41V
+2023-08-17,LWE,VR2Tx,490669,RT-LWE-09-A,dataDownload,,11:27:55,,,,,,ND,
+2023-08-17,LWE,VR2Tx,490669,RT-LWE-09-A,checked,,11:28:00,,,,,,ND,3.41V
+2023-08-17,LWE,VR2Tx,490668,RT-LWE-01-A,dataDownload,,11:30:25,,,,,,ND,
+2023-08-17,LWE,VR2Tx,490668,RT-LWE-01-A,checked,,11:30:40,,,,,,ND,3.33V
+2023-08-17,LWE,VR2Tx,490678,RT-LWE-05-A,dataDownload,,11:33:10,,,,,,ND,
+2023-08-17,LWE,VR2Tx,490678,RT-LWE-05-A,checked,,11:34:38,,,,,,ND,"SYNC TAG VERY HIGH ON, 3.36V"
+2023-08-17,LWE,VR2Tx,490678,RT-LWE-05-A,configure,,11:34:38,,,,,,ND,TURN OFF TRANSMISSION
+2023-08-17,LWE,VR2Tx,490676,RT-LWE-10-A,dataDownload,,11:36:22,,,,,,ND,
+2023-08-17,LWE,VR2Tx,490676,RT-LWE-10-A,checked,,11:36:34,,,,,,ND,3.39V
+2023-08-17,LWE,AquaMeasureDO,671355,RT-LWE-08-A,configure,,11:42:00,,,,,,ND,"SET TIME, TURN OFF DATA LOGGING"
+2023-08-17,LWE,AquaMeasureDO,671355,RT-LWE-08-A,dataDownload,,11:44:56,,,,,,ND,"DOWNLOADED RECORDS IN A NEW SERVER SESSION (RT-LWE), DOWNLOADED AS CSV IN TIME-COLLATED FORMAT"
+2023-08-17,LWE,AquaMeasureDO,671333,RT-LWE-01-A,configure,,11:52:06,,,,,,ND,"SET TIME, TURN OFF DATA LOGGING"
+2023-08-17,LWE,AquaMeasureDO,671333,RT-LWE-01-A,dataDownload,,11:52:06,,,,,,ND,"DOWNLOADED RECORDS IN A NEW SERVER SESSION (RT-LWE-01-A), DOWNLOADED AS CSV IN TIME-COLLATED FORMAT"
+2023-08-17,lab,AquaMeasureSal,687084,,Off,,14:53:45,,,,,,AS,
+2023-08-17,lab,AquaMeasureDO,671333,,Off,,14:57:37,,,,,,AS,
+2023-08-17,lab,AquaMeasureDO,671355,,Off,,14:59:20,,,,,,AS,
+2023-08-17,lab,VR2Tx,490664,,Off,,13:01:33,,,,,,AS,
+2023-08-17,lab,VR2Tx,490665,,Off,,13:03:09,,,,,,AS,
+2023-08-17,lab,VR2Tx,490675,,Off,,13:04:55,,,,,,AS,
+2023-08-17,lab,VR2Tx,490669,,Off,,13:07:50,,,,,,AS,
+2023-08-17,lab,VR2Tx,490677,,Off,,13:09:14,,,,,,AS,
+2023-08-17,lab,VR2Tx,490672,,Off,,13:11:00,,,,,,AS,
+2023-08-17,lab,VR2Tx,490668,,Off,,13:12:45,,,,,,AS,
+2023-08-17,lab,VR2Tx,490679,,Off,,13:14:50,,,,,,AS,
+2023-08-17,lab,VR2Tx,490678,,Off,,13:16:24,,,,,,AS,
+2023-08-17,lab,VR2Tx,490676,,Off,,13:18:24,,,,,,AS,
+2023-08-17,lab,VR2Tx,490666,,Off,,13:19:42,,,,,,AS,
+2023-08-17,lab,VR2Tx,490670,,Off,,13:20:59,,,,,,AS,

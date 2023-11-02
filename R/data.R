@@ -54,3 +54,19 @@
 #' @example
 #' data(track_gpx)
 "track_gpx"
+
+#' Reference document of Innovasea-Provided equipment
+#'
+#' List of all innovasea-provided equipment, equipment type, product ID and serial number. ****MUST BE UPDATED WHEN NEW EQUIPMENT IS PURCHASED****
+#'
+#' @format A data frame with 82 rows and 3 columns:
+#'
+#' \describe{
+#'   \item{Type}{Type of equipment (based on our defined codeing system)}
+#'   \item{ProductID}{Official Innovasea Product ID}
+#'   \item{SerialNo}{serial number of each piece of equipment}
+#' }
+#' @source {LTMFTN database of Innovasea Equipment}
+#' @example
+#' data(reference_serial_id)
+"reference_serial_id"
