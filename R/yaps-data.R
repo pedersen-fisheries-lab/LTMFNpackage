@@ -43,6 +43,9 @@ format_receiverlog_yaps <- function(receiverLog, full=TRUE, starttime="1970-01-0
   receiverLog$frac <- as.numeric(substring(receiverLog$time_utc,9, 12))
   receiverLog$epo <- as.integer(receiverLog$ts)
 
+  #extracting the numeric end segment of the transmitter code
+  receiverLog$transmitter <-  as.integer(substr(receiverLog$transmitter, 10, nchar(receiverLog$transmitter)))
+
   #reordering and removing unnecessary columns
   receiverLog <- dplyr::select(receiverLog,date_utc, time_utc, ts, epo, frac, receiver, transmitter, stationname, sensorvalue, sensorunit)
   receiverLog <- dplyr::relocate(receiverLog,date_utc, time_utc, ts, epo, frac, receiver, transmitter, stationname, sensorvalue, sensorunit)
@@ -63,7 +66,7 @@ format_receiverlog_yaps <- function(receiverLog, full=TRUE, starttime="1970-01-0
     colnames (receiverLog) [colnames (receiverLog) == 'transmitter'] <- 'tag'
     colnames (receiverLog) [colnames (receiverLog) == 'receiver'] <- 'serial'
 
-    receiverLog$serial <- substr(receiverLog$serial, start =  7, stop = 12)
+    receiverLog$serial <- as.integer(substr(receiverLog$serial, start =  7, stop = 12))
 
     receiverLog <- dplyr::select(receiverLog, ts, tag, epo, frac, serial)
   }
@@ -81,8 +84,8 @@ format_receiverlog_yaps <- function(receiverLog, full=TRUE, starttime="1970-01-0
 #' @param utm_zone UTM zone in which the field site is located. "18N" for Lac-Saint-Pierre, and "17N" for James Bay sites
 #' @returns returns a dataframe with the UTM coordinates added
 #'
-#' @export format_wpts_utm_yaps
-  format_wpts_utm_yaps <- function(gps_df, utm_zone, crs=4326){
+#' @export add_utm_wpts_yaps
+  add_utm_wpts_yaps <- function(gps_df, utm_zone, crs=4326){
     #data checks
     if(!is.data.frame(gps_df)){
       stop("The gps wpts must be in an object class data.frame or data.table. Please ensure this is the case.")
@@ -131,8 +134,8 @@ format_receiverlog_yaps <- function(receiverLog, full=TRUE, starttime="1970-01-0
 #' @param formatts boolean term for whether the
 #' @returns returns a dataframe with the UTM coordinates added
 #'
-#' @export format_tracks_utm_yaps
-format_tracks_utm_yaps <- function(track, starttime, endtime, utm_zone, crs=4326, formatts=TRUE){
+#' @export add_utm_tracks_yaps
+add_utm_tracks_yaps <- function(track, starttime, endtime, utm_zone, crs=4326, formatts=TRUE){
   if(!is.data.frame(track)){
     stop("The gps track data must be in an object class data.frame or data.table. Please ensure this is the case.")
   }
@@ -198,6 +201,5 @@ format_tracks_utm_yaps <- function(track, starttime, endtime, utm_zone, crs=4326
 
   return(track)
 }
-
 
 
