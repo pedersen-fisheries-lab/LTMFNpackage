@@ -3,17 +3,15 @@
 #'
 #' @param date a single date entry (as a character string)
 #' @returns a report of the check status for each entry
-#'
-#' @export .check_date
 .check_date <-  function(date){
   date_not_entered <- FALSE
   date_invalid <- FALSE
   date_out_of_range <- FALSE
 
   #check if entered
-  if (is.na(date)| !is.character(date) | date=="")
+  if (is.na(date)| !is.character(date) | date=="") {
     date_not_entered <- TRUE
-  else {
+  } else {
     #check length
     if (nchar(date)!=10)
       date_invalid <- TRUE
@@ -28,21 +26,19 @@
       day <- as.numeric(substring(date, 9, 10))
 
       #checking that year, month and date are written numerically
-      if(is.na(year)|is.na(month)|is.na(day))
+      if(is.na(year)|is.na(month)|is.na(day)){
         date_invalid <- TRUE
       #checking month
-      else if (month>12 |month<1)
+      } else if (month>12 |month<1) {
         date_invalid <- TRUE
       #Check day for each month option (long, short and february)
-      else if (month %in% c(1,3,5, 7, 8, 10, 12)){
+      } else if (month %in% c(1,3,5, 7, 8, 10, 12)){
         if(day>31 |day<1)
           date_invalid <- TRUE
-      }
-      else if (month%in% c( 4, 6, 9)){
+      } else if (month%in% c( 4, 6, 9)){
         if(day>30 |day<1)
           date_invalid <- TRUE
-      }
-      else if (month==2){
+      } else if (month==2){
         if(day>29 |day<1)
           date_invalid <- TRUE
       }
@@ -73,8 +69,6 @@
 #'
 #' @param time a single time entry (as a character string)
 #' @returns a report of the check status
-#'
-#' @export .check_time
 .check_time <- function(time){
 
   time_not_entered <- FALSE
@@ -122,69 +116,52 @@
   return (report)
 }
 
-#' Checks manually-input time entries in a data frame
+#' Checks site ID to make sure it is within the list of allowed values
 #'
-#' @param date the vector of date values (in character string)
-#' @returns a report of what issues were uncovered
-#'
-#' @export check_time_hhmmss
-.check_time<- function(df){
-  df$invalid_time_report <- sapply(df$time, .time_format)
+#' @param site a single date entry (as a character string)
+#' @returns a report of the check status for each entry
+.check_site <-  function(site) {
+  site_not_entered <- FALSE
+  site_invalid <- FALSE
 
-  final_time_report <- dplyr::select(df[which(df$invalid_time_report!=""), ], time, invalid_time_report)
-  print(final_time_report)
+  if (is.na(site) | !is.character(site) | site=="") {
+    site_not_entered <- TRUE
+  } else if(!(site %in% sites)){
+    site_invalid <- TRUE
+  }
+
+  #return report
+  report <- ""
+  if (site_not_entered)
+    report <- paste0(report, "site_not_entered")
+  if(site_invalid)
+    report <- paste0(report, "site_invalid")
+
+  return(report)
 }
 
-
-
-#' wrapper function for checking if serial ID values match
+#' Checks equipment type to make sure it is within the list of allowed values
 #'
-#' @param serial_id a single serial ID values
-#' @returns a boolean value indicating if the serial ID matches one from our database
-## Check serialID for all devices in user-entered data ####
-.match_serial_id <- function(serial_id){
-  serial_id %in% c(reference_serial_id$SerialNo, "all")
-}
+#' @param site a single date entry (as a character string)
+#' @returns a report of the check status for each entry
+.check_equip <-  function(equip){
+  equip_not_entered <- FALSE
+  equip_invalid <- FALSE
 
-#' Checks serial ID values in a manually entered dataframe
-#'
-#' @param df dataframe to check
-#' @returns a report of what issues were uncovered
-#'
-#' @export check_serial_id
-check_serial_id <- function(df){
-  df$objectSerialNo
-  match <- sapply(df$objectSerialNo, .match_serial_id)
+  if (is.na(equip) | !is.character(equip) | equip=="") {
+    equip_not_entered <- TRUE
+  } else if(!(equip %in% equip_types)){
+    equip_invalid <- TRUE
+  }
 
-  non_matching_entries <- df[!match,c(1,4)]
+  #return report
+  report <- ""
+  if (equip_not_entered)
+    report <- paste0(report, "equip_not_entered")
+  if(equip_invalid)
+    report <- paste0(report, "equip_invalid")
 
-  if (all(match)){
-    print("There are no serial ID errors")
-  }
-  else{
-    print("The following Serial ID number entries do not match the database of Innovasea Equipment for this project")
-    print(non_matching_entries)
-  }
-}
-
-######################### Equipment log data checking ###################
-#' Performs a check on a dataframe impored form equipment log database
-#'
-#' @param df dataframe of equipment lofg to check
-#' @param dateCheck/serialCheck/timeCheck boolean choice variables to indicate whether date, serial number and time should be checked
-#' @returns a report of what issues were uncovered
-#'
-#' @export check_equipmentLog
-check_equipmentLog <- function (equipmentLog, dateCheck=TRUE, serialCheck=TRUE, timeCheck=TRUE) {
-  if(dateCheck){
-    check_date_yymmdd(equipmentLog)
-  }
-  if(serialCheck){
-    check_serial_id(equipmentLog)
-  }
-  if(timeCheck){
-    check_time_hhmmss(equipmentLog)
-  }
+  return(report)
 }
 
 ######################### Error code summary ###################
@@ -193,11 +170,14 @@ check_equipmentLog <- function (equipmentLog, dateCheck=TRUE, serialCheck=TRUE, 
 #'
 #' @export quality_control_codes
 quality_control_codes <- function () {
-  print(cat(
-    "date_invalid: Date is invalid. The date should be reported in YYYY-MM-DD format. Check that year, month and date values are correct, that they are - delimited, and that no extra characters are present
+  cat(
+    "date_not_entered: Date is left blank. This entry is mandatory, please fill it.
+date_invalid: Date is invalid. The date should be reported in YYYY-MM-DD format. Check that year, month and date values are correct, that they are - delimited, and that no extra characters are present
 
+time_not_entered: time is left blank. This entry is mandatory, please fill it.
 time_invalid (col#): Time is invalid in the column indicated in parentheses. Time should be reported in HH:MM:SS format in 24h time. Check that hour, minute and second values are correct, that they are : delimited, that there are no extra characters and that the time is in 24h format. Seconds must be included. You may write 00 if a value is not reported to the seconds
 
+site_not_entered: site is left blank. This entry is mandatory, please fill it.
 site_invalid: Site ID is invalid. It must be one of the following values _____________. Make sure the value matches and that no extra characters are present
 
 equip_invalid: equipment type is invalid. It must be one of the following values _____________. Make sure the value matches and that no extra characters are present
@@ -228,7 +208,7 @@ depth_invalid: depth invalid. Depth is reported in meters in positive values. Ma
 
 depth_out_of_range: valid for a given site
 
-crew_invalid: the crew is not entered correctly. Make sure it is written as 2-3 letter initials unique to each person, separated by \', \'."))
+crew_invalid: the crew is not entered correctly. Make sure it is written as 2-3 letter initials unique to each person, separated by \', \'.")
 }
 
 

@@ -22,7 +22,3 @@ An equipment_log tibble containing the final recorded event for each ID, or NA i
 \description{
 Find the final recorded record of a given set of IDs from a equipment_log object
 }
-\examples{
-add(1, 1)
-add(10, 1)
-}
