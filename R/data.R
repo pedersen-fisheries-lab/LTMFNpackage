@@ -16,8 +16,6 @@
 #'   \item{TransmitterType, SensorPrecision}{Unpopulated Columns for sensor tags (not applicable for our project)}
 #' }
 #' @source {subset of VUE download}
-#' @example
-#' data(vue_det)
 "vue_det"
 
 #' GPS waypoint data frame
@@ -35,8 +33,6 @@
 #'   \item{type, extensions}{GARMIN extra data}
 #' }
 #' @source {From an eTREX device, data imported into GARMIN basecamp, downloaded as a GPX and loaded into R using readGPX()}
-#' @example
-#' data(wpts_gpx)
 "wpts_gpx"
 
 #' GPS track data frame
@@ -51,8 +47,6 @@
 #'   \item{time}{time of data download in YYYY-MM-DDTHH:MM:SSZ}
 #' }
 #' @source {From an eTREX device, data imported into GARMIN basecamp, downloaded as a GPX and loaded into R using readGPX()}
-#' @example
-#' data(track_gpx)
 "track_gpx"
 
 #' Reference document of Innovasea-Provided equipment
@@ -67,6 +61,18 @@
 #'   \item{SerialNo}{serial number of each piece of equipment}
 #' }
 #' @source {LTMFTN database of Innovasea Equipment}
-#' @example
-#' data(reference_serial_id)
 "reference_serial_id"
+
+#' Approved work sites code
+#'
+#' @format A vector of the entries "JEA", "JGR", "JMA", "JRU", "JOY", "LEA", "LWE", "base", "lab", and "other"
+#'
+#' @source {manually created}
+"sites"
+
+#' Approved equipment type codes codes
+#'
+#' @format A vector of the entries "VR2Tx", "VR2W", "tag", "RTtag", "VR100", "AquaMeasureSal", "AquaMeasureDO", "AquaMeasureCl","GPS"
+#'
+#' @source {manually created}
+"equip_types"
