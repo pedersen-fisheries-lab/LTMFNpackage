@@ -67,12 +67,19 @@
 #'
 #' @format A vector of the entries "JEA", "JGR", "JMA", "JRU", "JOY", "LEA", "LWE", "base", "lab", and "other"
 #'
-#' @source {manually created}
+#' @source {manually created from the excel data validation}
 "sites"
 
-#' Approved equipment type codes codes
+#' Approved equipment type codes
 #'
 #' @format A vector of the entries "VR2Tx", "VR2W", "tag", "RTtag", "VR100", "AquaMeasureSal", "AquaMeasureDO", "AquaMeasureCl","GPS"
 #'
-#' @source {manually created}
+#' @source {manually created from the excel data validation}
+"equip_types"
+
+#' Approved equipment action codes
+#'
+#' @format A vector of the entries "On", "Off", "deployed", "retrieved", "moved",  "dataDownload", "checked", "configure", "recharge", "other"
+#'
+#' @source {manually created from the excel data validation}
 "equip_types"

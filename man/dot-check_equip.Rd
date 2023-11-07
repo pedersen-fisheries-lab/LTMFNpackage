@@ -7,7 +7,7 @@
 .check_equip(equip)
 }
 \arguments{
-\item{site}{a single date entry (as a character string)}
+\item{equip}{a single equipment entry (as a character string)}
 }
 \value{
 a report of the check status for each entry

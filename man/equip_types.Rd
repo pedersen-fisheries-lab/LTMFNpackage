@@ -3,17 +3,25 @@
 \docType{data}
 \name{equip_types}
 \alias{equip_types}
-\title{Approved equipment type codes codes}
+\title{Approved equipment type codes}
 \format{
 A vector of the entries "VR2Tx", "VR2W", "tag", "RTtag", "VR100", "AquaMeasureSal", "AquaMeasureDO", "AquaMeasureCl","GPS"
+
+A vector of the entries "On", "Off", "deployed", "retrieved", "moved",  "dataDownload", "checked", "configure", "recharge", "other"
 }
 \source{
-{manually created}
+{manually created from the excel data validation}
+
+{manually created from the excel data validation}
 }
 \usage{
 equip_types
+
+equip_types
 }
 \description{
-Approved equipment type codes codes
+Approved equipment type codes
+
+Approved equipment action codes
 }
 \keyword{datasets}

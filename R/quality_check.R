@@ -118,7 +118,7 @@
 
 #' Checks site ID to make sure it is within the list of allowed values
 #'
-#' @param site a single date entry (as a character string)
+#' @param site a single site entry (as a character string)
 #' @returns a report of the check status for each entry
 .check_site <-  function(site) {
   site_not_entered <- FALSE
@@ -142,7 +142,7 @@
 
 #' Checks equipment type to make sure it is within the list of allowed values
 #'
-#' @param site a single date entry (as a character string)
+#' @param equip a single equipment entry (as a character string)
 #' @returns a report of the check status for each entry
 .check_equip <-  function(equip){
   equip_not_entered <- FALSE
@@ -160,6 +160,183 @@
     report <- paste0(report, "equip_not_entered")
   if(equip_invalid)
     report <- paste0(report, "equip_invalid")
+
+  return(report)
+}
+
+#' Checks the serial ID to make sure it is listed in our equipment list
+#'
+#' @param serial a single serial id entry (as a character or integer)
+#' @returns a report of the check status for each entry
+.check_serial <- function(serial){
+  serial_not_entered <- FALSE
+  serial_invalid <- FALSE
+
+  if (is.na(serial)|serial=="") {
+    serial_not_entered <- TRUE
+  } else if(!(serial %in% reference_serial_id$SerialNo)){
+    serial_invalid <- TRUE
+  }
+
+  #return report
+  report <- ""
+  if (serial_not_entered)
+    report <- paste0(report, "serial_not_entered")
+  if(serial_invalid)
+    report <- paste0(report, "serial_invalid")
+
+  return(report)
+}
+
+#' Checks to make sure the serial ID number matches the equipment type
+#'
+#' @param equip a single equipment type entry of the equipment type (as a character)
+#' @param serial a single serial ID entry of the serial id number (as a character or integer)
+#' @returns a report of the check status for each entry
+.check_equip_serial_match <- function(equip, serial){
+  equip_serial_nomatch <- FALSE
+
+  if(equip != reference_serial_id$Type[reference_serial_id$SerialNo==serial]) {
+    equip_serial_nomatch <- TRUE
+  }
+
+  report <- ""
+  if (equip_serial_nomatch) {
+    report <- paste0(report, "equip_serial_nomatch")
+  }
+
+  return(report)
+}
+
+#' Checks to make sure the station ID follows a valid format
+#'
+#' @param stnid a single station ID entry entry of the equipment type (as a character)
+#' @returns a report of the check status for the entry
+.check_stnid <- function(stnid){
+  stnid_invalid <- FALSE
+
+  if(! (is.na(stnid) | stnid=="" )){
+
+    deploy <- substring(stnid, 1, 2)
+    site <- substring(stnid, 4, 6)
+    id_num <- substring(stnid, 8, 9)
+    id_let <- substring(stnid, 11, 11)
+
+    #checking length
+    if(nchar(stnid)!=11) {
+      stnid_invalid <- TRUE
+
+    #checking - at positions 3, 7, 10
+    } else if(substr(stnid, 3, 3)!="-" | substr(stnid, 7, 7)!="-" |substr(stnid, 10, 10)!="-" ) {
+      stnid_invalid <- TRUE
+
+    #checking deplyment
+    } else if( !(deploy %in% c("RT", "GR", "GA"))){
+      stnid_invalid <- TRUE
+
+    #checking site (list of site ids, excluding general "base", "lab", and "other")
+    } else if (!(site %in% sites)){
+      stnid_invalid <- TRUE
+
+    } else if (site %in% c("lab", "base","other")) {
+      stnid_invalid <- TRUE
+
+    #checking number
+    } else if (is.na(as.numeric(id_num))){
+      stnid_invalid <- TRUE
+
+    } else if (as.numeric(id_num)<1 | as.numeric(id_num) >99){
+      stnid_invalid <- TRUE
+
+    #checking id_let based on unicode order
+    } else if ( !(id_let %in% LETTERS)) {
+      stnid_invalid <- TRUE
+    }
+  }
+
+
+  report <- ""
+  if (stnid_invalid) {
+    report <- paste0(report, "stnid_invalid")
+  }
+
+  return(report)
+}
+
+#' Checks to make sure the action is one of the permitted entries
+#'
+#' @param action a single station ID entry entry of the equipment type (as a character)
+#' @returns a report of the check status for the entry
+.check_action <- function(action){
+  action_not_entered <- FALSE
+  action_invalid <- FALSE
+
+  if (is.na(action)| action==""){
+    action_not_entered <- TRUE
+  } else if (!(action %in% equipment_actions)){
+    action_invalid <- TRUE
+  }
+
+  report <- ""
+  if(action_not_entered){
+    report <- paste0(report, "action_not_entered")
+  }
+  if(action_invalid) {
+    report <- paste0(report, "action_invalid")
+  }
+
+  return(report)
+}
+
+.check_deploy <- function(deploy){
+
+}
+
+.check_stnid_deploy_match <- function(stnid, deploy){
+
+}
+
+.check_wpt <- function(wpt){
+
+}
+
+.check_lat <- function(lat){
+
+}
+
+.check_lon <- function(lon){
+
+}
+
+#' Checks to make sure that the crew is entered and comma separated
+#'
+#' @param crew a single station ID entry entry of the equipment type (as a character)
+#' @returns a report of the check status for the entry
+.check_crew <- function(crew){
+  crew_not_entered <- FALSE
+  crew_invalid <- FALSE
+
+  #checking that crew was entered
+  if(is.na(crew) | crew==""){
+    crew_not_entered <- TRUE
+
+  #checking that all crew codes are comma separated and are 2-3 letter codes
+  #****DOES NOT CURRENTLY CHECK THE LAST ENTRY
+  } else {
+    commas <- unlist(gregexpr(',', crew))
+    commas_dist <- diff(sort(commas))
+    num_invalid <- sum(commas_dist>5 | commas_dist<3)
+
+    if(num_invalid>0){
+      crew_invalid <- TRUE
+    }
+  }
+
+  report <- ""
+  if (crew_not_entered)
+    report <- paste0(report, "crew_not_entered")
+  if(crew_invalid)
+    report <- paste0(report, "crew_invalid")
 
   return(report)
 }

@@ -8,7 +8,7 @@
 A vector of the entries "JEA", "JGR", "JMA", "JRU", "JOY", "LEA", "LWE", "base", "lab", and "other"
 }
 \source{
-{manually created}
+{manually created from the excel data validation}
 }
 \usage{
 sites

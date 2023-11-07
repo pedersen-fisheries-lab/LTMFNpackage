@@ -7,7 +7,7 @@
 .check_site(site)
 }
 \arguments{
-\item{site}{a single date entry (as a character string)}
+\item{site}{a single site entry (as a character string)}
 }
 \value{
 a report of the check status for each entry
