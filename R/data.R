@@ -77,9 +77,9 @@
 #' @source {manually created from the excel data validation}
 "equip_types"
 
-#' Approved equipment action codes
+#' Approved deployment type codes
 #'
-#' @format A vector of the entries "On", "Off", "deployed", "retrieved", "moved",  "dataDownload", "checked", "configure", "recharge", "other"
+#' @format A vector of the entries "GA", "GR", "RT", "other"
 #'
 #' @source {manually created from the excel data validation}
-"equip_types"
+"deploy_types"

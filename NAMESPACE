@@ -2,6 +2,8 @@
 
 export(add_utm_tracks_yaps)
 export(add_utm_wpts_yaps)
+export(check_equipment_log)
 export(find_equipment_event)
 export(format_receiverlog_yaps)
+export(import_database_xl)
 export(quality_control_codes)

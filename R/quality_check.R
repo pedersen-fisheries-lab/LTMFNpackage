@@ -1,4 +1,4 @@
-############## internal functions ####
+############## internal functions ###############################
 #' Checks date formats to make sure they are in YYYY-MM-DD format at the correct time
 #'
 #' @param date a single date entry (as a character string)
@@ -174,7 +174,7 @@
 
   if (is.na(serial)|serial=="") {
     serial_not_entered <- TRUE
-  } else if(!(serial %in% reference_serial_id$SerialNo)){
+  } else if(!(serial %in% c(reference_serial_id$SerialNo, "all"))){
     serial_invalid <- TRUE
   }
 
@@ -288,24 +288,213 @@
   return(report)
 }
 
+#' Checks to make sure the deployment type is entered and is one of the permitted entries
+#'
+#' @param deploy a single station ID entry entry of the equipment type (as a character)
+#' @returns a report of the check status for the entry
 .check_deploy <- function(deploy){
+  deploy_not_entered <- FALSE
+  deploy_invalid <- FALSE
 
+  # if (is.na(deploy) | deploy=="") {
+  #   deploy_not_entered <- TRUE
+  # } else
+
+  if(! is.na(deploy)) {
+    if(!(deploy %in% deploy_types)){
+      deploy_invalid <- TRUE
+    }
+  }
+
+  #return report
+  report <- ""
+  if (deploy_not_entered)
+    report <- paste0(report, "deploy_not_entered")
+  if(deploy_invalid)
+    report <- paste0(report, "deploy_invalid")
+
+  return(report)
 }
 
 .check_stnid_deploy_match <- function(stnid, deploy){
 
+  report <- ""
+  return(report)
 }
 
+#' Checks to make sure the waypoints are entered in an acceptable format
+#'
+#' CURRENTLY NOT CHECKING ANYTHING> POSSIBLE OPTIONS: checking for the presence of special cahracters, checking from proper comma delimitations
+#' @param wpt a single entry of waypoint names as a comma-separated string
+#' @returns a report of the check status for the entry
 .check_wpt <- function(wpt){
+ invalid_wpt <- FALSE
 
+  # possible gps special characters ! " # $ % & ' ( ) * + , - . / : ; < > = ? @ [ ] \ ^ _ ` { } | ~
+ report <- ""
+ if(invalid_wpt){
+   report <- paste0(report, "invalid_wpt")
+ }
+
+ return(report)
 }
 
+#' Checks to make sure the gps latitude is within sensible bounds
+#'
+#' @param lat a single numeric latitude value
+#' @returns a report of the check status for the entry
 .check_lat <- function(lat){
+  lat_invalid <- FALSE
+  lat_out_of_range <- FALSE
 
+  if(! is.na(lat)) {
+    if(is.na(as.numeric(lat))){
+      lat_invalid <- TRUE
+    } else if (as.numeric(lat) < 45.3 | as.numeric(lat) > 55.5 ){
+      lat_out_of_range <- TRUE
+    }
+  }
+
+  report <- ""
+
+  if(lat_invalid){
+    report <- paste0(report, "lat_invalid")
+  }
+  if (lat_out_of_range){
+    report <- paste0(report, "lat_out_of_range")
+  }
+
+  return(report)
 }
 
+#' Checks to make sure the gps longitude is within sensible bounds
+#'
+#' @param lon a single numeric longitude value
+#' @returns a report of the check status for the entry
 .check_lon <- function(lon){
+  lon_invalid <- FALSE
+  lon_out_of_range <- FALSE
 
+  if(!is.na(lon)){
+    if(is.na(as.numeric(lon))){
+      lon_invalid <- TRUE
+    } else if (as.numeric(lon) < -79.5 | as.numeric(lon) > -72.5 ){
+      lon_out_of_range <- TRUE
+    }
+  }
+
+  report <- ""
+
+  if(lon_invalid){
+    report <- paste0(report, "lon_invalid")
+  }
+  if (lon_out_of_range){
+    report <- paste0(report, "lon_out_of_range")
+  }
+
+  return(report)
+}
+
+#' Checks to make sure the gps latitude and longitude match the site ID
+#' NOT FUNCTIONALL****
+#'
+#' @param site site ID
+#' @param lat a single numeric latitude value
+#' @param lon a single numeric longitude value
+#' @returns a report of the check status for the entry
+.check_gps_site_match <- function(site, lat, lon){
+  site_gps_nomatch <- FALSE
+
+  if (site == "JEA") {
+    if (lat <52.16 |lat > 52.34){
+      site_gps_nomatch <- TRUE
+    }
+    if (lon < -78.58| long > -76.59){
+      site_gps_nomatch <- FALSE
+    }
+  }
+
+  if (site == "JGR") {
+    if (lat < 55.02 | lat > 55.34){
+      site_gps_nomatch <- TRUE
+    }
+    if (lon < 77.84 | long > -76.15){
+      site_gps_nomatch <- FALSE
+    }
+  }
+
+  if (site == "JMA") {
+    if (lat < 0 |lat > 0){
+      site_gps_nomatch <- TRUE
+    }
+    if (lon < -78.94 | long > 0 ){
+      site_gps_nomatch <- FALSE
+    }
+  }
+
+  if (site == "JRU") {
+    if (lat < 0 |lat > 0){
+      site_gps_nomatch <- TRUE
+    }
+    if (lon < 0 | long > 0){
+      site_gps_nomatch <- FALSE
+    }
+  }
+
+  if (site == "JOY") {
+    if (lat < 0 |lat > 0){
+      site_gps_nomatch <- TRUE
+    }
+    if (lon < 0 | long > 0){
+      site_gps_nomatch <- FALSE
+    }
+  }
+
+  if (site == "LEA") {
+    if (lat < 0 |lat > 0){
+      site_gps_nomatch <- TRUE
+    }
+    if (lon < 0 | long > 0){
+      site_gps_nomatch <- FALSE
+    }
+  }
+
+  if (site == "LWE") {
+    if (lat < 0 |lat > 0 ){
+      site_gps_nomatch <- TRUE
+    }
+    if (lon < 0 | long > 0){
+      site_gps_nomatch <- FALSE
+    }
+  }
+}
+
+#' Checks to make sure the depth is within sensible bounds
+#'
+#' @param depth a single numeric depth value
+#' @returns a report of the check status for the entry
+.check_depth <- function(depth){
+  depth_invalid <- FALSE
+  depth_out_of_range <- FALSE
+
+  if(! is.na(depth)){
+    if(is.na(as.numeric(depth))){
+      depth_invalid <- TRUE
+    } else if (as.numeric(depth) < 0 | as.numeric(depth) > 30){
+      depth_out_of_range <- TRUE
+    }
+  }
+
+  report <- ""
+
+  if(depth_invalid){
+    report <- paste0(report, "depth_invalid")
+  }
+  if (depth_out_of_range){
+    report <- paste0(report, "depth_out_of_range")
+  }
+
+  return(report)
 }
 
 #' Checks to make sure that the crew is entered and comma separated
@@ -321,9 +510,8 @@
     crew_not_entered <- TRUE
 
   #checking that all crew codes are comma separated and are 2-3 letter codes
-  #****DOES NOT CURRENTLY CHECK THE LAST ENTRY
   } else {
-    commas <- unlist(gregexpr(',', crew))
+    commas <- c(unlist(gregexpr(',', crew)), nchar(crew) + 1)
     commas_dist <- diff(sort(commas))
     num_invalid <- sum(commas_dist>5 | commas_dist<3)
 
@@ -341,6 +529,62 @@
   return(report)
 }
 
+######################### Spreadsheet_checks ###################
+#' Imports the excel database into R, as a list of multiple tibbles
+#'
+#' @param path a string designating the directory path of the database excel sheet
+#' @returns a report of the check status for the entry
+#' @export import_database_xl
+import_database_xl <- function(path){
+
+  sheet_names <- readxl::excel_sheets(path)
+  database <- lapply(sheet_names[-1], function(x) readxl::read_excel(path = path, sheet = x))
+  names(database) <- sheet_names[-1]
+
+  return(database)
+}
+
+#' Performs comprehensive verification on equipment_log
+#'
+#' @param equipment_log the equipment log tibble
+#' @returns an equipment_log tibble with the added data flag column
+#' @export check_equipment_log
+check_equipment_log <- function(equipment_log){
+  eq <- equipment_log
+  eq$data_flag <- ""
+
+  for (i in 1: nrow(eq)){
+    print(i)
+    eq$data_flag[i] <- paste0( eq$data_flag[i], ",", .check_date(eq$date[i]))
+    eq$data_flag[i] <- paste0( eq$data_flag[i], ",", .check_site(eq$site[i]))
+    eq$data_flag[i] <- paste0( eq$data_flag[i], ",", .check_equip(eq$equip_type[i]))
+    eq$data_flag[i] <- paste0( eq$data_flag[i], ",", .check_serial(eq$serial_id[i]))
+    eq$data_flag[i] <- paste0( eq$data_flag[i], ",", .check_stnid(eq$station_id[i]))
+    eq$data_flag[i] <- paste0( eq$data_flag[i], ",", .check_action(eq$action[i]))
+    eq$data_flag[i] <- paste0( eq$data_flag[i], ",", .check_deploy(eq$deploy_type[i]))
+    eq$data_flag[i] <- paste0( eq$data_flag[i], ",", .check_time(eq$time[i]))
+    eq$data_flag[i] <- paste0( eq$data_flag[i], ",", .check_wpt(eq$wpt[i]))
+    eq$data_flag[i] <- paste0( eq$data_flag[i], ",", .check_lat(eq$lat[i]))
+    eq$data_flag[i] <- paste0( eq$data_flag[i], ",", .check_lon(eq$lon[i]))
+    eq$data_flag[i] <- paste0( eq$data_flag[i], ",", .check_depth(eq$depth[i]))
+    eq$data_flag[i] <- paste0( eq$data_flag[i], ",", .check_crew(eq$crew[i]))
+
+    #checking matching
+    #NEED CHECKS ON WHETHER ENTRIES ARE FILLED AND IF SO WHETHER THEY CAN BE CHECKED (IE, NO OTHER FLAGS BROUGHT UP.)
+    if(! (grepl("serial_invalid", eq$data_flag[i]) | grepl("equip_invalid", eq$data_flag[i]) | grepl("serial_not_entered", eq$data_flag[i]) | grepl("equip_not_entered", eq$data_flag[i])) ){
+      eq$data_flag[i] <- paste0( eq$data_flag[i], ",", .check_equip_serial_match(equip = eq$equip_type[i], serial = eq$serial_id[i]))
+    }
+    if(!is.na( eq$station_id[i])){
+      if(! (grepl("stnid_invalid", eq$data_flag[i]) | grepl("deploy_invalid", eq$data_flag[i]) )){
+        eq$data_flag[i] <- paste0( eq$data_flag[i], ",", .check_stnid_deploy_match(stnid = eq$station_id[i], deploy = eq$deploy_type[i]))
+      }
+    }
+  }
+
+
+  return(eq)
+}
+
 ######################### Error code summary ###################
 
 #' Provides a summary of the possible error codes and their meaning
@@ -350,39 +594,43 @@ quality_control_codes <- function () {
   cat(
     "date_not_entered: Date is left blank. This entry is mandatory, please fill it.
 date_invalid: Date is invalid. The date should be reported in YYYY-MM-DD format. Check that year, month and date values are correct, that they are - delimited, and that no extra characters are present
+date_out_of_range: Date is out of valid range. The date should be between January 1 2023 and the computer's system date at the time of data checking
 
 time_not_entered: time is left blank. This entry is mandatory, please fill it.
 time_invalid (col#): Time is invalid in the column indicated in parentheses. Time should be reported in HH:MM:SS format in 24h time. Check that hour, minute and second values are correct, that they are : delimited, that there are no extra characters and that the time is in 24h format. Seconds must be included. You may write 00 if a value is not reported to the seconds
 
 site_not_entered: site is left blank. This entry is mandatory, please fill it.
-site_invalid: Site ID is invalid. It must be one of the following values _____________. Make sure the value matches and that no extra characters are present
+site_invalid: Site ID is invalid. It must be one of the values listed in object sites. Make sure the value matches and that no extra characters are present
 
-equip_invalid: equipment type is invalid. It must be one of the following values _____________. Make sure the value matches and that no extra characters are present
+equip_not_entered: equipment type is left blank. This entry is mandatory, please fill it.
+equip_invalid: equipment type is invalid. It must be one of the values listed in object equip_types. Make sure the value matches and that no extra characters are present
 
-serial_invalid (col#): serial ID is invalid in the column indicated in parentheses. Make sure the serial ID is present in the list ___________.
+serial_not_entered: serail ID is left blank. This entry is mandatory, please fill it. Each individual piece of equipment must have its own entry, and thus an associated serial ID number. The only exception is a task done on all units of a given equipment type, at which point \"all\" may be written.
+serial_invalid (col#): serial ID is invalid in the column indicated in parentheses. Make sure the serial ID is present in the list reference_serial_id$SerialNo
 
-equip_id_nomatch: serial ID value does not match the equipment type. Make sure the correct serial ID or equipment type is enterred
+equip_serial_nomatch: serial ID value does not match the equipment type. Make sure the correct serial ID or equipment type is enterred
 
-stnid_invalid: the station ID is invalid. This should be written as DD-SSS-XX-Z, where DD is the deployment type (RT, GA, or GR), SSS is the site id (_________), XX is a number from 01-99, and Z is a letter from A-Z.
+stnid_invalid: the station ID is invalid. This should be written as DD-SSS-XX-Z, where DD is the deployment type (RT, GA, or GR), SSS is the site id (see sites), XX is a number from 01-99, and Z is a letter from A-Z.
 
-action_invalid: the action is invalid. It must be one of the following values _____________.
+action_not_entered: action is left blank. This entry is mandatory, please fill it.
+action_invalid: the action is invalid. It must be one of the values listed in equipment_actions.  Make sure the value matches and that no extra characters are present
 
-deploy_invalid: deployment type is invalid. It must be one of the following values _____________.
+deploy_not_entered: deployment type is left blank. This entry is mandatory, please fill it. If the purpose of the action does not fall within a deployment type, enter \"other\"
+deploy_invalid: deployment type is invalid. It must be one of the values listed in deploy_types  Make sure the value matches and that no extra characters are present
 
 stn_deploy_nomatch: the deployment type and the station ID do not match.
 
-wpt_invalid: the waypoint entry is invalid************
+wpt_invalid: the waypoint entry contains unexpected special characters, or is not comma-separated
 
 lat_invalid: latitude value invalid. Must be in decimal degrees with at least 5 (xx.xxxxxx) and within the range of the data for a given site
-
-lon_invalid: longitude value invalid. Must be in decimal degrees with at least 5 decimals (-xx.xxxxxx)
-
 lat_out_of_range: latitude not within the range of the data for a given site
 
+lon_invalid: longitude value invalid. Must be in decimal degrees with at least 5 decimals (-xx.xxxxxx)
 lon_out_of_range: longitude not within the range of the data for a given site
 
-depth_invalid: depth invalid. Depth is reported in meters in positive values. Make sure it is reported in meters
+site_gps_nomatch: latitude and longitude are outside of the expected range for a given field site
 
+depth_invalid: depth invalid. Depth is reported in meters in positive values. Make sure it is reported in meters
 depth_out_of_range: valid for a given site
 
 crew_invalid: the crew is not entered correctly. Make sure it is written as 2-3 letter initials unique to each person, separated by \', \'.")

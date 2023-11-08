@@ -14,7 +14,8 @@ Imports:
   tidyr,
   lubridate,
   yaps,
-  sf
+  sf,
+  readxl
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.2.3
 Suggests: 
