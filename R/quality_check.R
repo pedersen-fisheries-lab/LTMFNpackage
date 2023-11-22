@@ -58,23 +58,26 @@ import_database_xl <- function(path){
 #' @export check_equipment_log
 check_equipment_log <- function(equipment_log){
   eq <- equipment_log
-  eq$data_flag <- ""
+
+  report_file <- data.frame(row_num = c(1:nrow(eq)),
+                            data_flag = "")
 
   for (i in 1: nrow(eq)){
     print(i)
-    eq$data_flag[i] <- paste0( eq$data_flag[i], ",", .check_date(eq$date[i]))
-    eq$data_flag[i] <- paste0( eq$data_flag[i], ",", .check_site(eq$site[i]))
-    eq$data_flag[i] <- paste0( eq$data_flag[i], ",", .check_equip(eq$equip_type[i]))
-    eq$data_flag[i] <- paste0( eq$data_flag[i], ",", .check_serial(eq$serial_id[i]))
-    eq$data_flag[i] <- paste0( eq$data_flag[i], ",", .check_stnid(eq$station_id[i]))
-    eq$data_flag[i] <- paste0( eq$data_flag[i], ",", .check_action(eq$action[i]))
-    eq$data_flag[i] <- paste0( eq$data_flag[i], ",", .check_deploy(deploy = eq$deploy_type[i], site = eq$site[i]))
-    eq$data_flag[i] <- paste0( eq$data_flag[i], ",", .check_time(eq$time[i]))
-    eq$data_flag[i] <- paste0( eq$data_flag[i], ",", .check_wpt(eq$wpt[i]))
-    eq$data_flag[i] <- paste0( eq$data_flag[i], ",", .check_lat(eq$lat[i]))
-    eq$data_flag[i] <- paste0( eq$data_flag[i], ",", .check_lon(eq$lon[i]))
-    eq$data_flag[i] <- paste0( eq$data_flag[i], ",", .check_depth(eq$depth_m[i]))
-    eq$data_flag[i] <- paste0( eq$data_flag[i], ",", .check_crew(eq$crew[i]))
+
+    report_file$data_flag[i] <- paste0( report_file$data_flag[i], ",", .check_date(eq$date[i]))
+    report_file$data_flag[i] <- paste0( report_file$data_flag[i], ",", .check_site(eq$site[i]))
+    report_file$data_flag[i] <- paste0( report_file$data_flag[i], ",", .check_equip(eq$equip_type[i]))
+    report_file$data_flag[i] <- paste0( report_file$data_flag[i], ",", .check_serial(eq$serial_id[i]))
+    report_file$data_flag[i] <- paste0( report_file$data_flag[i], ",", .check_stnid(eq$station_id[i]))
+    report_file$data_flag[i] <- paste0( report_file$data_flag[i], ",", .check_action(eq$action[i]))
+    report_file$data_flag[i] <- paste0( report_file$data_flag[i], ",", .check_deploy(deploy = eq$deploy_type[i], site = eq$site[i]))
+    report_file$data_flag[i] <- paste0( report_file$data_flag[i], ",", .check_time(eq$time[i]))
+    report_file$data_flag[i] <- paste0( report_file$data_flag[i], ",", .check_wpt(eq$wpt[i]))
+    report_file$data_flag[i] <- paste0( report_file$data_flag[i], ",", .check_lat(eq$lat[i]))
+    report_file$data_flag[i] <- paste0( report_file$data_flag[i], ",", .check_lon(eq$lon[i]))
+    report_file$data_flag[i] <- paste0( report_file$data_flag[i], ",", .check_depth(eq$depth_m[i]))
+    report_file$data_flag[i] <- paste0( report_file$data_flag[i], ",", .check_crew(eq$crew[i]))
 
     #checking matching
     #NEED CHECKS ON WHETHER ENTRIES ARE FILLED AND IF SO WHETHER THEY CAN BE CHECKED (IE, NO OTHER FLAGS BROUGHT UP.)
@@ -90,6 +93,9 @@ check_equipment_log <- function(equipment_log){
     # }
   }
 
+  #identifying which rows have which errors
+  # which(grepl(report_file$data_flag))
+  # report_file$row_num
 
   return(eq)
 }
