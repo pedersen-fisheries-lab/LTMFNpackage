@@ -1,535 +1,42 @@
-############## internal functions ###############################
-#' Checks date formats to make sure they are in YYYY-MM-DD format at the correct time
+######################### Data checking flow functions ###################
+#' Performs comprehensive verification of all excel data entry files within a given folder
 #'
-#' @param date a single date entry (as a character string)
-#' @returns a report of the check status for each entry
-.check_date <-  function(date){
-  date_not_entered <- FALSE
-  date_invalid <- FALSE
-  date_out_of_range <- FALSE
+#' @param folder_path the path of the folder in which the data entry xlsx sheets are stored. Folder must only contain the correct format of data entry sheets
+#' @returns creates a folder in which the flagged xlsx files are placed for the tester to look through them and correct data entry mistakes.
+#' @export check_dataentry
+check_dataentry <- function(folder_path){
 
-  #check if entered
-  if (is.na(date)| !is.character(date) | date=="") {
-    date_not_entered <- TRUE
-  } else {
-    #check length
-    if (nchar(date)!=10)
-      date_invalid <- TRUE
-    #check dash locations
-    if (substr(date, 5,5)!="-" |substr(date, 8,8)!="-")
-      date_invalid <- TRUE
+  #getting all file paths within the folder
+  file_names<- list.files(folder_path, pattern=".xlsx")
 
-    #check values
-    if(!date_invalid) {
-      year <- as.numeric(substring(date, 1, 4))
-      month <- as.numeric(substring(date, 6, 7))
-      day <- as.numeric(substring(date, 9, 10))
+  flagged_folder_path <- paste0(folder_path, "flagged")
 
-      #checking that year, month and date are written numerically
-      if(is.na(year)|is.na(month)|is.na(day)){
-        date_invalid <- TRUE
-      #checking month
-      } else if (month>12 |month<1) {
-        date_invalid <- TRUE
-      #Check day for each month option (long, short and february)
-      } else if (month %in% c(1,3,5, 7, 8, 10, 12)){
-        if(day>31 |day<1)
-          date_invalid <- TRUE
-      } else if (month%in% c( 4, 6, 9)){
-        if(day>30 |day<1)
-          date_invalid <- TRUE
-      } else if (month==2){
-        if(day>29 |day<1)
-          date_invalid <- TRUE
-      }
-    }
-
-    #check date range
-    if (!date_invalid){
-      if(as.numeric(substring(date, 1, 4))<2023 | as.numeric(substring(date, 1, 4))>as.numeric(substring(Sys.Date(), 1, 4)))
-      date_out_of_range <- TRUE
-    }
+  #setting a flagged folder within working data folder
+  if (! dir.exists(flagged_folder_path)){
+    dir.create(flagged_folder_path)
   }
 
-  #return standardized error code
-  report <- ""
-  if(date_not_entered)
-    report <- paste0(report ,"date_not_entered")
-  if (date_invalid){
-    report <- paste0(report ,"date_invalid")
-  }
-  if(date_out_of_range){
-    report <- paste0(report, "date_out_of_range")
+  for (current_file in file_names){
+    #importing database
+    database <- import_database_xl(paste0(folder_path, current_file))
+
+    #cheking database
+    database_flagged <- list()
+
+    database_flagged$equipment_log <- check_equipment_log(database$equipment_log)
+
+    database_flagged$fish <- check_fish(database$fish)
+
+    #the same for all the other sheets "fykes"         "angling"       "cast_netting"  "range_test"    "gps_records"
+
+    #exporting flagged database to excel
+    openxlsx::write.xlsx(x = database_flagged, file = paste0(flagged_folder_path, "/", substring(current_file, 1, I(nchar(current_file)-5)), "_flagged.xlsx"))
   }
 
-  return(report)
+
 }
 
-#' Checks manually-input time entries
-#'
-#' @param time a single time entry (as a character string)
-#' @returns a report of the check status
-.check_time <- function(time){
-
-  time_not_entered <- FALSE
-  time_invalid <- FALSE
-
-  #checking it exists
-  if (is.na(time) | !is.character(time) | time=="") {
-    time_not_entered <- TRUE
-  } else {
-    if(nchar(time)==8) {
-      hours <- 0
-    } else if (nchar(time)==7) {
-      hours <- -1
-    }
-
-    if (!(nchar(time)==8 |nchar(time)==7)) {
-      time_invalid <- TRUE
-    } else if (substr(time, 3+hours,3+hours)!=":" |substr(time, 6+hours,6+hours)!=":") {
-      time_invalid <- TRUE
-    } else {
-      hour <- as.numeric(substring(time, 1, 2+hours))
-      minute <- as.numeric(substring(time, 4+hours, 5+hours))
-      second <- as.numeric(substr(time, 7+hours, 8+hours))
-
-      #checking that all entries are numeric
-      if(is.na(hour)|is.na(minute)|is.na(second)) {
-        time_invalid <- TRUE
-      } else if(hour<0| hour>24){
-        time_invalid <- TRUE
-      } else if (minute<0 |minute>59){
-        time_invalid <- TRUE
-      } else if(second<0 |second>59){
-        time_invalid <- TRUE
-      }
-    }
-  }
-
-  #generating the report
-  report <- ""
-  if(time_not_entered){
-    report <- paste0(report, "time_not_entered")
-  }
-  if (time_invalid)
-    report <- paste0(report, "time_invalid")
-  return (report)
-}
-
-#' Checks site ID to make sure it is within the list of allowed values
-#'
-#' @param site a single site entry (as a character string)
-#' @returns a report of the check status for each entry
-.check_site <-  function(site) {
-  site_not_entered <- FALSE
-  site_invalid <- FALSE
-
-  if (is.na(site) | !is.character(site) | site=="") {
-    site_not_entered <- TRUE
-  } else if(!(site %in% sites)){
-    site_invalid <- TRUE
-  }
-
-  #return report
-  report <- ""
-  if (site_not_entered)
-    report <- paste0(report, "site_not_entered")
-  if(site_invalid)
-    report <- paste0(report, "site_invalid")
-
-  return(report)
-}
-
-#' Checks equipment type to make sure it is within the list of allowed values
-#'
-#' @param equip a single equipment entry (as a character string)
-#' @returns a report of the check status for each entry
-.check_equip <-  function(equip){
-  equip_not_entered <- FALSE
-  equip_invalid <- FALSE
-
-  if (is.na(equip) | !is.character(equip) | equip=="") {
-    equip_not_entered <- TRUE
-  } else if(!(equip %in% equip_types)){
-    equip_invalid <- TRUE
-  }
-
-  #return report
-  report <- ""
-  if (equip_not_entered)
-    report <- paste0(report, "equip_not_entered")
-  if(equip_invalid)
-    report <- paste0(report, "equip_invalid")
-
-  return(report)
-}
-
-#' Checks the serial ID to make sure it is listed in our equipment list
-#'
-#' @param serial a single serial id entry (as a character or integer)
-#' @returns a report of the check status for each entry
-.check_serial <- function(serial){
-  serial_not_entered <- FALSE
-  serial_invalid <- FALSE
-
-  if (is.na(serial)|serial=="") {
-    serial_not_entered <- TRUE
-  } else if(!(serial %in% c(reference_serial_id$SerialNo, "all"))){
-    serial_invalid <- TRUE
-  }
-
-  #return report
-  report <- ""
-  if (serial_not_entered)
-    report <- paste0(report, "serial_not_entered")
-  if(serial_invalid)
-    report <- paste0(report, "serial_invalid")
-
-  return(report)
-}
-
-#' Checks to make sure the serial ID number matches the equipment type
-#'
-#' @param equip a single equipment type entry of the equipment type (as a character)
-#' @param serial a single serial ID entry of the serial id number (as a character or integer)
-#' @returns a report of the check status for each entry
-.check_equip_serial_match <- function(equip, serial){
-  equip_serial_nomatch <- FALSE
-
-  if(equip != reference_serial_id$Type[reference_serial_id$SerialNo==serial]) {
-    equip_serial_nomatch <- TRUE
-  }
-
-  report <- ""
-  if (equip_serial_nomatch) {
-    report <- paste0(report, "equip_serial_nomatch")
-  }
-
-  return(report)
-}
-
-#' Checks to make sure the station ID follows a valid format
-#'
-#' @param stnid a single station ID entry entry of the equipment type (as a character)
-#' @returns a report of the check status for the entry
-.check_stnid <- function(stnid){
-  stnid_invalid <- FALSE
-
-  if(! (is.na(stnid) | stnid=="" )){
-
-    deploy <- substring(stnid, 1, 2)
-    site <- substring(stnid, 4, 6)
-    id_num <- substring(stnid, 8, 9)
-    id_let <- substring(stnid, 11, 11)
-
-    #checking length
-    if(nchar(stnid)!=11) {
-      stnid_invalid <- TRUE
-
-    #checking - at positions 3, 7, 10
-    } else if(substr(stnid, 3, 3)!="-" | substr(stnid, 7, 7)!="-" |substr(stnid, 10, 10)!="-" ) {
-      stnid_invalid <- TRUE
-
-    #checking deplyment
-    } else if( !(deploy %in% c("RT", "GR", "GA"))){
-      stnid_invalid <- TRUE
-
-    #checking site (list of site ids, excluding general "base", "lab", and "other")
-    } else if (!(site %in% sites)){
-      stnid_invalid <- TRUE
-
-    } else if (site %in% c("lab", "base","other")) {
-      stnid_invalid <- TRUE
-
-    #checking number
-    } else if (is.na(as.numeric(id_num))){
-      stnid_invalid <- TRUE
-
-    } else if (as.numeric(id_num)<1 | as.numeric(id_num) >99){
-      stnid_invalid <- TRUE
-
-    #checking id_let based on unicode order
-    } else if ( !(id_let %in% LETTERS)) {
-      stnid_invalid <- TRUE
-    }
-  }
-
-
-  report <- ""
-  if (stnid_invalid) {
-    report <- paste0(report, "stnid_invalid")
-  }
-
-  return(report)
-}
-
-#' Checks to make sure the action is one of the permitted entries
-#'
-#' @param action a single station ID entry entry of the equipment type (as a character)
-#' @returns a report of the check status for the entry
-.check_action <- function(action){
-  action_not_entered <- FALSE
-  action_invalid <- FALSE
-
-  if (is.na(action)| action==""){
-    action_not_entered <- TRUE
-  } else if (!(action %in% equipment_actions)){
-    action_invalid <- TRUE
-  }
-
-  report <- ""
-  if(action_not_entered){
-    report <- paste0(report, "action_not_entered")
-  }
-  if(action_invalid) {
-    report <- paste0(report, "action_invalid")
-  }
-
-  return(report)
-}
-
-#' Checks to make sure the deployment type is entered and is one of the permitted entries
-#'
-#' @param deploy a single station ID entry entry of the equipment type (as a character)
-#' @returns a report of the check status for the entry
-.check_deploy <- function(deploy){
-  deploy_not_entered <- FALSE
-  deploy_invalid <- FALSE
-
-  # if (is.na(deploy) | deploy=="") {
-  #   deploy_not_entered <- TRUE
-  # } else
-
-  if(! is.na(deploy)) {
-    if(!(deploy %in% deploy_types)){
-      deploy_invalid <- TRUE
-    }
-  }
-
-  #return report
-  report <- ""
-  if (deploy_not_entered)
-    report <- paste0(report, "deploy_not_entered")
-  if(deploy_invalid)
-    report <- paste0(report, "deploy_invalid")
-
-  return(report)
-}
-
-.check_stnid_deploy_match <- function(stnid, deploy){
-
-  report <- ""
-  return(report)
-}
-
-#' Checks to make sure the waypoints are entered in an acceptable format
-#'
-#' CURRENTLY NOT CHECKING ANYTHING> POSSIBLE OPTIONS: checking for the presence of special cahracters, checking from proper comma delimitations
-#' @param wpt a single entry of waypoint names as a comma-separated string
-#' @returns a report of the check status for the entry
-.check_wpt <- function(wpt){
- invalid_wpt <- FALSE
-
-  # possible gps special characters ! " # $ % & ' ( ) * + , - . / : ; < > = ? @ [ ] \ ^ _ ` { } | ~
- report <- ""
- if(invalid_wpt){
-   report <- paste0(report, "invalid_wpt")
- }
-
- return(report)
-}
-
-#' Checks to make sure the gps latitude is within sensible bounds
-#'
-#' @param lat a single numeric latitude value
-#' @returns a report of the check status for the entry
-.check_lat <- function(lat){
-  lat_invalid <- FALSE
-  lat_out_of_range <- FALSE
-
-  if(! is.na(lat)) {
-    if(is.na(as.numeric(lat))){
-      lat_invalid <- TRUE
-    } else if (as.numeric(lat) < 45.3 | as.numeric(lat) > 55.5 ){
-      lat_out_of_range <- TRUE
-    }
-  }
-
-  report <- ""
-
-  if(lat_invalid){
-    report <- paste0(report, "lat_invalid")
-  }
-  if (lat_out_of_range){
-    report <- paste0(report, "lat_out_of_range")
-  }
-
-  return(report)
-}
-
-#' Checks to make sure the gps longitude is within sensible bounds
-#'
-#' @param lon a single numeric longitude value
-#' @returns a report of the check status for the entry
-.check_lon <- function(lon){
-  lon_invalid <- FALSE
-  lon_out_of_range <- FALSE
-
-  if(!is.na(lon)){
-    if(is.na(as.numeric(lon))){
-      lon_invalid <- TRUE
-    } else if (as.numeric(lon) < -79.5 | as.numeric(lon) > -72.5 ){
-      lon_out_of_range <- TRUE
-    }
-  }
-
-  report <- ""
-
-  if(lon_invalid){
-    report <- paste0(report, "lon_invalid")
-  }
-  if (lon_out_of_range){
-    report <- paste0(report, "lon_out_of_range")
-  }
-
-  return(report)
-}
-
-#' Checks to make sure the gps latitude and longitude match the site ID
-#' NOT FUNCTIONALL****
-#'
-#' @param site site ID
-#' @param lat a single numeric latitude value
-#' @param lon a single numeric longitude value
-#' @returns a report of the check status for the entry
-.check_gps_site_match <- function(site, lat, lon){
-  site_gps_nomatch <- FALSE
-
-  if (site == "JEA") {
-    if (lat <52.16 |lat > 52.34){
-      site_gps_nomatch <- TRUE
-    }
-    if (lon < -78.58| long > -76.59){
-      site_gps_nomatch <- FALSE
-    }
-  }
-
-  if (site == "JGR") {
-    if (lat < 55.02 | lat > 55.34){
-      site_gps_nomatch <- TRUE
-    }
-    if (lon < 77.84 | long > -76.15){
-      site_gps_nomatch <- FALSE
-    }
-  }
-
-  if (site == "JMA") {
-    if (lat < 0 |lat > 0){
-      site_gps_nomatch <- TRUE
-    }
-    if (lon < -78.94 | long > 0 ){
-      site_gps_nomatch <- FALSE
-    }
-  }
-
-  if (site == "JRU") {
-    if (lat < 0 |lat > 0){
-      site_gps_nomatch <- TRUE
-    }
-    if (lon < 0 | long > 0){
-      site_gps_nomatch <- FALSE
-    }
-  }
-
-  if (site == "JOY") {
-    if (lat < 0 |lat > 0){
-      site_gps_nomatch <- TRUE
-    }
-    if (lon < 0 | long > 0){
-      site_gps_nomatch <- FALSE
-    }
-  }
-
-  if (site == "LEA") {
-    if (lat < 0 |lat > 0){
-      site_gps_nomatch <- TRUE
-    }
-    if (lon < 0 | long > 0){
-      site_gps_nomatch <- FALSE
-    }
-  }
-
-  if (site == "LWE") {
-    if (lat < 0 |lat > 0 ){
-      site_gps_nomatch <- TRUE
-    }
-    if (lon < 0 | long > 0){
-      site_gps_nomatch <- FALSE
-    }
-  }
-}
-
-#' Checks to make sure the depth is within sensible bounds
-#'
-#' @param depth a single numeric depth value
-#' @returns a report of the check status for the entry
-.check_depth <- function(depth){
-  depth_invalid <- FALSE
-  depth_out_of_range <- FALSE
-
-  if(! is.na(depth)){
-    if(is.na(as.numeric(depth))){
-      depth_invalid <- TRUE
-    } else if (as.numeric(depth) < 0 | as.numeric(depth) > 30){
-      depth_out_of_range <- TRUE
-    }
-  }
-
-  report <- ""
-
-  if(depth_invalid){
-    report <- paste0(report, "depth_invalid")
-  }
-  if (depth_out_of_range){
-    report <- paste0(report, "depth_out_of_range")
-  }
-
-  return(report)
-}
-
-#' Checks to make sure that the crew is entered and comma separated
-#'
-#' @param crew a single station ID entry entry of the equipment type (as a character)
-#' @returns a report of the check status for the entry
-.check_crew <- function(crew){
-  crew_not_entered <- FALSE
-  crew_invalid <- FALSE
-
-  #checking that crew was entered
-  if(is.na(crew) | crew==""){
-    crew_not_entered <- TRUE
-
-  #checking that all crew codes are comma separated and are 2-3 letter codes
-  } else {
-    commas <- c(unlist(gregexpr(',', crew)), nchar(crew) + 1)
-    commas_dist <- diff(sort(commas))
-    num_invalid <- sum(commas_dist>5 | commas_dist<3)
-
-    if(num_invalid>0){
-      crew_invalid <- TRUE
-    }
-  }
-
-  report <- ""
-  if (crew_not_entered)
-    report <- paste0(report, "crew_not_entered")
-  if(crew_invalid)
-    report <- paste0(report, "crew_invalid")
-
-  return(report)
-}
-
-######################### Spreadsheet_checks ###################
+######################### Importing and Exporting data  ################################
 #' Imports the excel database into R, as a list of multiple tibbles
 #'
 #' @param path a string designating the directory path of the database excel sheet
@@ -538,8 +45,8 @@
 import_database_xl <- function(path){
 
   sheet_names <- readxl::excel_sheets(path)
-  database <- lapply(sheet_names[-1], function(x) readxl::read_excel(path = path, sheet = x))
-  names(database) <- sheet_names[-1]
+  database <- lapply(sheet_names[!sheet_names== "README! - Instructions"], function(x) readxl::read_excel(path = path, sheet = x))
+  names(database) <- sheet_names[!sheet_names== "README! - Instructions"]
 
   return(database)
 }
@@ -561,30 +68,40 @@ check_equipment_log <- function(equipment_log){
     eq$data_flag[i] <- paste0( eq$data_flag[i], ",", .check_serial(eq$serial_id[i]))
     eq$data_flag[i] <- paste0( eq$data_flag[i], ",", .check_stnid(eq$station_id[i]))
     eq$data_flag[i] <- paste0( eq$data_flag[i], ",", .check_action(eq$action[i]))
-    eq$data_flag[i] <- paste0( eq$data_flag[i], ",", .check_deploy(eq$deploy_type[i]))
+    eq$data_flag[i] <- paste0( eq$data_flag[i], ",", .check_deploy(deploy = eq$deploy_type[i], site = eq$site[i]))
     eq$data_flag[i] <- paste0( eq$data_flag[i], ",", .check_time(eq$time[i]))
     eq$data_flag[i] <- paste0( eq$data_flag[i], ",", .check_wpt(eq$wpt[i]))
     eq$data_flag[i] <- paste0( eq$data_flag[i], ",", .check_lat(eq$lat[i]))
     eq$data_flag[i] <- paste0( eq$data_flag[i], ",", .check_lon(eq$lon[i]))
-    eq$data_flag[i] <- paste0( eq$data_flag[i], ",", .check_depth(eq$depth[i]))
+    eq$data_flag[i] <- paste0( eq$data_flag[i], ",", .check_depth(eq$depth_m[i]))
     eq$data_flag[i] <- paste0( eq$data_flag[i], ",", .check_crew(eq$crew[i]))
 
     #checking matching
     #NEED CHECKS ON WHETHER ENTRIES ARE FILLED AND IF SO WHETHER THEY CAN BE CHECKED (IE, NO OTHER FLAGS BROUGHT UP.)
     if(! (grepl("serial_invalid", eq$data_flag[i]) | grepl("equip_invalid", eq$data_flag[i]) | grepl("serial_not_entered", eq$data_flag[i]) | grepl("equip_not_entered", eq$data_flag[i])) ){
-      eq$data_flag[i] <- paste0( eq$data_flag[i], ",", .check_equip_serial_match(equip = eq$equip_type[i], serial = eq$serial_id[i]))
-    }
-    if(!is.na( eq$station_id[i])){
-      if(! (grepl("stnid_invalid", eq$data_flag[i]) | grepl("deploy_invalid", eq$data_flag[i]) )){
-        eq$data_flag[i] <- paste0( eq$data_flag[i], ",", .check_stnid_deploy_match(stnid = eq$station_id[i], deploy = eq$deploy_type[i]))
+      if (eq$serial_id[i] != "all") {
+        eq$data_flag[i] <- paste0( eq$data_flag[i], ",", .check_equip_serial_match(equip = eq$equip_type[i], serial = eq$serial_id[i]))
       }
     }
+    # if(!is.na( eq$station_id[i])){
+    #   if(! (grepl("stnid_invalid", eq$data_flag[i]) | grepl("deploy_invalid", eq$data_flag[i]) )){
+    #     eq$data_flag[i] <- paste0( eq$data_flag[i], ",", .check_stnid_deploy_match(stnid = eq$station_id[i], deploy = eq$deploy_type[i]))
+    #   }
+    # }
   }
 
 
   return(eq)
 }
 
+#' Performs comprehensive verification on fish database
+#'
+#' @param fish the equipment log tibble
+#' @returns an equipment_log tibble with the added data flag column
+#' @export check_fish
+check_fish <- function(fish){
+  return(fish)
+}
 ######################### Error code summary ###################
 
 #' Provides a summary of the possible error codes and their meaning
@@ -606,7 +123,7 @@ equip_not_entered: equipment type is left blank. This entry is mandatory, please
 equip_invalid: equipment type is invalid. It must be one of the values listed in object equip_types. Make sure the value matches and that no extra characters are present
 
 serial_not_entered: serail ID is left blank. This entry is mandatory, please fill it. Each individual piece of equipment must have its own entry, and thus an associated serial ID number. The only exception is a task done on all units of a given equipment type, at which point \"all\" may be written.
-serial_invalid (col#): serial ID is invalid in the column indicated in parentheses. Make sure the serial ID is present in the list reference_serial_id$SerialNo
+serial_invalid (col#): serial ID is invalid in the column indicated in parentheses. Make sure the serial ID is present in the list reference_serial_id$serial_id
 
 equip_serial_nomatch: serial ID value does not match the equipment type. Make sure the correct serial ID or equipment type is enterred
 

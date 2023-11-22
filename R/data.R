@@ -51,16 +51,18 @@
 
 #' Reference document of Innovasea-Provided equipment
 #'
-#' List of all innovasea-provided equipment, equipment type, product ID and serial number. ****MUST BE UPDATED WHEN NEW EQUIPMENT IS PURCHASED****
+#' List of all innovasea-provided and GPS equipment, equipment type, product ID and serial number. ****MUST BE UPDATED WHEN NEW EQUIPMENT IS PURCHASED****
 #'
-#' @format A data frame with 82 rows and 3 columns:
+#' @format A data frame with 157 rows and 4 columns:
 #'
 #' \describe{
-#'   \item{Type}{Type of equipment (based on our defined codeing system)}
-#'   \item{ProductID}{Official Innovasea Product ID}
-#'   \item{SerialNo}{serial number of each piece of equipment}
+#'   \item{type}{Type of equipment (based on our defined codeing system)}
+#'   \item{product_id}{Official Innovasea Product ID}
+#'   \item{serial_id}{serial number of each piece of equipment}
 #' }
-#' @source {LTMFTN database of Innovasea Equipment}
+#' @source {Downloaded from https://liveconcordia-my.sharepoint.com/personal/eric_pedersen_concordia_ca/Documents/Research/projects%20-%20spatial%20community%20ecology/Quebec%20fish%20telemetry%20network/data/EquipmentSummary.xlsx:
+#'
+#' reference_serial_id <- read_excel("data-raw/EquipmentSummary.xlsx", sheet = "reference_serial_id")}
 "reference_serial_id"
 
 #' Approved work sites code
@@ -83,3 +85,24 @@
 #'
 #' @source {manually created from the excel data validation}
 "deploy_types"
+
+#' Approved fish capture method codes
+#'
+#' @format A vector of the entries "fyke", "angling", "castNet", "other"
+#'
+#' @source {manually created from the excel data validation}
+"capture_methods"
+
+#' Approved fish species codes
+#'
+#' @format A vector of the entries "BKTR", "CISC", "CPRD", "LKTR", "LKWH", "NRPK", "RNSM", "STBS", "TENC", "WALL", "YLPR", "bycatch"
+#'
+#' @source {manually created from the excel data validation}
+"species_codes"
+
+#' Approved fish sex and maturity codes
+#'
+#' @format A vector of the entries "MM", "IM", "MF", "IF", "unk"
+#'
+#' @source {manually created from the excel data validation}
+"sex_options"
