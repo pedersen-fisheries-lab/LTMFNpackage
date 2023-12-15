@@ -54,12 +54,12 @@
   #return standardized error code
   report <- ""
   if(date_not_entered)
-    report <- paste0(report ,"date_not_entered")
+    report <- paste0(report ,"date_not_entered/")
   if (date_invalid){
-    report <- paste0(report ,"date_invalid")
+    report <- paste0(report ,"date_invalid/")
   }
   if(date_out_of_range){
-    report <- paste0(report, "date_out_of_range")
+    report <- paste0(report, "date_out_of_range/")
   }
 
   return(report)
@@ -109,10 +109,10 @@
   #generating the report
   report <- ""
   if(time_not_entered){
-    report <- paste0(report, "time_not_entered")
+    report <- paste0(report, "time_not_entered/")
   }
   if (time_invalid)
-    report <- paste0(report, "time_invalid")
+    report <- paste0(report, "time_invalid/")
   return (report)
 }
 
@@ -133,9 +133,9 @@
   #return report
   report <- ""
   if (site_not_entered)
-    report <- paste0(report, "site_not_entered")
+    report <- paste0(report, "site_not_entered/")
   if(site_invalid)
-    report <- paste0(report, "site_invalid")
+    report <- paste0(report, "site_invalid/")
 
   return(report)
 }
@@ -157,9 +157,9 @@
   #return report
   report <- ""
   if (equip_not_entered)
-    report <- paste0(report, "equip_not_entered")
+    report <- paste0(report, "equip_not_entered/")
   if(equip_invalid)
-    report <- paste0(report, "equip_invalid")
+    report <- paste0(report, "equip_invalid/")
 
   return(report)
 }
@@ -181,9 +181,9 @@
   #return report
   report <- ""
   if (serial_not_entered)
-    report <- paste0(report, "serial_not_entered")
+    report <- paste0(report, "serial_not_entered/")
   if(serial_invalid)
-    report <- paste0(report, "serial_invalid")
+    report <- paste0(report, "serial_invalid/")
 
   return(report)
 }
@@ -202,7 +202,7 @@
 
   report <- ""
   if (equip_serial_nomatch) {
-    report <- paste0(report, "equip_serial_nomatch")
+    report <- paste0(report, "equip_serial_nomatch/")
   }
 
   return(report)
@@ -257,7 +257,7 @@
 
   report <- ""
   if (stnid_invalid) {
-    report <- paste0(report, "stnid_invalid")
+    report <- paste0(report, "stnid_invalid/")
   }
 
   return(report)
@@ -279,10 +279,10 @@
 
   report <- ""
   if(action_not_entered){
-    report <- paste0(report, "action_not_entered")
+    report <- paste0(report, "action_not_entered/")
   }
   if(action_invalid) {
-    report <- paste0(report, "action_invalid")
+    report <- paste0(report, "action_invalid/")
   }
 
   return(report)
@@ -310,9 +310,9 @@
   #return report
   report <- ""
   if (deploy_not_entered)
-    report <- paste0(report, "deploy_not_entered")
+    report <- paste0(report, "deploy_not_entered/")
   if(deploy_invalid)
-    report <- paste0(report, "deploy_invalid")
+    report <- paste0(report, "deploy_invalid/")
 
   return(report)
 }
@@ -334,7 +334,7 @@
   # possible gps special characters ! " # $ % & ' ( ) * + , - . / : ; < > = ? @ [ ] \ ^ _ ` { } | ~
   report <- ""
   if(invalid_wpt){
-    report <- paste0(report, "invalid_wpt")
+    report <- paste0(report, "invalid_wpt/")
   }
 
   return(report)
@@ -359,10 +359,10 @@
   report <- ""
 
   if(lat_invalid){
-    report <- paste0(report, "lat_invalid")
+    report <- paste0(report, "lat_invalid/")
   }
   if (lat_out_of_range){
-    report <- paste0(report, "lat_out_of_range")
+    report <- paste0(report, "lat_out_of_range/")
   }
 
   return(report)
@@ -387,10 +387,10 @@
   report <- ""
 
   if(lon_invalid){
-    report <- paste0(report, "lon_invalid")
+    report <- paste0(report, "lon_invalid/")
   }
   if (lon_out_of_range){
-    report <- paste0(report, "lon_out_of_range")
+    report <- paste0(report, "lon_out_of_range/")
   }
 
   return(report)
@@ -489,10 +489,10 @@
   report <- ""
 
   if(depth_invalid){
-    report <- paste0(report, "depth_invalid")
+    report <- paste0(report, "depth_invalid/")
   }
   if (depth_out_of_range){
-    report <- paste0(report, "depth_out_of_range")
+    report <- paste0(report, "depth_out_of_range/")
   }
 
   return(report)
@@ -523,9 +523,9 @@
 
   report <- ""
   if (crew_not_entered)
-    report <- paste0(report, "crew_not_entered")
+    report <- paste0(report, "crew_not_entered/")
   if(crew_invalid)
-    report <- paste0(report, "crew_invalid")
+    report <- paste0(report, "crew_invalid/")
 
   return(report)
 }
@@ -547,9 +547,9 @@
   #return report
   report <- ""
   if (capture_not_entered)
-    report <- paste0(report, "capture_not_entered")
+    report <- paste0(report, "capture_not_entered/")
   if(capture_invalid)
-    report <- paste0(report, "capture_invalid")
+    report <- paste0(report, "capture_invalid/")
 
   return(report)
 }
@@ -571,9 +571,9 @@
   #return report
   report <- ""
   if (species_not_entered)
-    report <- paste0(report, "species_not_entered")
+    report <- paste0(report, "species_not_entered/")
   if(species_invalid)
-    report <- paste0(report, "species_invalid")
+    report <- paste0(report, "species_invalid/")
 
   return(report)
 }
@@ -599,13 +599,13 @@
   report <- ""
 
   if (temp_not_entered){
-    report <- paste0(report, "temp_not_entered")
+    report <- paste0(report, "temp_not_entered/")
   }
   if(temp_invalid){
-    report <- paste0(report, "temp_invalid")
+    report <- paste0(report, "temp_invalid/")
   }
   if (temp_out_of_range){
-    report <- paste0(report, "temp_out_of_range")
+    report <- paste0(report, "temp_out_of_range/")
   }
 
   return(report)
@@ -636,13 +636,13 @@
   report <- ""
 
   if (length_not_entered){
-    report <- paste0(report, "length_not_entered")
+    report <- paste0(report, "length_not_entered/")
   }
   if(length_invalid){
-    report <- paste0(report, "length_invalid")
+    report <- paste0(report, "length_invalid/")
   }
   if (length_out_of_range){
-    report <- paste0(report, "length_out_of_range")
+    report <- paste0(report, "length_out_of_range/")
   }
 
   return(report)
@@ -668,13 +668,13 @@
   report <- ""
 
   if (weight_not_entered){
-    report <- paste0(report, "weight_not_entered")
+    report <- paste0(report, "weight_not_entered/")
   }
   if(weight_invalid){
-    report <- paste0(report, "weight_invalid")
+    report <- paste0(report, "weight_invalid/")
   }
   if (weight_out_of_range){
-    report <- paste0(report, "weight_out_of_range")
+    report <- paste0(report, "weight_out_of_range/")
   }
 
   return(report)
@@ -705,9 +705,9 @@
   #return report
   report <- ""
   if (sex_not_entered)
-    report <- paste0(report, "sex_not_entered")
+    report <- paste0(report, "sex_not_entered/")
   if(sex_invalid)
-    report <- paste0(report, "sex_invalid")
+    report <- paste0(report, "sex_invalid/")
 
   return(report)
 }
@@ -750,10 +750,10 @@
 
   report <- ""
   if(initials_not_entered){
-    report <- paste0(report, "initials_not_entered")
+    report <- paste0(report, "initials_not_entered/")
   }
   if (intials_invalid) {
-    report <- paste0(report, "intials_invalid")
+    report <- paste0(report, "intials_invalid/")
   }
 
   return(report)
