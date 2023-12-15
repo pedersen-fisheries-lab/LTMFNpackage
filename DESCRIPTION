@@ -6,21 +6,22 @@ Authors@R: person("Natalie", "Dupont", email = "natalie.dupont@concordia.ca",
   role = c("aut", "cre"))
 Description: This pacakge contains useful helper functions for formatting and analyzing data for the LTMFTN fish telemetry project.
     These include packages to format data into standardized and user-friendly formats, as well as helper and wrapper functions to analyze small-scale movement data using the YAPS pacakge.
-License: use_mit_license()
+License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true
 Imports:
-  dplyr,
-  tidyr,
-  lubridate,
-  yaps,
-  sf,
-  readxl,
-  openxlsx
+    dplyr,
+    tidyr,
+    lubridate,
+    sf,
+    readxl,
+    openxlsx,
+    purrr
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.2.3
 Suggests: 
-    testthat (>= 3.0.0)
+    testthat (>= 3.0.0),
+    yaps
 Config/testthat/edition: 3
 Depends: 
     R (>= 2.10)
