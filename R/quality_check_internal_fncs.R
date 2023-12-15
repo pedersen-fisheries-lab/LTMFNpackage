@@ -9,7 +9,7 @@
   date_out_of_range <- FALSE
 
   #check if entered
-  if (is.na(date)| !is.character(date) | date=="") {
+  if (is.na(date)| is.null(date) | date=="") {
     date_not_entered <- TRUE
   } else {
     #check length

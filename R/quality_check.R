@@ -8,13 +8,13 @@ check_dataentry <- function(folder_path){
 
   #Checking that data entry is occurring in the right spot
     #checking device
-  if (Sys.info[6] != "PedersenLab" |
-      Sys.info[4] != "DESKTOP-H8SPKU6"){
-    warning("Data checking should be performed in the database directory of the Lab Surface Pro computer.
+  if (Sys.info()[6] != "PedersenLab" |
+      Sys.info()[4] != "DESKTOP-H8SPKU6"){
+    message("Data checking should be performed in the database directory of the Lab Surface Pro computer.
             This device does not seem to be the lab surface pro (NodeName: DESKTOP-H8SPKU6), or it is not signed into PedersenLab.
             If you wish to proceed, enter \"Y\" into the console. If not, enter \"N\" into the console")
 
-    user_decision <- readline(prompt = "Would you like to proceed? (enter N or Y)")
+    user_decision <- readline(prompt = "Would you like to proceed? (enter N or Y): ")
 
     if(user_decision == "N"){
       stop("Data checking stopped")
@@ -25,11 +25,12 @@ check_dataentry <- function(folder_path){
     }
   }
     #checking file directory
-  if (folder_path != "[what it should be"){
-    warning("Data checking should be performed in the database directory of the Lab Surface Pro computer [exact folder path].
-            The current directory is []. If you wish to proceed, enter \"Y\" into the console. If not, enter \"N\" into the console")
+  if (getwd() != "C:/Users/PedersenLab/Documents/ltmftn_project/ltmftn_database/internal_database"){
+    message("Your working directory for data checking should be set to \"ltmftn_project/ltmftn_database/internal_database\" on the lab surface pro.
+            You can do this with the following line of code: setwd(\"~/ltmftn_project/ltmftn_database/internal_database\".
+            The current directory is []. If you wish to proceed with this working directory, enter \"Y\" into the console. If not, enter \"N\".")
 
-    user_decision <- readline(prompt = "Would you like to proceed? (enter N or Y)")
+    user_decision <- readline(prompt = "Would you like to proceed? (enter N or Y): ")
 
     if(user_decision == "N"){
       stop("Data checking stopped")
@@ -47,42 +48,69 @@ check_dataentry <- function(folder_path){
   #getting all file paths within the folder
   file_names<- list.files(folder_path, pattern=".xlsx")
 
-  flagged_folder_path <- paste0(folder_path, "flagged")
-
-  #setting a flagged folder within working data folder
-  if (! dir.exists(flagged_folder_path)){
-    dir.create(flagged_folder_path)
-  }
+  flagged_folder_path <- "flagged/"
 
   #IMPORT AND MERGE ALL DATA ENTRY FILES
   database_list <- lapply(file_names, FUN = function(x) import_database_xl(paste0(folder_path, x)))
-  #add data enterer, and date of entry into database
-  #merge dataframes
 
+  #check that data entry information is present
+  missing_entry_data <- ""
+  entry_date_invalid <- ""
+  entry_initials_invalid <- ""
+  for (i in 1:length(database_list)){
+    if(is.null(database_list[[i]]$entry_metadata$date[1]) |
+       is.null(database_list[[i]]$entry_metadata$enterer_initials[1])){
+      missing_entry_data <- paste0(missing_entry_data, ", ", i)
+    }
+    if(.check_date(as.character(database_list[[i]]$entry_metadata$date[1])) != ""){
+      entry_date_invalid <- paste0(entry_date_invalid, ", ", i)
+    }
 
-
-  for (current_file in file_names){
-    #importing database
-    database <- import_database_xl(paste0(folder_path, current_file))
-
-    #cheking database
-    database_flagged <- list()
-
-    database_flagged$equipment_log <- check_equipment_log(database$equipment_log)
-
-    database_flagged$fish <- check_fish(database$fish)
-
-    #the same for all the other sheets "fykes"         "angling"       "cast_netting"  "range_test"    "gps_records"
-
-    #exporting flagged database to excel
-    openxlsx::write.xlsx(x = database_flagged, file = paste0(flagged_folder_path, "/", substring(current_file, 1, I(nchar(current_file)-5)), "_flagged.xlsx"))
+    if(.check_crew(database_list[[i]]$entry_metadata$date[1]) != ""){
+      entry_initials_invalid <- paste0(entry_initials_invalid, ", ", i)
+    }
+  }
+  if(missing_entry_data != ""){
+    stop(paste0("The following files have missing data entry data: ", missing_entry_data,
+                "both the date and initials of the data enterer are necessary. Please add this data in the entry_metadata sheet"))
+  }
+  if(entry_date_invalid != ""){
+    stop(paste0("The following files have an invalid date for data entry metadata: ", entry_date_invalid,
+                "Please follow the YYYY-MM-DD format for the date in the entry_metadata sheet"))
+  }
+  if(entry_initials_invalid != ""){
+    stop(paste0("The following files have invalid initials for data entry metadata: ", entry_initials_invalid,
+                "Please write the data enterer's initials as 2 or 3 letters in the entry_metadata sheet"))
   }
 
-  #if no comments flagged, immediately append to main database
-  #if( original data_flag column in each sheets is all NA )
-  #append immediately to final database and announce that this was done
+  #adding data entry metadata into each row of data
+  database_list <- lapply(X = database_list, FUN = function(list_entry){
+    date <- list_entry$entry_metadata$date[1]
+    enterer <- list_entry$entry_metadata$enterer_initials[1]
 
+    list_entry <- lapply(list_entry, function(list_entry) {
+      list_entry$entry_date <- date
+      list_entry$entry_initials <- enterer
+      return(list_entry)
+    })
+    return(list_entry)
+  } )
 
+  #merging the separate lists
+  names_tables <- names(database_list[[1]])
+
+  database <- purrr::map(names_tables, ~purrr::map_dfr(database_list, purrr::pluck, .x))
+  names(database) <- names_tables
+
+  #removing separate entry_matadata dataframe
+  database <- database[setdiff(names(database), "entry_metadata")]
+
+  #checking the data
+  database_flagged <- database
+  database_flagged$equipment_log <- check_equipment_log(database$equipment_log)
+  database_flagged$fish <- check_fish(database$fish)
+
+  openxlsx::write.xlsx(x = database_flagged, file = paste0(Sys.Date(), "database_flagged.xlsx"))
 }
 
 ######################### Importing and Exporting data  ################################
@@ -157,8 +185,6 @@ check_equipment_log <- function(equipment_log){
     #   }
     # }
   }
-
-
   return(eq)
 }
 
@@ -220,7 +246,49 @@ depth_out_of_range: valid for a given site
 
 crew_invalid: the crew is not entered correctly. Make sure it is written as 2-3 letter initials unique to each person, separated by \', \'.")
 }
-
-
-
-
+#
+#
+# #
+# #
+# # database <- list(equipment_log=NULL
+# #                  , fish=NULL)
+# # for (i in names.tables) {
+# #   for (j in 1:length(database_list)) {
+# #     temp_data <- database_list[[j]][i]
+# #
+# #     record_list[[i]] <- rbind(record_list[[i]], data.frame(temp_data))
+# #   }
+# # }
+# #
+# # result_df <- do.call(rbind, lapply(names(database_list), function(name) {
+# #   data <- database_list[[name]]$data
+# #   data$df_name <- name
+# #   return(data)
+# # }))
+#
+#
+#
+#
+#
+#
+# for (current_file in file_names){
+#   #importing database
+#   database <- import_database_xl(paste0(folder_path, current_file))
+#
+#   #cheking database
+#   database_flagged <- list()
+#
+#   database_flagged$equipment_log <- check_equipment_log(database$equipment_log)
+#
+#   database_flagged$fish <- check_fish(database$fish)
+#
+#   #the same for all the other sheets "fykes"         "angling"       "cast_netting"  "range_test"    "gps_records"
+#
+#   #exporting flagged database to excel
+#   openxlsx::write.xlsx(x = database_flagged, file = paste0(flagged_folder_path, "/", substring(current_file, 1, I(nchar(current_file)-5)), "_flagged.xlsx"))
+# }
+#
+# #if no comments flagged, immediately append to main database
+# #if( original data_flag column in each sheets is all NA )
+# #append immediately to final database and announce that this was done
+#
