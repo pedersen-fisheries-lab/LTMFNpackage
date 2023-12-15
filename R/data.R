@@ -106,3 +106,10 @@
 #'
 #' @source {manually created from the excel data validation}
 "sex_options"
+
+#' Approved equipment action codes
+#'
+#' @format A vector of the entries "On", "Off", "deployed", "retrieved", "moved" , "dataDownload", "checked", "configure", "recharge", "other"
+#'
+#' @source {manually created from the excel data validation}
+"equipment_actions"
