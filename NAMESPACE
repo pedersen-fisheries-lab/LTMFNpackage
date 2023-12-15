@@ -2,6 +2,7 @@
 
 export(add_utm_tracks_yaps)
 export(add_utm_wpts_yaps)
+export(append_to_database)
 export(check_dataentry)
 export(check_equipment_log)
 export(check_fish)
