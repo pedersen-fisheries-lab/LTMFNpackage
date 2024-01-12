@@ -10,7 +10,7 @@ check_fish(fish)
 \item{fish}{the equipment log tibble}
 }
 \value{
-an equipment_log tibble with the added data flag column
+an fish tibble with the added data flag column
 }
 \description{
 Performs comprehensive verification on fish database
