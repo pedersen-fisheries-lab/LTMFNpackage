@@ -71,10 +71,10 @@ format_receiverlog_yaps <- function(receiverLog, full=TRUE, starttime="1970-01-0
     receiverLog <- dplyr::select(receiverLog, ts, tag, epo, frac, serial)
   }
 
+  receiverLog <- data.table::setDT(receiverLog)
+
   return(receiverLog)
 }
-
-
 
 ######################## GPS Data ##########################
 #' convert a dataframe of gps waypoints into UTM

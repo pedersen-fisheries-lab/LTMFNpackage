@@ -2,19 +2,20 @@
 #' Performs comprehensive verification of all excel data entry files within a given folder
 #'
 #' @param folder_path the path of the folder in which the data entry xlsx sheets are stored. Folder must only contain the correct format of data entry sheets
+#' @param return_summary whether to output a summary of data checking to the console
 #' @returns creates a folder in which the flagged xlsx files are placed for the tester to look through them and correct data entry mistakes.
 #' @export check_dataentry
-check_dataentry <- function(folder_path){
+check_dataentry <- function(folder_path, return_summary = TRUE){
 
   #Checking that data entry is occurring in the right spot
     #checking device
   if (Sys.info()[6] != "PedersenLab" |
       Sys.info()[4] != "DESKTOP-H8SPKU6"){
     message("Data checking should be performed in the database directory of the Lab Surface Pro computer.
-            This device does not seem to be the lab surface pro (NodeName: DESKTOP-H8SPKU6), or it is not signed into PedersenLab.
+            This device does not seem to be the lab surface pro (NodeName: DESKTOP-H8SPKU6), or it is not signed into the PedersenLab account.
             If you wish to proceed, enter \"Y\" into the console. If not, enter \"N\" into the console")
 
-    user_decision <- readline(prompt = "Would you like to proceed? (enter N or Y): ")
+    user_decision <- readline(prompt = "Would you like to proceed? (enter Y or N): ")
 
     if(user_decision == "N"){
       stop("Data checking stopped")
@@ -26,15 +27,18 @@ check_dataentry <- function(folder_path){
   }
     #checking file directory
   if (getwd() != "C:/Users/PedersenLab/Documents/ltmftn_project/ltmftn_database/internal_database"){
-    message("Your working directory for data checking should be set to \"ltmftn_project/ltmftn_database/internal_database\" on the lab surface pro.
-            You can do this with the following line of code: setwd(\"~/ltmftn_project/ltmftn_database/internal_database\".
-            The current directory is []. If you wish to proceed with this working directory, enter \"Y\" into the console. If not, enter \"N\".")
+    message(paste0("Your working directory for data checking should be set to \"ltmftn_project/ltmftn_database/internal_database\" on the lab surface pro.
+            You can do this with the following line of code: setwd(\"~/ltmftn_project/ltmftn_database/internal_database\").
+            The current directory is", getwd(),  ". Please choose one of the following options by entering a number into the console (1, 2, 3):"))
 
-    user_decision <- readline(prompt = "Would you like to proceed? (enter N or Y): ")
+    user_decision <- readline(prompt = "1: change the working directory to \"~/ltmftn_project/ltmftn_database/internal_database\" \n2: stop data checking\n3: proceed with the current working directory")
 
-    if(user_decision == "N"){
+    if(user_decision == "1"){
+      setwd("~/ltmftn_project/ltmftn_database/internal_database")
+      message(paset0("Working directory set to: ", getwd()))
+    } else if (user_decision == "2") {
       stop("Data checking stopped")
-    } else if (user_decision == "Y") {
+    } else if( user_decision == "3") {
       message("Data checking is proceeding")
     } else {
       stop("User entry is not valid, Data checking halted")
@@ -46,55 +50,60 @@ check_dataentry <- function(folder_path){
   }
 
   #getting all file paths within the folder
-  file_names<- list.files(folder_path, pattern=".xlsx")
+  file_names <- list.files(folder_path, pattern=".xlsx")
 
   flagged_folder_path <- "flagged/"
 
   #IMPORT AND MERGE ALL DATA ENTRY FILES
-  database_list <- lapply(file_names, FUN = function(x) import_database_xl(paste0(folder_path, x)))
+    database_list <- lapply(file_names, FUN = function(x) import_database_xl(paste0(folder_path, x)))
+    names(database_list) <- file_names
 
-  #check that data entry information is present
-  missing_entry_data <- ""
-  entry_date_invalid <- ""
-  entry_initials_invalid <- ""
-  for (i in 1:length(database_list)){
-    if(is.null(database_list[[i]]$entry_metadata$date[1]) |
-       is.null(database_list[[i]]$entry_metadata$enterer_initials[1])){
-      missing_entry_data <- paste0(missing_entry_data, ", ", i)
-    }
-    if(.check_date(as.character(database_list[[i]]$entry_metadata$date[1])) != ""){
-      entry_date_invalid <- paste0(entry_date_invalid, ", ", i)
-    }
+    #check that data entry information is present
+      missing_entry_data <- rep(FALSE, times = length(database_list))
+      entry_date_invalid <- rep(FALSE, times = length(database_list))
+      entry_initials_invalid <- rep(FALSE, times = length(database_list))
 
-    if(.check_crew(database_list[[i]]$entry_metadata$date[1]) != ""){
-      entry_initials_invalid <- paste0(entry_initials_invalid, ", ", i)
+      for (i in 1:length(database_list)){
+        if(is.null(database_list[[i]]$entry_metadata$date[1]) |
+           is.null(database_list[[i]]$entry_metadata$enterer_initials[1])){
+          missing_entry_data[i] <- TRUE
+        }
+        if(.check_date(as.character(database_list[[i]]$entry_metadata$date[1])) != ""){
+          entry_date_invalid[i] <- TRUE
+        }
+
+        if(.check_single_initials(database_list[[i]]$entry_metadata$date[1]) != ""){
+          entry_initials_invalid[i] <- TRUE
+        }
+      }
+
+    if(any(missing_entry_data) ){
+      stop(paste0("The following files have missing data entry data: ", file_names[missing_entry_data],
+                  "both the date and initials of the data enterer are necessary. Please add this data in the entry_metadata sheet"))
     }
-  }
-  if(missing_entry_data != ""){
-    stop(paste0("The following files have missing data entry data: ", missing_entry_data,
-                "both the date and initials of the data enterer are necessary. Please add this data in the entry_metadata sheet"))
-  }
-  if(entry_date_invalid != ""){
-    stop(paste0("The following files have an invalid date for data entry metadata: ", entry_date_invalid,
-                "Please follow the YYYY-MM-DD format for the date in the entry_metadata sheet"))
-  }
-  if(entry_initials_invalid != ""){
-    stop(paste0("The following files have invalid initials for data entry metadata: ", entry_initials_invalid,
-                "Please write the data enterer's initials as 2 or 3 letters in the entry_metadata sheet"))
-  }
+    if(entry_date_invalid != ""){
+      stop(paste0("The following files have an invalid date for data entry metadata: ", file_names[entry_date_invalid],
+                  "Please follow the YYYY-MM-DD format for the date in the entry_metadata sheet"))
+    }
+    if(entry_initials_invalid != ""){
+      stop(paste0("The following files have invalid initials for data entry metadata: ", file_names[entry_initials_invalid],
+                  "Please write the data enterer's initials as 2 or 3 letters in the entry_metadata sheet"))
+    }
 
   #adding data entry metadata into each row of data
-  database_list <- lapply(X = database_list, FUN = function(list_entry){
-    date <- list_entry$entry_metadata$date[1]
-    enterer <- list_entry$entry_metadata$enterer_initials[1]
+    database_list <- lapply(X = database_list, FUN = function(list_entry){
+      #Extracting the data entry data from the sheet for each database being checked
+      date <- list_entry$entry_metadata$date[1]
+      enterer <- list_entry$entry_metadata$enterer_initials[1]
 
-    list_entry <- lapply(list_entry, function(list_entry) {
-      list_entry$entry_date <- date
-      list_entry$entry_initials <- enterer
+      #Adding the data entry data to each sheet for each database being checked
+      list_entry <- lapply(list_entry, function(list_entry) {
+        list_entry$entry_date <- date
+        list_entry$entry_initials <- enterer
+        return(list_entry)
+      })
       return(list_entry)
-    })
-    return(list_entry)
-  } )
+    } )
 
   #merging the separate lists
   names_tables <- names(database_list[[1]])
@@ -103,14 +112,59 @@ check_dataentry <- function(folder_path){
   names(database) <- names_tables
 
   #removing separate entry_matadata dataframe
-  database <- database[setdiff(names(database), "entry_metadata")]
+  #database <- database[setdiff(names(database), "entry_metadata")]
 
   #checking the data
   database_flagged <- database
   database_flagged$equipment_log <- check_equipment_log(database$equipment_log)
   database_flagged$fish <- check_fish(database$fish)
+  database_flagged$fykes <- check_fykes(database$fykes)
+  database_flagged$angling <- check_angling(database$angling)
+  database_flagged$cast_netting <- check_cast_netting(database$cast_netting)
+  database_flagged$range_test <- check_angling(database$range_test)
+  database_flagged$gps_records <- check_angling(database$gps_records)
 
   openxlsx::write.xlsx(x = database_flagged, file = paste0(Sys.Date(), "database_flagged.xlsx"))
+
+  output_message <- paste0("Data entry successfully complete. Flagged data have been output in the ", getwd(), flagged_folder_path, " directory. Make all data entry corrections in this flagged file")
+
+  #creating summary report
+  if (return_summary){
+    eq_flagged_rows <- which(database_flagged$equipment_log$data_flag != "")
+    fish_flagged_rows <- which(database_flagged$fish$data_flag != "")
+    fyke_flagged_rows <- which(database_flagged$fykes$data_flag != "")
+    angling_flagged_rows <- which(database_flagged$angling$data_flag != "")
+    cast_flagged_rows <- which(database_flagged$cast_netting$data_flag != "")
+    rt_flagged_rows <- which(database_flagged$range_test$data_flag != "")
+    gps_flagged_rows <- which(database_flagged$gps_records$data_flag != "")
+
+    output_message <- paste0(output_message, "Here is a list of the flagged rows in each sheet:",
+                             "\nequipment_log rows: ", paste0(eq_flagged_rows, collapse = ", "),
+                             "\nfish rows: ", paste0(fish_flagged_rows, collapse = ", "),
+                             "\nfyke rows: ",paste0(fyke_flagged_rows, collapse = ", "),
+                             "\nangling rows: ", paste0(angling_flagged_rows, collapse = ", "),
+                             "\ncast_netting rows: ",paste0(cast_flagged_rows, collapse = ", "),
+                             "\nrange_test rows: ", paste0(rt_flagged_rows, collapse = ", "),
+                             "\ngps_records rows: ", paste0(gps_flagged_rows, collapse = ", "))
+
+    #data entry summary
+    data_enterers <- unique(database_flagged$entry_metadata$enterer_initials)
+    all_crew <- unique(c(data_enterers,
+                         unlist(stringr::str_split(database_flagged$equipment_log$crew, ", ")),
+                         unlist(stringr::str_split(database_flagged$fish$crew, ", ")),
+                         unlist(stringr::str_split(database_flagged$fykes$crew, ", ")),
+                         unlist(stringr::str_split(database_flagged$angling$crew, ", ")),
+                         unlist(stringr::str_split(database_flagged$range_test$crew, ", ")),
+                         unlist(stringr::str_split(database_flagged$gps_records$crew, ", "))))
+    output_message <- paste0(output_message, "\n\nThe following people participated in the data pipeline: \n",
+                             "data entry: ",  paste0(data_enterers, collapse = ", "),
+                             "\nall crew: ", paste0(all_crew, collapse = ", "))
+
+  }
+
+  output_message <- paste0("\nFor further data checking, please use the visualize_data_check function")
+
+  return(cat(output_message))
 }
 
 ######################### Importing and Exporting data  ################################
@@ -145,6 +199,12 @@ append_to_database <- function(checked_database){
 
 }
 
+visualize_data_check <- function(database){
+  #check dates
+  #check initials
+  #check
+}
+
 ######################### Checking each sheet  ################################
 
 #' Performs comprehensive verification on equipment_log
@@ -156,45 +216,222 @@ check_equipment_log <- function(equipment_log){
   eq <- equipment_log
   eq$data_flag <- ""
 
-  for (i in 1: nrow(eq)){
-    print(i)
-    eq$data_flag[i] <- paste0( eq$data_flag[i], .check_date(eq$date[i]))
-    eq$data_flag[i] <- paste0( eq$data_flag[i], .check_site(eq$site[i]))
-    eq$data_flag[i] <- paste0( eq$data_flag[i], .check_equip(eq$equip_type[i]))
-    eq$data_flag[i] <- paste0( eq$data_flag[i], .check_serial(eq$serial_id[i]))
-    eq$data_flag[i] <- paste0( eq$data_flag[i], .check_stnid(eq$station_id[i]))
-    eq$data_flag[i] <- paste0( eq$data_flag[i], .check_action(eq$action[i]))
-    eq$data_flag[i] <- paste0( eq$data_flag[i], .check_deploy(deploy = eq$deploy_type[i], site = eq$site[i]))
-    eq$data_flag[i] <- paste0( eq$data_flag[i], .check_time(eq$time[i]))
-    eq$data_flag[i] <- paste0( eq$data_flag[i], .check_wpt(eq$wpt[i]))
-    eq$data_flag[i] <- paste0( eq$data_flag[i], .check_lat(eq$lat[i]))
-    eq$data_flag[i] <- paste0( eq$data_flag[i], .check_lon(eq$lon[i]))
-    eq$data_flag[i] <- paste0( eq$data_flag[i], .check_depth(eq$depth_m[i]))
-    eq$data_flag[i] <- paste0( eq$data_flag[i], .check_crew(eq$crew[i]))
+  eq$data_flag <- eq$data_flag <- apply(eq, 1, function(row) {
+    data_flag <- ""
+    data_flag <- paste0(data_flag, .check_date(row["date"]))
+    data_flag <- paste0(data_flag, .check_site(row["site"]))
+    data_flag <- paste0(data_flag, .check_equip(row["equip_type"]))
+    data_flag <- paste0(data_flag, .check_serial(row["serial_id"], equip_type = row["equip_type"]))
+    data_flag <- paste0(data_flag, .check_stnid(row["station_id"], row["deploy_type"]))
+    data_flag <- paste0(data_flag, .check_action(row["action"]))
+    data_flag <- paste0(data_flag, .check_deploy(deploy = row["deploy_type"], site = row["site"]))
+    data_flag <- paste0(data_flag, .check_time(row["time"]))
+    data_flag <- paste0(data_flag, .check_wpt(row["wpt"]))
+    data_flag <- paste0(data_flag, .check_lat(row["lat"]))
+    data_flag <- paste0(data_flag, .check_lon(row["lon"]))
+    data_flag <- paste0(data_flag, .check_depth(row["depth_m"]))
+    data_flag <- paste0(data_flag, .check_subs(row["subs"])) #fnctn to be populated
+    data_flag <- paste0(data_flag, .check_crew(row["crew"]))
 
-    #checking matching
-    #NEED CHECKS ON WHETHER ENTRIES ARE FILLED AND IF SO WHETHER THEY CAN BE CHECKED (IE, NO OTHER FLAGS BROUGHT UP.)
-    if(! (grepl("serial_invalid", eq$data_flag[i]) | grepl("equip_invalid", eq$data_flag[i]) | grepl("serial_not_entered", eq$data_flag[i]) | grepl("equip_not_entered", eq$data_flag[i])) ){
-      if (eq$serial_id[i] != "all") {
-        eq$data_flag[i] <- paste0( eq$data_flag[i], .check_equip_serial_match(equip = eq$equip_type[i], serial = eq$serial_id[i]))
-      }
-    }
-    # if(!is.na( eq$station_id[i])){
-    #   if(! (grepl("stnid_invalid", eq$data_flag[i]) | grepl("deploy_invalid", eq$data_flag[i]) )){
-    #     eq$data_flag[i] <- paste0( eq$data_flag[i], .check_stnid_deploy_match(stnid = eq$station_id[i], deploy = eq$deploy_type[i]))
-    #   }
-    # }
-  }
+    return(data_flag)
+  })
+
   return(eq)
 }
 
 #' Performs comprehensive verification on fish database
 #'
 #' @param fish the equipment log tibble
-#' @returns an equipment_log tibble with the added data flag column
+#' @returns an fish tibble with the added data flag column
 #' @export check_fish
 check_fish <- function(fish){
+  fish$data_flag <- ""
+
+  if(!(is.na(row["tag_serial"])| row["tag_serial"] == "") & row["recap"] !="yes"){
+    tagging <- TRUE
+  } else {
+    tagging <- FALSE
+  }
+
+  fish$data_flag <- fish$data_flag <- apply(fish, 1, function(row) {
+    data_flag <- ""
+    data_flag <- paste0(data_flag, .check_date(row["date"]))
+    data_flag <- paste0(data_flag, .check_site(row["site"]))
+    data_flag <- paste0(data_flag, .check_capture_method(row["capture_method"]))
+    data_flag <- paste0(data_flag, .check_fykeid(row["fyke_id"]))
+    data_flag <- paste0(data_flag, "capt_", .check_time(row["capture_time"], mandatory = FALSE))
+    data_flag <- paste0(data_flag, "capt", .check_lat(row["capture_lat"], mandatory = FALSE))
+    data_flag <- paste0(data_flag, "capt", .check_lon(row["capture_lon"], mandatory = FALSE))
+    data_flag <- paste0(data_flag, .check_species(row["species"]))
+    data_flag <- paste0(data_flag, .check_temp(row["temp_c"]))
+    data_flag <- paste0(data_flag, "capt_", .check_condition(row["capture_cond"])) #populate fnctn
+    data_flag <- paste0(data_flag, .check_length(row["length_mm"]))
+    data_flag <- paste0(data_flag, .check_weight(row["weight_g"]))
+    data_flag <- paste0(data_flag, .check_dna_scale_id(row["scale_id"])) #populate fnct
+    data_flag <- paste0(data_flag, .check_dna_scale_id(row["dna_id"])) #populate fnct
+    data_flag <- paste0(data_flag, .check_sex(row["sex"]))
+    data_flag <- paste0(data_flag, .check_serial(row["tag_serial"]), equip_type = "tag")
+    data_flag <- paste0(data_flag, .check_tag_model(row["tag_model"])) #create fnct
+    data_flag <- paste0(data_flag, .check_clove_conc(row["clove_conc"], mandatory = tagging)) #create fnct
+    data_flag <- paste0(data_flag, "anesth_", .check_time(row["anesth_start"], mandatory = tagging))
+    data_flag <- paste0(data_flag, "surgs_", .check_time(row["surg_start"], mandatory = tagging))
+    data_flag <- paste0(data_flag, "surge_", .check_time(row["surg_end"], mandatory = tagging))
+    data_flag <- paste0(data_flag, "recov_", .check_time(row["recov_end"], mandatory = tagging))
+    data_flag <- paste0(data_flag, "rele_", .check_time(row["release_time"], mandatory = tagging))
+    data_flag <- paste0(data_flag, "rele_", .check_lat(row["release_lat"], mandatory = tagging))
+    data_flag <- paste0(data_flag, "rele_", .check_lon(row["release_lon"], mandatory = tagging))
+    data_flag <- paste0(data_flag, "rele_", .check_condition(row["release_cond"], mandatory = tagging))
+    data_flag <- paste0(data_flag, .check_mort(row["mort"], mandatory = tagging))
+    data_flag <- paste0(data_flag, .check_recap(row["recap"], mandatory = tagging))
+    data_flag <- paste0(data_flag, "surg_",.check_single_initials(row["surgeon"], mandatory = tagging))
+    data_flag <- paste0(data_flag, "assi_",.check_single_initials(row["assistant"], mandatory = tagging))
+    data_flag <- paste0(data_flag, "reco_",.check_single_initials(row["recorder"], mandatory = tagging))
+
+    data_flag <- paste0(data_flag, .check_crew(row["crew"]))
+
+    return(data_flag)
+  })
+
   return(fish)
+}
+
+#' Performs comprehensive verification on fyke database
+#'
+#' @param fyke the equipment log tibble
+#' @returns an angling tibble with the added data flag column
+#' @export check_fyke
+check_fyke <- function(fyke){
+  fyke$data_flag <- ""
+
+  if(row["net_action"] %in% c("set", "retrieved")){
+    need_gps <- TRUE
+  } else {
+    need_gps <- FALSE
+  }
+
+  fyke$data_flag <- fyke$data_flag <- apply(fyke, 1, function(row) {
+    data_flag <- ""
+    data_flag <- paste0(data_flag, .check_date(row["date"]))
+    data_flag <- paste0(data_flag, .check_site(row["site"]))
+    data_flag <- paste0(data_flag, .check_fykeid(row["fyke_id"], mandatory = TRUE)) #populate fnct
+    data_flag <- paste0(data_flag, .check_net_action(row["net_action"]))
+    data_flag <- paste0(data_flag, .check_lat(row["lat"], mandatory = need_gps))
+    data_flag <- paste0(data_flag, .check_lon(row["lon"], mandatory = need_gps))
+    data_flag <- paste0(data_flag, "out_", .check_time(row["out_time"]))
+    data_flag <- paste0(data_flag, "in_", .check_time(row["in_time"]))
+    data_flag <- paste0(data_flag, .check_fish_caught(row["fish_caught"]))
+    data_flag <- paste0(data_flag, .check_crew(row["crew"]))
+
+    return(data_flag)
+  })
+  return(fyke)
+}
+
+#' Performs comprehensive verification on angling database
+#'
+#' @param angling the equipment log tibble
+#' @returns an angling tibble with the added data flag column
+#' @export check_angling
+check_angling <- function(angling){
+  angling$data_flag <- ""
+
+  angling$data_flag <- angling$data_flag <- apply(angling, 1, function(row) {
+    data_flag <- ""
+    data_flag <- paste0(data_flag, .check_date(row["date"]))
+    data_flag <- paste0(data_flag, .check_site(row["site"]))
+    data_flag <- paste0(data_flag, "start_", .check_time(row["start_time"], mandatory = TRUE))
+    data_flag <- paste0(data_flag, "start_", .check_lat(row["start_lat"], mandatory = TRUE))
+    data_flag <- paste0(data_flag, "start_", .check_lon(row["start_lon"], mandatory = TRUE))
+    data_flag <- paste0(data_flag, "end_", .check_time(row["end_time"], mandatory = TRUE))
+    data_flag <- paste0(data_flag, "end_", .check_lat(row["end_lat"], mandatory = FALSE))
+    data_flag <- paste0(data_flag, "end_", .check_lon(row["end_lon"], mandatory = FALSE))
+    #check trackid create fnct
+    #check n_rods create fnct
+    data_flag <- paste0(data_flag, .check_crew(row["crew"]))
+
+    return(data_flag)
+  })
+  return(angling)
+}
+
+#' Performs comprehensive verification on cast_netting database
+#'
+#' @param cast_netting the equipment log tibble
+#' @returns an cast_netting tibble with the added data flag column
+#' @export check_cast_netting
+check_cast_netting <- function(cast_netting){
+  cast_netting$data_flag <- ""
+
+  cast_netting$data_flag <- cast_netting$data_flag <- apply(cast_netting, 1, function(row) {
+    data_flag <- ""
+    data_flag <- paste0(data_flag, .check_date(row["date"]))
+    data_flag <- paste0(data_flag, .check_site(row["site"]))
+    data_flag <- paste0(data_flag, "start", .check_time(row["start_time"]))
+    data_flag <- paste0(data_flag, "start", .check_lat(row["start_lat"]))
+    data_flag <- paste0(data_flag, "start", .check_lon(row["start_lon"]))
+    data_flag <- paste0(data_flag, "end", .check_time(row["end_time"]))
+    data_flag <- paste0(data_flag, "end", .check_lat(row["end_lat"]))
+    data_flag <- paste0(data_flag, "end", .check_lon(row["end_lon"]))
+    #check trackid
+    #check n_nets
+    data_flag <- paste0(data_flag, .check_crew(row["crew"]))
+
+    return(data_flag)
+  })
+  return(cast_netting)
+}
+
+#' Performs comprehensive verification on range_test database
+#'
+#' @param range_test the equipment log tibble
+#' @returns an range_test tibble with the added data flag column
+#' @export check_range_test
+check_range_test <- function(range_test){
+  range_test$data_flag <- ""
+
+  range_test$data_flag <- range_test$data_flag <- apply(range_test, 1, function(row) {
+    data_flag <- ""
+    data_flag <- paste0(data_flag, .check_date(row["date"]))
+    data_flag <- paste0(data_flag, .check_site(row["site"]))
+    #check rt type
+    #check distance
+    #chekc object_id???
+    #check wpt
+    data_flag <- paste0(data_flag, .check_lat(row["lat"]))
+    data_flag <- paste0(data_flag, .check_lon(row["lon"]))
+    data_flag <- paste0(data_flag, "start", .check_time(row["start_time"]))
+    data_flag <- paste0(data_flag, "end", .check_time(row["end_time"]))
+    data_flag <- paste0(data_flag, .check_depth(row["depth_m"]))
+    #check susbtrate
+    #check rttag_ids?
+    data_flag <- paste0(data_flag, .check_crew(row["crew"]))
+
+    return(data_flag)
+  })
+  return(range_test)
+}
+
+#' Performs comprehensive verification on gps_records database
+#'
+#' @param gps_records the equipment log tibble
+#' @returns an gps_records tibble with the added data flag column
+#' @export check_gps_records
+check_gps_records <- function(gps_records){
+  gps_records$data_flag <- ""
+
+  gps_records$data_flag <- gps_records$data_flag <- apply(gps_records, 1, function(row) {
+    data_flag <- ""
+    data_flag <- paste0(data_flag, .check_date(row["date"]))
+    data_flag <- paste0(data_flag, .check_site(row["site"]))
+    #check obj_name
+    #check_file_name
+    #check record type
+    #check device
+    data_flag <- paste0(data_flag, .check_crew(row["crew"]))
+
+    return(data_flag)
+  })
+  return(gps_records)
 }
 ######################### Error code summary ###################
 
@@ -202,7 +439,7 @@ check_fish <- function(fish){
 #'
 #' @export quality_control_codes
 quality_control_codes <- function () {
-  cat(
+  message(
     "date_not_entered: Date is left blank. This entry is mandatory, please fill it.
 date_invalid: Date is invalid. The date should be reported in YYYY-MM-DD format. Check that year, month and date values are correct, that they are - delimited, and that no extra characters are present
 date_out_of_range: Date is out of valid range. The date should be between January 1 2023 and the computer's system date at the time of data checking

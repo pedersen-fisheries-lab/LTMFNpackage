@@ -74,7 +74,7 @@
 
 #' Approved equipment type codes
 #'
-#' @format A vector of the entries "VR2Tx", "VR2W", "tag", "RTtag", "VR100", "AquaMeasureSal", "AquaMeasureDO", "AquaMeasureCl","GPS"
+#' @format A vector of the entries "VR2Tx", "VR2W",  "tag",   "RTtag", "VR100", "AMchl", "AMdo",  "AMsal", "GPS"
 #'
 #' @source {manually created from the excel data validation}
 "equip_types"
@@ -95,8 +95,8 @@
 
 #' Approved fish species codes
 #'
-#' @format A vector of the entries "BKTR", "CISC", "CPRD", "LKTR", "LKWH", "NRPK", "RNSM", "STBS", "TENC", "WALL", "YLPR", "bycatch"
-#'
+#' @format A vector of the entries 'c("COAR",  "COCL", "ESLU",  "MOHU",  "MOSA" , "OSMO", "PEFL", "SAFO", "SANA", "SAVI",  "TITI", "bycatch")
+#
 #' @source {manually created from the excel data validation}
 "species_codes"
 
@@ -113,3 +113,10 @@
 #'
 #' @source {manually created from the excel data validation}
 "equipment_actions"
+
+#' Approved fyke action codes
+#'
+#' @format A vector of the entries "set", "retrieved", "checked", "moved"
+#'
+#' @source {manually created from the excel data validation}
+"fyke_actions"

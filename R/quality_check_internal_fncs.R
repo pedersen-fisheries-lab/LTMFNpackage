@@ -2,16 +2,24 @@
 #' Checks date formats to make sure they are in YYYY-MM-DD format at the correct time
 #'
 #' @param date a single date entry (as a character string)
+#' @param mandatory TRUE/FALSE designates if the data to be checked is mandatory
+#'
 #' @returns a report of the check status for each entry
-.check_date <-  function(date){
+.check_date <-  function(date, mandatory = TRUE){
   date_not_entered <- FALSE
   date_invalid <- FALSE
   date_out_of_range <- FALSE
 
   #check if entered
-  if (is.na(date)| is.null(date) | date=="") {
+  if (is.null(date)) {
     date_not_entered <- TRUE
-  } else {
+  } else if(is.na(date)){
+    date_not_entered <- TRUE
+  }
+  else if ( as.character(date)==""){
+    date_not_entered <- TRUE
+  }
+  else {
     #check length
     if (nchar(date)!=10)
       date_invalid <- TRUE
@@ -53,8 +61,10 @@
 
   #return standardized error code
   report <- ""
-  if(date_not_entered)
-    report <- paste0(report ,"date_not_entered/")
+  if (mandatory == TRUE){
+    if(date_not_entered)
+      report <- paste0(report ,"date_not_entered/")
+  }
   if (date_invalid){
     report <- paste0(report ,"date_invalid/")
   }
@@ -68,14 +78,18 @@
 #' Checks manually-input time entries
 #'
 #' @param time a single time entry (as a character string)
+#' @param mandatory TRUE/FALSE designates if the data to be checked is mandatory
+#'
 #' @returns a report of the check status
-.check_time <- function(time){
+.check_time <- function(time, mandatory = TRUE){
 
   time_not_entered <- FALSE
   time_invalid <- FALSE
 
   #checking it exists
-  if (is.na(time) | !is.character(time) | time=="") {
+  if (is.null(time)){
+    time_not_entered <- TRUE
+  }else if (is.na(time) | !is.character(time) | time=="") {
     time_not_entered <- TRUE
   } else {
     if(nchar(time)==8) {
@@ -108,8 +122,10 @@
 
   #generating the report
   report <- ""
-  if(time_not_entered){
-    report <- paste0(report, "time_not_entered/")
+  if (mandatory == TRUE){
+    if(time_not_entered){
+      report <- paste0(report, "time_not_entered/")
+    }
   }
   if (time_invalid)
     report <- paste0(report, "time_invalid/")
@@ -119,8 +135,10 @@
 #' Checks site ID to make sure it is within the list of allowed values
 #'
 #' @param site a single site entry (as a character string)
+#' @param mandatory TRUE/FALSE designates if the data to be checked is mandatory
+#'
 #' @returns a report of the check status for each entry
-.check_site <-  function(site) {
+.check_site <-  function(site, mandatory = TRUE) {
   site_not_entered <- FALSE
   site_invalid <- FALSE
 
@@ -132,8 +150,10 @@
 
   #return report
   report <- ""
-  if (site_not_entered)
-    report <- paste0(report, "site_not_entered/")
+  if (mandatory == TRUE){
+    if (site_not_entered)
+      report <- paste0(report, "site_not_entered/")
+  }
   if(site_invalid)
     report <- paste0(report, "site_invalid/")
 
@@ -143,12 +163,14 @@
 #' Checks equipment type to make sure it is within the list of allowed values
 #'
 #' @param equip a single equipment entry (as a character string)
+#' @param mandatory TRUE/FALSE designates if the data to be checked is mandatory
+#'
 #' @returns a report of the check status for each entry
-.check_equip <-  function(equip){
+.check_equip <-  function(equip, mandatory = TRUE){
   equip_not_entered <- FALSE
   equip_invalid <- FALSE
 
-  if (is.na(equip) | !is.character(equip) | equip=="") {
+  if (is.na(equip) | equip=="") {
     equip_not_entered <- TRUE
   } else if(!(equip %in% equip_types)){
     equip_invalid <- TRUE
@@ -156,8 +178,10 @@
 
   #return report
   report <- ""
-  if (equip_not_entered)
-    report <- paste0(report, "equip_not_entered/")
+  if (mandatory == TRUE){
+    if (equip_not_entered)
+      report <- paste0(report, "equip_not_entered/")
+  }
   if(equip_invalid)
     report <- paste0(report, "equip_invalid/")
 
@@ -167,43 +191,41 @@
 #' Checks the serial ID to make sure it is listed in our equipment list
 #'
 #' @param serial a single serial id entry (as a character or integer)
+#' @param equip_type what category of equipment is to be checked (ex: tag, VR2Tx, etc.)
+#' @param mandatory TRUE/FALSE designates if the data to be checked is mandatory
+#'
 #' @returns a report of the check status for each entry
-.check_serial <- function(serial){
+.check_serial <- function(serial, equip_type = "all", mandatory = TRUE){
   serial_not_entered <- FALSE
   serial_invalid <- FALSE
+  serial_equip_nomatch <- FALSE
 
-  if (is.na(serial)|serial=="") {
-    serial_not_entered <- TRUE
-  } else if(!(serial %in% c(reference_serial_id$serial_id, "all"))){
-    serial_invalid <- TRUE
+  if(equip_type == "all"){
+    serial_ref <- c(reference_serial_id$serial_id, "all")
+  } else {
+    serial_ref <- c(reference_serial_id$serial_id[reference_serial_id$type == equip_type], "all")
+  }
+
+  if (equip_type %in% equip_types |equip_type == "all" ){
+    if (is.na(serial)|serial=="") {
+      serial_not_entered <- TRUE
+    } else if(!(serial %in% c(reference_serial_id$serial_id, "all"))){
+      serial_invalid <- TRUE
+    } else if (!(serial %in% serial_ref)){
+      serial_equip_nomatch <- TRUE
+    }
   }
 
   #return report
   report <- ""
-  if (serial_not_entered)
-    report <- paste0(report, "serial_not_entered/")
+  if (mandatory == TRUE){
+    if (serial_not_entered)
+      report <- paste0(report, "serial_not_entered/")
+  }
   if(serial_invalid)
     report <- paste0(report, "serial_invalid/")
-
-  return(report)
-}
-
-#' Checks to make sure the serial ID number matches the equipment type
-#'
-#' @param equip a single equipment type entry of the equipment type (as a character)
-#' @param serial a single serial ID entry of the serial id number (as a character or integer)
-#' @returns a report of the check status for each entry
-.check_equip_serial_match <- function(equip, serial){
-  equip_serial_nomatch <- FALSE
-
-  if(equip != reference_serial_id$type[reference_serial_id$serial_id==serial]) {
-    equip_serial_nomatch <- TRUE
-  }
-
-  report <- ""
-  if (equip_serial_nomatch) {
-    report <- paste0(report, "equip_serial_nomatch/")
-  }
+  if(serial_equip_nomatch)
+    report <- paste0(report, "serial_equip_nomatch")
 
   return(report)
 }
@@ -211,51 +233,54 @@
 #' Checks to make sure the station ID follows a valid format
 #'
 #' @param stnid a single station ID entry entry of the equipment type (as a character)
+#' @param deploy a single station ID entry entry of the equipment type (as a character)
+#'
 #' @returns a report of the check status for the entry
-.check_stnid <- function(stnid){
+.check_stnid <- function(stnid, deploy){
   stnid_invalid <- FALSE
+  stnid_deploy_nomatch <- FALSE
+  stnid_site_nomatch <- FALSE
 
   if(! (is.na(stnid) | stnid=="" )){
+    st_deploy <- substring(stnid, 1, 2)
+    st_site <- substring(stnid, 4, 6)
+    st_id_num <- substring(stnid, 8, 9)
+    st_id_let <- substring(stnid, 11, 11)
+    st_dash <- c(substring(stnid, 3, 3), substring(stnid, 7, 7), substring(stnid, 10, 10))
 
-    deploy <- substring(stnid, 1, 2)
-    site <- substring(stnid, 4, 6)
-    id_num <- substring(stnid, 8, 9)
-    id_let <- substring(stnid, 11, 11)
-
-    #checking length
-    if(nchar(stnid)!=11) {
+    if(length(stnid)>11){
       stnid_invalid <- TRUE
-
-      #checking - at positions 3, 7, 10
-    } else if(substr(stnid, 3, 3)!="-" | substr(stnid, 7, 7)!="-" |substr(stnid, 10, 10)!="-" ) {
+    }else if( !(st_deploy %in% deploy_types[-4])){
       stnid_invalid <- TRUE
-
-      #checking deplyment
-    } else if( !(deploy %in% c("RT", "GR", "GA"))){
-      stnid_invalid <- TRUE
-
       #checking site (list of site ids, excluding general "base", "lab", and "other")
-    } else if (!(site %in% sites)){
+    } else if (!(st_site %in% sites)){
       stnid_invalid <- TRUE
-
-    } else if (site %in% c("lab", "base","other")) {
+    } else if (st_site %in% c("lab", "base","other")) {
       stnid_invalid <- TRUE
-
       #checking number
-    } else if (is.na(as.numeric(id_num))){
+    } else if (is.na(as.numeric(st_id_num))){
       stnid_invalid <- TRUE
-
-    } else if (as.numeric(id_num)<1 | as.numeric(id_num) >99){
+    } else if (as.numeric(st_id_num) <1 | as.numeric(st_id_num) >99){
       stnid_invalid <- TRUE
-
       #checking id_let based on unicode order
-    } else if ( !(id_let %in% LETTERS)) {
+    } else if ( !(st_id_let %in% LETTERS)) {
+      stnid_invalid <- TRUE
+    } else if(any(st_dash != "-")){
       stnid_invalid <- TRUE
     }
   }
 
+    #checking that station matches site and deplyment type
+  if(deploy %in% deploy_types){
+    if(st_deploy != deploy){
+      stnid_deploy_nomatch <- TRUE
+    }
+  }
 
   report <- ""
+  if(stnid_deploy_nomatch){
+    report <- paste0(report, "stnid_deploy_nomatch/")
+  }
   if (stnid_invalid) {
     report <- paste0(report, "stnid_invalid/")
   }
@@ -266,8 +291,10 @@
 #' Checks to make sure the action is one of the permitted entries
 #'
 #' @param action a single station ID entry entry of the equipment type (as a character)
+#' @param mandatory TRUE/FALSE designates if the data to be checked is mandatory
+#'
 #' @returns a report of the check status for the entry
-.check_action <- function(action){
+.check_action <- function(action, mandatory = TRUE){
   action_not_entered <- FALSE
   action_invalid <- FALSE
 
@@ -278,8 +305,10 @@
   }
 
   report <- ""
-  if(action_not_entered){
-    report <- paste0(report, "action_not_entered/")
+  if (mandatory == TRUE){
+    if(action_not_entered){
+      report <- paste0(report, "action_not_entered/")
+    }
   }
   if(action_invalid) {
     report <- paste0(report, "action_invalid/")
@@ -291,8 +320,11 @@
 #' Checks to make sure the deployment type is entered and is one of the permitted entries
 #'
 #' @param deploy a single station ID entry entry of the equipment type (as a character)
+#' @param site site ID
+#' @param mandatory TRUE/FALSE designates if the data to be checked is mandatory
+#'
 #' @returns a report of the check status for the entry
-.check_deploy <- function(deploy, site){
+.check_deploy <- function(deploy, site, mandatory = FALSE){
   deploy_not_entered <- FALSE
   deploy_invalid <- FALSE
 
@@ -309,17 +341,13 @@
 
   #return report
   report <- ""
-  if (deploy_not_entered)
-    report <- paste0(report, "deploy_not_entered/")
+  if (mandatory == TRUE){
+    if (deploy_not_entered)
+      report <- paste0(report, "deploy_not_entered/")
+  }
   if(deploy_invalid)
     report <- paste0(report, "deploy_invalid/")
 
-  return(report)
-}
-
-.check_stnid_deploy_match <- function(stnid, deploy){
-
-  report <- ""
   return(report)
 }
 
@@ -327,8 +355,10 @@
 #'
 #' CURRENTLY NOT CHECKING ANYTHING> POSSIBLE OPTIONS: checking for the presence of special cahracters, checking from proper comma delimitations
 #' @param wpt a single entry of waypoint names as a comma-separated string
+#' @param mandatory TRUE/FALSE designates if the data to be checked is mandatory
+#'
 #' @returns a report of the check status for the entry
-.check_wpt <- function(wpt){
+.check_wpt <- function(wpt, mandatory = FALSE){
   invalid_wpt <- FALSE
 
   # possible gps special characters ! " # $ % & ' ( ) * + , - . / : ; < > = ? @ [ ] \ ^ _ ` { } | ~
@@ -343,10 +373,17 @@
 #' Checks to make sure the gps latitude is within sensible bounds
 #'
 #' @param lat a single numeric latitude value
+#' @param mandatory TRUE/FALSE designates if the data to be checked is mandatory
+#'
 #' @returns a report of the check status for the entry
-.check_lat <- function(lat){
+.check_lat <- function(lat, mandatory = FALSE){
+  lat_not_entered <- FALSE
   lat_invalid <- FALSE
   lat_out_of_range <- FALSE
+
+  if (is.na(lat) | lat=="") {
+    lat_not_entered <- TRUE
+  }
 
   if(! is.na(lat)) {
     if(is.na(as.numeric(lat))){
@@ -357,7 +394,11 @@
   }
 
   report <- ""
-
+  if (mandatory == TRUE){
+    if(lat_not_entered){
+      report <- paste0(report, "lat_not_entered/")
+    }
+  }
   if(lat_invalid){
     report <- paste0(report, "lat_invalid/")
   }
@@ -371,21 +412,30 @@
 #' Checks to make sure the gps longitude is within sensible bounds
 #'
 #' @param lon a single numeric longitude value
+#' @param mandatory TRUE/FALSE designates if the data to be checked is mandatory
+#'
 #' @returns a report of the check status for the entry
-.check_lon <- function(lon){
+.check_lon <- function(lon, mandatory = FALSE){
+  lon_not_entered <- FALSE
   lon_invalid <- FALSE
   lon_out_of_range <- FALSE
 
-  if(!is.na(lon)){
+  if(!(is.na(lon)| lon =="")){
     if(is.na(as.numeric(lon))){
       lon_invalid <- TRUE
     } else if (as.numeric(lon) < -79.5 | as.numeric(lon) > -72.5 ){
       lon_out_of_range <- TRUE
     }
+  } else {
+    lon_not_entered <- TRUE
   }
 
   report <- ""
-
+  if (mandatory == TRUE){
+    if(lon_not_entered){
+      report <- paste0(report, "lon_not_entered/")
+    }
+  }
   if(lon_invalid){
     report <- paste0(report, "lon_invalid/")
   }
@@ -396,85 +446,13 @@
   return(report)
 }
 
-#' Checks to make sure the gps latitude and longitude match the site ID
-#' NOT FUNCTIONALL****
-#'
-#' @param site site ID
-#' @param lat a single numeric latitude value
-#' @param lon a single numeric longitude value
-#' @returns a report of the check status for the entry
-.check_gps_site_match <- function(site, lat, lon){
-  site_gps_nomatch <- FALSE
-
-  if (site == "JEA") {
-    if (lat <52.16 |lat > 52.34){
-      site_gps_nomatch <- TRUE
-    }
-    if (lon < -78.58| long > -76.59){
-      site_gps_nomatch <- FALSE
-    }
-  }
-
-  if (site == "JGR") {
-    if (lat < 55.02 | lat > 55.34){
-      site_gps_nomatch <- TRUE
-    }
-    if (lon < 77.84 | long > -76.15){
-      site_gps_nomatch <- FALSE
-    }
-  }
-
-  if (site == "JMA") {
-    if (lat < 0 |lat > 0){
-      site_gps_nomatch <- TRUE
-    }
-    if (lon < -78.94 | long > 0 ){
-      site_gps_nomatch <- FALSE
-    }
-  }
-
-  if (site == "JRU") {
-    if (lat < 0 |lat > 0){
-      site_gps_nomatch <- TRUE
-    }
-    if (lon < 0 | long > 0){
-      site_gps_nomatch <- FALSE
-    }
-  }
-
-  if (site == "JOY") {
-    if (lat < 0 |lat > 0){
-      site_gps_nomatch <- TRUE
-    }
-    if (lon < 0 | long > 0){
-      site_gps_nomatch <- FALSE
-    }
-  }
-
-  if (site == "LEA") {
-    if (lat < 0 |lat > 0){
-      site_gps_nomatch <- TRUE
-    }
-    if (lon < 0 | long > 0){
-      site_gps_nomatch <- FALSE
-    }
-  }
-
-  if (site == "LWE") {
-    if (lat < 0 |lat > 0 ){
-      site_gps_nomatch <- TRUE
-    }
-    if (lon < 0 | long > 0){
-      site_gps_nomatch <- FALSE
-    }
-  }
-}
-
 #' Checks to make sure the depth is within sensible bounds
 #'
 #' @param depth a single numeric depth value
+#' @param mandatory TRUE/FALSE designates if the data to be checked is mandatory
+#'
 #' @returns a report of the check status for the entry
-.check_depth <- function(depth){
+.check_depth <- function(depth, mandatory = FALSE){
   depth_invalid <- FALSE
   depth_out_of_range <- FALSE
 
@@ -497,12 +475,34 @@
 
   return(report)
 }
+#' Checks to make sure the depth is within sensible bounds
+#'
+#' @param subs a single numeric depth value
+#' @param mandatory TRUE/FALSE designates if the data to be checked is mandatory
+#'
+#' @returns a report of the check status for the entry
+.check_subs <- function(subs, mandatory = FALSE){
+  subs_invalid <- FALSE
+
+  if(! (is.na(subs)|subs=="")){
+  }
+
+  report <- ""
+
+  if(subs_invalid){
+    report <- paste0(report, "subs_invalid/")
+  }
+
+  return(report)
+}
 
 #' Checks to make sure that the crew is entered and comma separated
 #'
 #' @param crew a single station ID entry entry of the equipment type (as a character)
+#' @param mandatory TRUE/FALSE designates if the data to be checked is mandatory
+#'
 #' @returns a report of the check status for the entry
-.check_crew <- function(crew){
+.check_crew <- function(crew, mandatory = TRUE){
   crew_not_entered <- FALSE
   crew_invalid <- FALSE
 
@@ -522,8 +522,10 @@
   }
 
   report <- ""
-  if (crew_not_entered)
-    report <- paste0(report, "crew_not_entered/")
+  if (mandatory == TRUE){
+    if (crew_not_entered)
+      report <- paste0(report, "crew_not_entered/")
+  }
   if(crew_invalid)
     report <- paste0(report, "crew_invalid/")
 
@@ -533,8 +535,10 @@
 #' Checks to make sure that the capture method one of the accepted values and is filled in
 #'
 #' @param capture_method a single station ID entry entry of the equipment type (as a character)
+#' @param mandatory TRUE/FALSE designates if the data to be checked is mandatory
+#'
 #' @returns a report of the check status for the entry
-.check_capture_method <- function(capture_method){
+.check_capture_method <- function(capture_method, mandatory = TRUE){
   capture_not_entered <- FALSE
   capture_invalid <- FALSE
 
@@ -546,10 +550,40 @@
 
   #return report
   report <- ""
-  if (capture_not_entered)
-    report <- paste0(report, "capture_not_entered/")
+  if (mandatory == TRUE){
+    if (capture_not_entered)
+      report <- paste0(report, "capture_not_entered/")
+  }
   if(capture_invalid)
     report <- paste0(report, "capture_invalid/")
+
+  return(report)
+}
+
+#' Checks to make sure that the capture method one of the accepted values and is filled in
+#'
+#' @param fykeid a single fyke id number entry
+#' @param mandatory TRUE/FALSE designates if the data to be checked is mandatory
+#'
+#' @returns a report of the check status for the entry
+.check_fykeid <- function(fykeid, mandatory = FALSE){
+  fykeid_not_entered <- FALSE
+  fykeid_invalid <- FALSE
+
+  if (is.na(fykeid) | fykeid=="") {
+    fykeid_not_entered <- TRUE
+  } else if(FALSE){
+    fykeid_invalid <- TRUE
+  }
+
+  #return report
+  report <- ""
+  if (mandatory == TRUE){
+    if (fykeid_not_entered)
+      report <- paste0(report, "fykeid_not_entered/")
+  }
+  if(fykeid_invalid)
+    report <- paste0(report, "fykeid_invalid/")
 
   return(report)
 }
@@ -557,8 +591,10 @@
 #' Checks to make sure that the fish species is of the accepted values and is filled in
 #'
 #' @param species a single station ID entry entry of the equipment type (as a character)
+#' @param mandatory TRUE/FALSE designates if the data to be checked is mandatory
+#'
 #' @returns a report of the check status for the entry
-.check_species <- function(species){
+.check_species <- function(species, mandatory = TRUE){
   species_not_entered <- FALSE
   species_invalid <- FALSE
 
@@ -570,8 +606,10 @@
 
   #return report
   report <- ""
-  if (species_not_entered)
-    report <- paste0(report, "species_not_entered/")
+  if (mandatory == TRUE){
+    if (species_not_entered)
+      report <- paste0(report, "species_not_entered/")
+  }
   if(species_invalid)
     report <- paste0(report, "species_invalid/")
 
@@ -581,8 +619,10 @@
 #' Checks to make sure the temp is within sensible bounds
 #'
 #' @param temp a single numeric temp value
+#' @param mandatory TRUE/FALSE designates if the data to be checked is mandatory
+#'
 #' @returns a report of the check status for the entry
-.check_temp <- function(temp){
+.check_temp <- function(temp, mandatory = FALSE){
   temp_not_entered <-  FALSE
   temp_invalid <- FALSE
   temp_out_of_range <- FALSE
@@ -597,9 +637,10 @@
 
 
   report <- ""
-
-  if (temp_not_entered){
-    report <- paste0(report, "temp_not_entered/")
+  if(mandatory){
+    if (temp_not_entered){
+      report <- paste0(report, "temp_not_entered/")
+    }
   }
   if(temp_invalid){
     report <- paste0(report, "temp_invalid/")
@@ -611,15 +652,23 @@
   return(report)
 }
 
-.check_conditions <- function(condition){
+#' Checks whether the conditions code has been entered
+#'
+#' @param condition a single condition value to be checked
+#' @param mandatory TRUE/FALSE designates if the data to be checked is mandatory
+#'
+#' @returns a report of the check status for the entry
+.check_condition <- function(condition, mandatory = TRUE){
 
 }
 
 #' Checks to make sure the length is within sensible bounds
 #'
 #' @param length a single numeric length value
+#' @param mandatory TRUE/FALSE designates if the data to be checked is mandatory
+#'
 #' @returns a report of the check status for the entry
-.check_length <- function(length){
+.check_length <- function(length, mandatory = TRUE){
   length_not_entered <-  FALSE
   length_invalid <- FALSE
   length_out_of_range <- FALSE
@@ -634,9 +683,10 @@
 
 
   report <- ""
-
-  if (length_not_entered){
-    report <- paste0(report, "length_not_entered/")
+  if(mandatory){
+    if (length_not_entered){
+      report <- paste0(report, "length_not_entered/")
+    }
   }
   if(length_invalid){
     report <- paste0(report, "length_invalid/")
@@ -651,8 +701,10 @@
 #' Checks to make sure the weight is within sensible bounds
 #'
 #' @param weight a single numeric weight value
+#' @param mandatory TRUE/FALSE designates if the data to be checked is mandatory
+#'
 #' @returns a report of the check status for the entry
-.check_weight <- function(weight){
+.check_weight <- function(weight, mandatory = TRUE){
   weight_not_entered <-  FALSE
   weight_invalid <- FALSE
   weight_out_of_range <- FALSE
@@ -666,9 +718,10 @@
   }
 
   report <- ""
-
-  if (weight_not_entered){
-    report <- paste0(report, "weight_not_entered/")
+  if(mandatory){
+    if (weight_not_entered){
+      report <- paste0(report, "weight_not_entered/")
+    }
   }
   if(weight_invalid){
     report <- paste0(report, "weight_invalid/")
@@ -684,15 +737,24 @@
 
 }
 
-.check_dna_scale_id <- function(scale_id, dna_id){
+#' Checks to make sure the weight is within sensible bounds
+#'
+#' @param scale_id a single scale sample ID number
+#' @param dna_ida single DNA sample ID number
+#' @param mandatory TRUE/FALSE designates if the data to be checked is mandatory
+#'
+#' @returns a report of the check status for the entry
+.check_dna_scale_id <- function(scale_id, dna_id, mandatory = FALSE){
 
 }
 
-#' Checks to make sure the sex is entered as on of the approvd codes
+#' Checks to make sure the sex is entered as on of the approved codes
 #'
 #' @param sex a single character string sex and maturity code
+#' @param mandatory TRUE/FALSE designates if the data to be checked is mandatory
+#'
 #' @returns a report of the check status for the entry
-.check_sex <- function(sex){
+.check_sex <- function(sex, mandatory = TRUE){
   sex_not_entered <- FALSE
   sex_invalid <- FALSE
 
@@ -704,35 +766,36 @@
 
   #return report
   report <- ""
-  if (sex_not_entered)
-    report <- paste0(report, "sex_not_entered/")
+  if(mandatory){
+    if (sex_not_entered)
+      report <- paste0(report, "sex_not_entered/")
+  }
   if(sex_invalid)
     report <- paste0(report, "sex_invalid/")
 
   return(report)
 }
 
-.check_tag_serial <- function(tag_serial){
+#ADD TAG MODEL
+.check_clove_conc <- function(clove_conc, mandatory = FALSE){
 
 }
 
-.check_clove_conc <- function(clove_conc){
+.check_mort <- function(mort, mandatory = FALSE){
 
 }
 
-.check_mort <- function(mort){
-
-}
-
-.check_recap <- function(recap){
+.check_recap <- function(recap, mandatory = FALSE){
 
 }
 
 #' Checks to make sure that entries that require single initials are correctly filled out
 #'
 #' @param initials a single 2 or 3-letter initials code
+#' @param mandatory TRUE/FALSE designates if the data to be checked is mandatory
+#'
 #' @returns a report of the check status for the entry
-.check_single_initials <- function(initials){
+.check_single_initials <- function(initials, mandatory = TRUE){
   initials_not_entered <- FALSE
   intials_invalid <- FALSE
 
@@ -749,12 +812,69 @@
   }
 
   report <- ""
-  if(initials_not_entered){
-    report <- paste0(report, "initials_not_entered/")
+  if(mandatory){
+    if(initials_not_entered){
+      report <- paste0(report, "initials_not_entered/")
+    }
   }
   if (intials_invalid) {
     report <- paste0(report, "intials_invalid/")
   }
+
+  return(report)
+}
+
+#' Checks to make sure the sex is entered as on of the approvd codes
+#'
+#' @param net_action a single character string sex and maturity code
+#' @param mandatory TRUE/FALSE designates if the data to be checked is mandatory
+#'
+#' @returns a report of the check status for the entry
+.check_net_action <- function(net_action, mandatory = TRUE){
+  net_action_not_entered <- FALSE
+  net_action_invalid <- FALSE
+
+  if (is.na(net_action) | net_action=="") {
+    net_action_not_entered <- TRUE
+  } else if(!(net_action %in% fyke_actions)){
+    net_action_invalid <- TRUE
+  }
+
+  #return report
+  report <- ""
+  if(mandatory){
+    if (net_action_not_entered)
+      report <- paste0(report, "net_action_not_entered/")
+  }
+  if(net_action_invalid)
+    report <- paste0(report, "net_action_invalid/")
+
+  return(report)
+}
+
+#' Checks to make sure the sex is entered as on of the approvd codes
+#'
+#' @param fish_caught a single character string sex and maturity code
+#' @param mandatory TRUE/FALSE designates if the data to be checked is mandatory
+#' @returns a report of the check status for the entry
+.check_fish_caught <- function(fish_caught, mandatory = TRUE){
+  fish_caught_not_entered <- FALSE
+  fish_caught_invalid <- FALSE
+
+  if (is.na(fish_caught) | sex=="") {
+    fish_caught_not_entered <- TRUE
+  } else if(!(fish_caught %in% c("yes", "no"))){
+    fish_caught_invalid <- TRUE
+  }
+
+  #return report
+  report <- ""
+  if(mandatory){
+    if (fish_caught_not_entered)
+      report <- paste0(report, "fish_caught_not_entered/")
+  }
+  if(fish_caught_invalid)
+    report <- paste0(report, "fish_caught_invalid/")
 
   return(report)
 }
