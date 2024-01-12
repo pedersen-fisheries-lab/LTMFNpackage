@@ -4,10 +4,14 @@
 \alias{.check_deploy}
 \title{Checks to make sure the deployment type is entered and is one of the permitted entries}
 \usage{
-.check_deploy(deploy, site)
+.check_deploy(deploy, site, mandatory = FALSE)
 }
 \arguments{
 \item{deploy}{a single station ID entry entry of the equipment type (as a character)}
+
+\item{site}{site ID}
+
+\item{mandatory}{TRUE/FALSE designates if the data to be checked is mandatory}
 }
 \value{
 a report of the check status for the entry

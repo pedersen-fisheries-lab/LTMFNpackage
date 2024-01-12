@@ -4,10 +4,12 @@
 \alias{.check_time}
 \title{Checks manually-input time entries}
 \usage{
-.check_time(time)
+.check_time(time, mandatory = TRUE)
 }
 \arguments{
 \item{time}{a single time entry (as a character string)}
+
+\item{mandatory}{TRUE/FALSE designates if the data to be checked is mandatory}
 }
 \value{
 a report of the check status

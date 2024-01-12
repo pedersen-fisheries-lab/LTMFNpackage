@@ -2,16 +2,18 @@
 % Please edit documentation in R/quality_check_internal_fncs.R
 \name{.check_sex}
 \alias{.check_sex}
-\title{Checks to make sure the sex is entered as on of the approvd codes}
+\title{Checks to make sure the sex is entered as on of the approved codes}
 \usage{
-.check_sex(sex)
+.check_sex(sex, mandatory = TRUE)
 }
 \arguments{
 \item{sex}{a single character string sex and maturity code}
+
+\item{mandatory}{TRUE/FALSE designates if the data to be checked is mandatory}
 }
 \value{
 a report of the check status for the entry
 }
 \description{
-Checks to make sure the sex is entered as on of the approvd codes
+Checks to make sure the sex is entered as on of the approved codes
 }

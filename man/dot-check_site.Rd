@@ -4,10 +4,12 @@
 \alias{.check_site}
 \title{Checks site ID to make sure it is within the list of allowed values}
 \usage{
-.check_site(site)
+.check_site(site, mandatory = TRUE)
 }
 \arguments{
 \item{site}{a single site entry (as a character string)}
+
+\item{mandatory}{TRUE/FALSE designates if the data to be checked is mandatory}
 }
 \value{
 a report of the check status for each entry

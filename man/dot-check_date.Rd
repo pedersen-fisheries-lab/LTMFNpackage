@@ -4,10 +4,12 @@
 \alias{.check_date}
 \title{Checks date formats to make sure they are in YYYY-MM-DD format at the correct time}
 \usage{
-.check_date(date)
+.check_date(date, mandatory = TRUE)
 }
 \arguments{
 \item{date}{a single date entry (as a character string)}
+
+\item{mandatory}{TRUE/FALSE designates if the data to be checked is mandatory}
 }
 \value{
 a report of the check status for each entry

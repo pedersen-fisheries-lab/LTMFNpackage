@@ -4,10 +4,12 @@
 \alias{.check_depth}
 \title{Checks to make sure the depth is within sensible bounds}
 \usage{
-.check_depth(depth)
+.check_depth(depth, mandatory = FALSE)
 }
 \arguments{
 \item{depth}{a single numeric depth value}
+
+\item{mandatory}{TRUE/FALSE designates if the data to be checked is mandatory}
 }
 \value{
 a report of the check status for the entry

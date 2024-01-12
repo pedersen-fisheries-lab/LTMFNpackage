@@ -4,10 +4,12 @@
 \alias{.check_length}
 \title{Checks to make sure the length is within sensible bounds}
 \usage{
-.check_length(length)
+.check_length(length, mandatory = TRUE)
 }
 \arguments{
 \item{length}{a single numeric length value}
+
+\item{mandatory}{TRUE/FALSE designates if the data to be checked is mandatory}
 }
 \value{
 a report of the check status for the entry

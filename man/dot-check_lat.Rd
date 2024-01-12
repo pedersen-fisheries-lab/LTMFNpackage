@@ -4,10 +4,12 @@
 \alias{.check_lat}
 \title{Checks to make sure the gps latitude is within sensible bounds}
 \usage{
-.check_lat(lat)
+.check_lat(lat, mandatory = FALSE)
 }
 \arguments{
 \item{lat}{a single numeric latitude value}
+
+\item{mandatory}{TRUE/FALSE designates if the data to be checked is mandatory}
 }
 \value{
 a report of the check status for the entry

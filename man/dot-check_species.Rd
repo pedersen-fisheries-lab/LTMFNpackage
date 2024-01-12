@@ -4,10 +4,12 @@
 \alias{.check_species}
 \title{Checks to make sure that the fish species is of the accepted values and is filled in}
 \usage{
-.check_species(species)
+.check_species(species, mandatory = TRUE)
 }
 \arguments{
 \item{species}{a single station ID entry entry of the equipment type (as a character)}
+
+\item{mandatory}{TRUE/FALSE designates if the data to be checked is mandatory}
 }
 \value{
 a report of the check status for the entry

@@ -4,10 +4,12 @@
 \alias{.check_wpt}
 \title{Checks to make sure the waypoints are entered in an acceptable format}
 \usage{
-.check_wpt(wpt)
+.check_wpt(wpt, mandatory = FALSE)
 }
 \arguments{
 \item{wpt}{a single entry of waypoint names as a comma-separated string}
+
+\item{mandatory}{TRUE/FALSE designates if the data to be checked is mandatory}
 }
 \value{
 a report of the check status for the entry

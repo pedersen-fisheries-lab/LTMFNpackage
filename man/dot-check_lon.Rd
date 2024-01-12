@@ -4,10 +4,12 @@
 \alias{.check_lon}
 \title{Checks to make sure the gps longitude is within sensible bounds}
 \usage{
-.check_lon(lon)
+.check_lon(lon, mandatory = FALSE)
 }
 \arguments{
 \item{lon}{a single numeric longitude value}
+
+\item{mandatory}{TRUE/FALSE designates if the data to be checked is mandatory}
 }
 \value{
 a report of the check status for the entry

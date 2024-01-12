@@ -4,10 +4,12 @@
 \alias{.check_equip}
 \title{Checks equipment type to make sure it is within the list of allowed values}
 \usage{
-.check_equip(equip)
+.check_equip(equip, mandatory = TRUE)
 }
 \arguments{
 \item{equip}{a single equipment entry (as a character string)}
+
+\item{mandatory}{TRUE/FALSE designates if the data to be checked is mandatory}
 }
 \value{
 a report of the check status for each entry

@@ -4,10 +4,12 @@
 \alias{.check_stnid}
 \title{Checks to make sure the station ID follows a valid format}
 \usage{
-.check_stnid(stnid)
+.check_stnid(stnid, deploy)
 }
 \arguments{
 \item{stnid}{a single station ID entry entry of the equipment type (as a character)}
+
+\item{deploy}{a single station ID entry entry of the equipment type (as a character)}
 }
 \value{
 a report of the check status for the entry

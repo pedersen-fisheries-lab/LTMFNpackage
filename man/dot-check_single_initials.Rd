@@ -4,10 +4,12 @@
 \alias{.check_single_initials}
 \title{Checks to make sure that entries that require single initials are correctly filled out}
 \usage{
-.check_single_initials(initials)
+.check_single_initials(initials, mandatory = TRUE)
 }
 \arguments{
 \item{initials}{a single 2 or 3-letter initials code}
+
+\item{mandatory}{TRUE/FALSE designates if the data to be checked is mandatory}
 }
 \value{
 a report of the check status for the entry

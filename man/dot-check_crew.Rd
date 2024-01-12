@@ -4,10 +4,12 @@
 \alias{.check_crew}
 \title{Checks to make sure that the crew is entered and comma separated}
 \usage{
-.check_crew(crew)
+.check_crew(crew, mandatory = TRUE)
 }
 \arguments{
 \item{crew}{a single station ID entry entry of the equipment type (as a character)}
+
+\item{mandatory}{TRUE/FALSE designates if the data to be checked is mandatory}
 }
 \value{
 a report of the check status for the entry
