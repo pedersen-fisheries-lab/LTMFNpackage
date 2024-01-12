@@ -5,7 +5,7 @@
 \alias{species_codes}
 \title{Approved fish species codes}
 \format{
-A vector of the entries "BKTR", "CISC", "CPRD", "LKTR", "LKWH", "NRPK", "RNSM", "STBS", "TENC", "WALL", "YLPR", "bycatch"
+A vector of the entries 'c("COAR",  "COCL", "ESLU",  "MOHU",  "MOSA" , "OSMO", "PEFL", "SAFO", "SANA", "SAVI",  "TITI", "bycatch")
 }
 \source{
 {manually created from the excel data validation}

@@ -5,7 +5,7 @@
 \alias{equip_types}
 \title{Approved equipment type codes}
 \format{
-A vector of the entries "VR2Tx", "VR2W", "tag", "RTtag", "VR100", "AquaMeasureSal", "AquaMeasureDO", "AquaMeasureCl","GPS"
+A vector of the entries "VR2Tx", "VR2W",  "tag",   "RTtag", "VR100", "AMchl", "AMdo",  "AMsal", "GPS"
 }
 \source{
 {manually created from the excel data validation}
