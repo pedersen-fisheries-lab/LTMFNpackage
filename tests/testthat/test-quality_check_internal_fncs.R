@@ -67,41 +67,40 @@ test_that(".check_equip_works", {
 })
 
 test_that(".check_serial_works", {
-  expect_equal(object = LTMFNpackage:::.check_serial("490656"), "")
   expect_equal(object = LTMFNpackage:::.check_serial(490656), "")
-  expect_equal(object = LTMFNpackage:::.check_serial("012246"), "")
-
+  expect_equal(object = LTMFNpackage:::.check_serial(490656), "")
+  expect_equal(object = LTMFNpackage:::.check_serial("012246", "VR100"), "")
 
   expect_equal(object = LTMFNpackage:::.check_serial("vr2tx"), "serial_invalid/")
-  expect_equal(object = LTMFNpackage:::.check_serial("receiver"), "equip_invalid/")
+  expect_equal(object = LTMFNpackage:::.check_serial("receiver"), "serial_invalid/")
 
   #is this an issue??
   expect_equal(object = LTMFNpackage:::.check_serial(012246), "serial_invalid/")
+
   expect_equal(object = LTMFNpackage:::.check_serial(490999), "serial_invalid/")
 
   expect_equal(object = LTMFNpackage:::.check_serial(""), "serial_not_entered/")
   expect_equal(object = LTMFNpackage:::.check_serial(NA), "serial_not_entered/")
-})
 
-test_that(".check_equip_serial_match_works", {
-  expect_equal(object = LTMFNpackage:::.check_equip_serial_match(equip = "VR100", serial = "012246"), "")
-
-  expect_equal(object = LTMFNpackage:::.check_equip_serial_match(equip = "VR100", serial = "490666"), "equip_serial_nomatch/")
-  expect_equal(object = LTMFNpackage:::.check_equip_serial_match(equip = "VR100", serial = "490666"), "equip_serial_nomatch/")
+  expect_equal(object = LTMFNpackage:::.check_serial(490656, "RTtag"), "serial_equip_nomatch/")
 })
 
 test_that(".check_stnid_works", {
-  expect_equal(object = LTMFNpackage:::.check_stnid("RT-LWE-01-A"), "")
-  expect_equal(object = LTMFNpackage:::.check_stnid("GA-JEA-99-Z"), "")
-  expect_equal(object = LTMFNpackage:::.check_stnid("GR-LWE-01-A"), "")
-  expect_equal(object = LTMFNpackage:::.check_stnid(NA), "")
+  expect_equal(object = LTMFNpackage:::.check_stnid("RT-LWE-01-A", deploy = "RT"), "")
+  expect_equal(object = LTMFNpackage:::.check_stnid("GA-JEA-99-Z", deploy = "GA"), "")
+  expect_equal(object = LTMFNpackage:::.check_stnid("GR-LWE-01-A", deploy = "GR"), "")
+  expect_equal(object = LTMFNpackage:::.check_stnid(NA, NA), "")
+  expect_equal(object = LTMFNpackage:::.check_stnid("GR-LWE-01-A", NA), "")
+  expect_equal(object = LTMFNpackage:::.check_stnid(NA, "RT"), "")
 
-  expect_equal(object = LTMFNpackage:::.check_stnid("rt-lwe-01-a"), "stnid_invalid/")
-  expect_equal(object = LTMFNpackage:::.check_stnid(490999), "stnid_invalid/")
-  expect_equal(object = LTMFNpackage:::.check_stnid("RT-LWE-01-!"), "stnid_invalid/")
-  expect_equal(object = LTMFNpackage:::.check_stnid("RT/LWE/01-/A"), "stnid_invalid/")
-  expect_equal(object = LTMFNpackage:::.check_stnid("RT-LWE-01"), "stnid_invalid/")
-  expect_equal(object = LTMFNpackage:::.check_stnid("LWE-01-A"), "stnid_invalid/")
+  expect_equal(object = LTMFNpackage:::.check_stnid("rt-lwe-01-a", NA), "stnid_invalid/")
+  expect_equal(object = LTMFNpackage:::.check_stnid(490999, NA), "stnid_invalid/")
+  expect_equal(object = LTMFNpackage:::.check_stnid("RT-LWE-01-!", NA), "stnid_invalid/")
+  expect_equal(object = LTMFNpackage:::.check_stnid("RT/LWE/01-/A", NA), "stnid_invalid/")
+  expect_equal(object = LTMFNpackage:::.check_stnid("RT-LWE-01", NA), "stnid_invalid/")
+  expect_equal(object = LTMFNpackage:::.check_stnid("LWE-01-A", "RT"), "stnid_invalid/")
+
+  expect_equal(object = LTMFNpackage:::.check_stnid("GR-LWE-01-A", deploy = "RT"), "stnid_deploy_nomatch/")
 })
 
 test_that(".check_action_works", {
@@ -143,18 +142,16 @@ test_that(".check_lat_works", {
   expect_equal(object = LTMFNpackage:::.check_lat(lat = 55.6), "lat_out_of_range/")
 
   expect_equal(object = LTMFNpackage:::.check_lat(lat = "lat_value"), "lat_invalid/")
-  expect_equal(object = LTMFNpackage:::.check_lat(lat = Sys.Date()), "lat_out_of_range/")
 })
 
 test_that(".check_lon_works", {
   expect_equal(object = LTMFNpackage:::.check_lon(lon = -79.4), "")
-  expect_equal(object = LTMFNpackage:::.check_lon(lon = "45.9"), "")
+  expect_equal(object = LTMFNpackage:::.check_lon(lon = "-79.4"), "")
 
   expect_equal(object = LTMFNpackage:::.check_lon(lon = -79.6), "lon_out_of_range/")
   expect_equal(object = LTMFNpackage:::.check_lon(lon = -72.4), "lon_out_of_range/")
 
   expect_equal(object = LTMFNpackage:::.check_lon(lon = "lon_value"), "lon_invalid/")
-  expect_equal(object = LTMFNpackage:::.check_lon(lon = Sys.Date()), "lon_out_of_range/")
 })
 
 test_that(".check_depth_works", {
@@ -197,8 +194,20 @@ test_that(".check_capture_method_works", {
   expect_equal(object = LTMFNpackage:::.check_capture_method(capture_method = NA), "capture_not_entered/")
 })
 
+test_that(".check_fykeid_works", {
+  expect_equal(object = LTMFNpackage:::.check_fykeid(fykeid = "LG4", mandatory = TRUE), "")
+  expect_equal(object = LTMFNpackage:::.check_fykeid(fykeid = "SG15", mandatory = TRUE), "")
+
+  expect_equal(object = LTMFNpackage:::.check_fykeid(fykeid = "", mandatory = TRUE), "fykeid_not_entered/")
+  expect_equal(object = LTMFNpackage:::.check_fykeid(fykeid = NA, mandatory = TRUE), "fykeid_not_entered/")
+
+  expect_equal(object = LTMFNpackage:::.check_fykeid(fykeid = "sg15", mandatory = TRUE), "fykeid_invalid/")
+  expect_equal(object = LTMFNpackage:::.check_fykeid(fykeid = "SG150", mandatory = TRUE), "fykeid_invalid/")
+  expect_equal(object = LTMFNpackage:::.check_fykeid(fykeid = "*G15", mandatory = TRUE), "fykeid_invalid/")
+})
+
 test_that(".check_species_works", {
-  expect_equal(object = LTMFNpackage:::.check_species(species = "BKTR"), "")
+  expect_equal(object = LTMFNpackage:::.check_species(species = "COAR"), "")
   expect_equal(object = LTMFNpackage:::.check_species(species = "bycatch"), "")
 
   expect_equal(object = LTMFNpackage:::.check_species(species = "brook trout"), "species_invalid/")
@@ -217,6 +226,18 @@ test_that(".check_temp_works", {
 
   expect_equal(object = LTMFNpackage:::.check_temp(temp = "", mandatory = TRUE), "temp_not_entered/")
   expect_equal(object = LTMFNpackage:::.check_temp(temp = NA, mandatory = TRUE), "temp_not_entered/")
+})
+
+test_that(".check_condition_works", {
+  expect_equal(object = LTMFNpackage:::.check_condition(condition = "vigorous", mandatory = TRUE), "")
+  expect_equal(object = LTMFNpackage:::.check_condition(condition = NA, mandatory = FALSE), "")
+
+  expect_equal(object = LTMFNpackage:::.check_condition(condition = "", mandatory = TRUE), "condition_not_entered/")
+  expect_equal(object = LTMFNpackage:::.check_condition(condition = NA, mandatory = TRUE), "condition_not_entered/")
+
+  expect_equal(object = LTMFNpackage:::.check_condition(condition = -8, mandatory = TRUE), "condition_invalid/")
+  expect_equal(object = LTMFNpackage:::.check_condition(condition = "nonsense", mandatory = TRUE), "condition_invalid/")
+  expect_equal(object = LTMFNpackage:::.check_condition(condition = "VIGOROUS", mandatory = TRUE), "condition_invalid/")
 })
 
 test_that(".check_length_works", {
@@ -241,15 +262,16 @@ test_that(".check_weight_works", {
   expect_equal(object = LTMFNpackage:::.check_weight(weight = NA), "weight_not_entered/")
 })
 
-test_that(".check_sex_works" , {
-  expect_equal(object = LTMFNpackage:::.check_sex(sex = "MM"), "")
-  expect_equal(object = LTMFNpackage:::.check_sex(sex = "M"), "")
-  expect_equal(object = LTMFNpackage:::.check_sex(sex = "unk"), "")
+test_that("check_dna_scale_id_works", {
+  expect_equal(object = LTMFNpackage:::.check_dna_scale_id(dna_id = "A0110", scale_id = "A0110", mandatory = FALSE), "")
+  expect_equal(object = LTMFNpackage:::.check_dna_scale_id(dna_id = "A0110", scale_id = "A0110", mandatory = TRUE), "")
+  expect_equal(object = LTMFNpackage:::.check_dna_scale_id(dna_id = "", scale_id = "", mandatory = FALSE), "")
+  expect_equal(object = LTMFNpackage:::.check_dna_scale_id(dna_id = NA, scale_id = NA, mandatory = FALSE), "")
 
-  expect_equal(object = LTMFNpackage:::.check_sex(sex = "100"), "sex_invalid/")
-
-  expect_equal(object = LTMFNpackage:::.check_sex(sex = ""), "sex_not_entered/")
-  expect_equal(object = LTMFNpackage:::.check_sex(sex = NA), "sex_not_entered/")
+  expect_equal(object = LTMFNpackage:::.check_dna_scale_id(dna_id = NA, scale_id = NA, mandatory = TRUE), "dna_id_not_entered/scale_id_not_entered/")
+  expect_equal(object = LTMFNpackage:::.check_dna_scale_id(dna_id = "aaaaaaaaa", scale_id = "aaaaaaaaa", mandatory = TRUE), "dna_id_invalid/scale_id_invalid/")
+  expect_equal(object = LTMFNpackage:::.check_dna_scale_id(dna_id = "aaaaaaaaa", scale_id = "bbb", mandatory = TRUE), "dna_id_invalid/dna_scale_nomatch/")
+  expect_equal(object = LTMFNpackage:::.check_dna_scale_id(dna_id = "aaa", scale_id = "bbb", mandatory = TRUE), "dna_scale_nomatch/")
 })
 
 test_that(".check_sex_works", {
@@ -261,5 +283,37 @@ test_that(".check_sex_works", {
 
   expect_equal(object = LTMFNpackage:::.check_sex(sex = ""), "sex_not_entered/")
   expect_equal(object = LTMFNpackage:::.check_sex(sex = NA), "sex_not_entered/")
+})
+
+test_that(".check_tag_model_works", {
+  expect_equal(object = LTMFNpackage:::.check_tag_model(), "")
+})
+
+test_that(".check_clove_conc_works", {
+  expect_equal(object = LTMFNpackage:::.check_clove_conc(), "")
+})
+
+test_that(".check_mort_works", {
+  expect_equal(object = LTMFNpackage:::.check_mort(), "")
+})
+
+test_that(".check_recap_works", {
+  expect_equal(object = LTMFNpackage:::.check_recap(), "")
+})
+
+test_that(".check_single_initials_works", {
+  expect_equal(object = LTMFNpackage:::.check_single_initials(), "")
+})
+
+test_that(".check_net_action_works", {
+  expect_equal(object = LTMFNpackage:::.check_net_action(), "")
+})
+
+test_that(".check_fish_caught_works", {
+  expect_equal(object = LTMFNpackage:::.check_fish_caught(), "")
+})
+
+test_that(".check_nrods_or_nets_works", {
+  expect_equal(object = LTMFNpackage:::.check_nrods_or_nets(), "")
 })
 
