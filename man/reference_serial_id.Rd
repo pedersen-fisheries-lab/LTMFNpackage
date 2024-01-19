@@ -11,6 +11,7 @@ A data frame with 157 rows and 4 columns:
 \item{type}{Type of equipment (based on our defined codeing system)}
 \item{product_id}{Official Innovasea Product ID}
 \item{serial_id}{serial number of each piece of equipment}
+\item{transmitter_id}{transmitter id number of each piece of equipment. If the equipment has multiple transmitter codes, only one is given here}
 }
 }
 \source{

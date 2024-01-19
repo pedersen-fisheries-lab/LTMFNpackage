@@ -59,6 +59,7 @@
 #'   \item{type}{Type of equipment (based on our defined codeing system)}
 #'   \item{product_id}{Official Innovasea Product ID}
 #'   \item{serial_id}{serial number of each piece of equipment}
+#'   \item{transmitter_id}{transmitter id number of each piece of equipment. If the equipment has multiple transmitter codes, only one is given here}
 #' }
 #' @source {Downloaded from https://liveconcordia-my.sharepoint.com/personal/eric_pedersen_concordia_ca/Documents/Research/projects%20-%20spatial%20community%20ecology/Quebec%20fish%20telemetry%20network/data/EquipmentSummary.xlsx:
 #'
@@ -120,3 +121,17 @@
 #'
 #' @source {manually created from the excel data validation}
 "fyke_actions"
+
+#' Approved fish condition codes
+#'
+#' @format a vector with entries "vigorous", "normal", "weak"
+#'
+#' @source {condition_codes <- c("vigorous", "normal", "weak")     usethis::use_data(condition_codes)}
+"condition_codes"
+
+#' Approved tag model codes
+#'
+#' @format a vector with entries "V6", "V7", "V8", "V9", "V13", "V16"
+#'
+#' @source {tag_models <- c("V6", "V7", "V8", "V9", "V13", "V16")       usethis::use_data(tag_models)}
+"tag_models"
