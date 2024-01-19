@@ -4,14 +4,12 @@
 \alias{.check_dna_scale_id}
 \title{Checks to make sure the weight is within sensible bounds}
 \usage{
-.check_dna_scale_id(scale_id, dna_id, mandatory = FALSE)
+.check_dna_scale_id(dna_id, scale_id, mandatory = FALSE)
 }
 \arguments{
 \item{scale_id}{a single scale sample ID number}
 
 \item{mandatory}{TRUE/FALSE designates if the data to be checked is mandatory}
-
-\item{dna_ida}{single DNA sample ID number}
 }
 \value{
 a report of the check status for the entry

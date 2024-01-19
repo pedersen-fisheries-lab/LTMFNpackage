@@ -2,12 +2,12 @@
 % Please edit documentation in R/quality_check_internal_fncs.R
 \name{.check_fish_caught}
 \alias{.check_fish_caught}
-\title{Checks to make sure the sex is entered as on of the approvd codes}
+\title{Checks to make sure the sex is entered as on of the approved codes}
 \usage{
 .check_fish_caught(fish_caught, mandatory = TRUE)
 }
 \arguments{
-\item{fish_caught}{a single character string sex and maturity code}
+\item{fish_caught}{a single character string of yes or no}
 
 \item{mandatory}{TRUE/FALSE designates if the data to be checked is mandatory}
 }
@@ -15,5 +15,5 @@
 a report of the check status for the entry
 }
 \description{
-Checks to make sure the sex is entered as on of the approvd codes
+Checks to make sure the sex is entered as on of the approved codes
 }
