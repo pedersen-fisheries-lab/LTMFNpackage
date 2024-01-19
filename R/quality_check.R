@@ -35,7 +35,7 @@ check_dataentry <- function(folder_path, return_summary = TRUE){
 
     if(user_decision == "1"){
       setwd("~/ltmftn_project/ltmftn_database/internal_database")
-      message(paset0("Working directory set to: ", getwd()))
+      message(paste0("Working directory set to: ", getwd()))
     } else if (user_decision == "2") {
       stop("Data checking stopped")
     } else if( user_decision == "3") {
@@ -230,7 +230,6 @@ check_equipment_log <- function(equipment_log){
     data_flag <- paste0(data_flag, .check_lat(row["lat"]))
     data_flag <- paste0(data_flag, .check_lon(row["lon"]))
     data_flag <- paste0(data_flag, .check_depth(row["depth_m"]))
-    data_flag <- paste0(data_flag, .check_subs(row["subs"])) #fnctn to be populated
     data_flag <- paste0(data_flag, .check_crew(row["crew"]))
 
     return(data_flag)
@@ -264,15 +263,14 @@ check_fish <- function(fish){
     data_flag <- paste0(data_flag, "capt", .check_lon(row["capture_lon"], mandatory = FALSE))
     data_flag <- paste0(data_flag, .check_species(row["species"]))
     data_flag <- paste0(data_flag, .check_temp(row["temp_c"]))
-    data_flag <- paste0(data_flag, "capt_", .check_condition(row["capture_cond"])) #populate fnctn
+    data_flag <- paste0(data_flag, "capt_", .check_condition(row["capture_cond"]))
     data_flag <- paste0(data_flag, .check_length(row["length_mm"]))
     data_flag <- paste0(data_flag, .check_weight(row["weight_g"]))
-    data_flag <- paste0(data_flag, .check_dna_scale_id(row["scale_id"])) #populate fnct
-    data_flag <- paste0(data_flag, .check_dna_scale_id(row["dna_id"])) #populate fnct
+    data_flag <- paste0(data_flag, .check_dna_scale_id(row["dna_id"], row["scale_id"])) #populate fnct
     data_flag <- paste0(data_flag, .check_sex(row["sex"]))
     data_flag <- paste0(data_flag, .check_serial(row["tag_serial"]), equip_type = "tag")
     data_flag <- paste0(data_flag, .check_tag_model(row["tag_model"])) #create fnct
-    data_flag <- paste0(data_flag, .check_clove_conc(row["clove_conc"], mandatory = tagging)) #create fnct
+    data_flag <- paste0(data_flag, .check_clove_conc(row["clove_conc"], mandatory = tagging))
     data_flag <- paste0(data_flag, "anesth_", .check_time(row["anesth_start"], mandatory = tagging))
     data_flag <- paste0(data_flag, "surgs_", .check_time(row["surg_start"], mandatory = tagging))
     data_flag <- paste0(data_flag, "surge_", .check_time(row["surg_end"], mandatory = tagging))
@@ -313,7 +311,7 @@ check_fyke <- function(fyke){
     data_flag <- ""
     data_flag <- paste0(data_flag, .check_date(row["date"]))
     data_flag <- paste0(data_flag, .check_site(row["site"]))
-    data_flag <- paste0(data_flag, .check_fykeid(row["fyke_id"], mandatory = TRUE)) #populate fnct
+    data_flag <- paste0(data_flag, .check_fykeid(row["fyke_id"], mandatory = TRUE))
     data_flag <- paste0(data_flag, .check_net_action(row["net_action"]))
     data_flag <- paste0(data_flag, .check_lat(row["lat"], mandatory = need_gps))
     data_flag <- paste0(data_flag, .check_lon(row["lon"], mandatory = need_gps))
@@ -345,8 +343,8 @@ check_angling <- function(angling){
     data_flag <- paste0(data_flag, "end_", .check_time(row["end_time"], mandatory = TRUE))
     data_flag <- paste0(data_flag, "end_", .check_lat(row["end_lat"], mandatory = FALSE))
     data_flag <- paste0(data_flag, "end_", .check_lon(row["end_lon"], mandatory = FALSE))
-    #check trackid create fnct
-    #check n_rods create fnct
+    data_flag <- paste0(data_flag, "end_", .check_nrods_or_nets(row["n_rods"], mandatory = TRUE, fishtype = "nrods"))
+    #check trackid create fnct NOT NECESSARY
     data_flag <- paste0(data_flag, .check_crew(row["crew"]))
 
     return(data_flag)
@@ -373,7 +371,7 @@ check_cast_netting <- function(cast_netting){
     data_flag <- paste0(data_flag, "end", .check_lat(row["end_lat"]))
     data_flag <- paste0(data_flag, "end", .check_lon(row["end_lon"]))
     #check trackid
-    #check n_nets
+    data_flag <- paste0(data_flag, "end_", .check_nrods_or_nets(row["n_rods"], mandatory = TRUE, fishtype = "nnets"))
     data_flag <- paste0(data_flag, .check_crew(row["crew"]))
 
     return(data_flag)
