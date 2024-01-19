@@ -81,11 +81,11 @@ check_dataentry <- function(folder_path, return_summary = TRUE){
       stop(paste0("The following files have missing data entry data: ", file_names[missing_entry_data],
                   "both the date and initials of the data enterer are necessary. Please add this data in the entry_metadata sheet"))
     }
-    if(entry_date_invalid != ""){
+    if(any(entry_date_invalid != "")){
       stop(paste0("The following files have an invalid date for data entry metadata: ", file_names[entry_date_invalid],
                   "Please follow the YYYY-MM-DD format for the date in the entry_metadata sheet"))
     }
-    if(entry_initials_invalid != ""){
+    if(any(entry_initials_invalid != "")){
       stop(paste0("The following files have invalid initials for data entry metadata: ", file_names[entry_initials_invalid],
                   "Please write the data enterer's initials as 2 or 3 letters in the entry_metadata sheet"))
     }
