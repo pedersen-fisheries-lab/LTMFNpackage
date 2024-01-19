@@ -12,9 +12,9 @@ LazyData: true
 Imports:
     data.table,
     dplyr,
-    tidyr,
     lubridate,
     sf,
+    stringr,
     readxl,
     openxlsx,
     purrr
