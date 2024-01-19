@@ -67,13 +67,13 @@ check_dataentry <- function(folder_path, return_summary = TRUE){
         if(is.null(database_list[[i]]$entry_metadata$date[1]) |
            is.null(database_list[[i]]$entry_metadata$enterer_initials[1])){
           missing_entry_data[i] <- TRUE
-        }
-        if(.check_date(as.character(database_list[[i]]$entry_metadata$date[1])) != ""){
+        }else{ if(.check_date(as.character(database_list[[i]]$entry_metadata$date[1])) != ""){
           entry_date_invalid[i] <- TRUE
         }
 
-        if(.check_single_initials(database_list[[i]]$entry_metadata$date[1]) != ""){
-          entry_initials_invalid[i] <- TRUE
+          if(.check_single_initials(database_list[[i]]$entry_metadata$date[1]) != ""){
+            entry_initials_invalid[i] <- TRUE
+          }
         }
       }
 
