@@ -4,12 +4,16 @@
 \alias{check_dataentry}
 \title{Performs comprehensive verification of all excel data entry files within a given folder}
 \usage{
-check_dataentry(folder_path, return_summary = TRUE)
+check_dataentry(folder_path, return_summary = TRUE, recheck = FALSE, prefix)
 }
 \arguments{
 \item{folder_path}{the path of the folder in which the data entry xlsx sheets are stored. Folder must only contain the correct format of data entry sheets}
 
 \item{return_summary}{whether to output a summary of data checking to the console}
+
+\item{recheck}{whether the data is to be rechecked (TRUE) or checked for the first time (FALSE)}
+
+\item{prefix}{the prefix of the csv files to be used. in the format "YYYYMMDDHHMM_"}
 }
 \value{
 creates a folder in which the flagged xlsx files are placed for the tester to look through them and correct data entry mistakes.

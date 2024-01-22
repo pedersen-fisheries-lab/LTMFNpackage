@@ -982,7 +982,7 @@
   fish_caught_not_entered <- FALSE
   fish_caught_invalid <- FALSE
 
-  if (is.na(fish_caught) | sex=="") {
+  if (is.na(fish_caught) | fish_caught=="") {
     fish_caught_not_entered <- TRUE
   } else if(!(fish_caught %in% c("yes", "no"))){
     fish_caught_invalid <- TRUE
