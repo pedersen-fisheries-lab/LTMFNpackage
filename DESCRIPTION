@@ -18,7 +18,9 @@ Imports:
     readxl,
     openxlsx,
     purrr,
-    tibble
+    tibble,
+    gt,
+    mapview
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.3.0
 Suggests: 
