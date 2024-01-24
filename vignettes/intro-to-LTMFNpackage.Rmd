@@ -10,14 +10,23 @@ vignette: >
 ```{r, include = FALSE}
 knitr::opts_chunk$set(
   collapse = TRUE,
-  comment = "#>"
+  comment = "#>",
+  fig.width = 8, fig.height = 5
 )
 ```
 
 ```{r setup}
 library(LTMFNpackage)
+library(gt)
+library(mapview)
+
 ```
-#Introduction to the LTMFNpackage
+
+```{r echo=FALSE}
+user_decision <- "Y"
+```
+
+# Introduction to the LTMFNpackage
 
 Hello and welcome to LTMFNpackage! This package was designed to regroup useful functions for the Long-Term Monitoring of Fish Tracking Networks project (LTMFTN). It mainly includes functions useful for:
 
@@ -30,16 +39,15 @@ First, let's load the package:
 library(LTMFNpackage)
 ```
 
-##Data entry quality control
+## Data entry quality control
 
-This package contains a suite of data quality control functions to be used on manual data entry. These functions are specifically designed for use with our internal excel database. This database is formatted with multiple sheets (LIST OF SHEETS) to enter different data types
+This package contains a suite of data quality control functions to be used on manual data entry. These functions are specifically designed for use with our internal excel database. This database is formatted with multiple sheets to enter different data types. 
 
-The following functions are used for quality control
-check_dataentry: general function to check data entry
-append_to_database: add quality controlled data to the clean database
-import_database_xl: function to import excel database
+The following functions are used for quality control. 
+check_dataentry: general function to check data entry and do visual quality control
+append_to_database: add csv files that have been checked to the clean database. 
 
-There are also functions available for checking individual sheets. These are not designed as part of the regular data pipeline, but are made available for performing individual checks
+There are also functions available for checking individual sheets. These are not designed as part of the regular data pipeline, but are made available for performing individual checks. 
 check_equipment_log
 check_fish
 check_fykes
@@ -48,20 +56,44 @@ check_cast_netting
 check_range_test
 check_gps_records.
 
-To perform quality control according to the data management protocol:
-1. Place all data entry excel files into the raw data folder on the lab Surface Pro ([EXACT DIRECTORY])
-2. call the function check_dataentry(folder_path = "[EXACT DIRECTORY]")
-    This function will check that the surface pro is being used, and that the proper working directory is set [EXACT DIRECTORY]. For standardized data management, ensure this is the case. For the purposes of this example, the correct folder_path and directory will not be used
+To perform quality control according to the data management protocol:  
+1. Place all data entry excel files into the raw data folder on the lab Surface Pro (C:/Users/PedersenLac/Documents/ltmftn_project/ltmftn_database/internal_database/raw/)
+2. call the function check_dataentry(folder_path = "C:/Users/PedersenLac/Documents/ltmftn_project/ltmftn_database/internal_database/")
+    This function will check that the surface pro is being used, and that the proper working directory is set (C:/Users/PedersenLac/Documents/ltmftn_project/ltmftn_database/internal_database/). With default settings, this function will also output data visualization figures for more manual quality control (a plot of dates, a mapview of gps locations, and a table of crew initials).   
+    
+For standardized data management, ensure the working directory is correct. For the purposes of this example, the correct folder_path and directory will not be used, and you will have to enter confirmation codes into the console. 
 ```{r}
-setwd("~/Documents/Pedersen2023/LTMFTN/LTMFNpackage/data-raw/data_qc_example")
-check_dataentry(folder_path = "raw/")
+setwd("~/Documents/Pedersen2023/LTMFTN/LTMFNpackage/data-raw/")
+qc_info <- check_dataentry(folder_path = "data_qc_example/", return_summary = TRUE, recheck = FALSE, visualize = TRUE)
+#please enter Y, then 3 into the console to override the directory protections
+```
+We can then check the resulting csv files for the errors that were reported in the data_flag comment. You can also see the visual QC information given by the function.   
 
+#### dates_plot 
+
+shows the dates that are recorded in the data. Any dates that produce a warning of "failed to parse" indicates an invalid date that you need to find in the csv (using the invalid_date flag code). The dates shown in the plot are valid dates, but it is up to the data enterer to double check and make sure that the dates are sensible. For example, if there is a date listed in november for an activity that you know only occured in the summer months, you should look through the data to find and identfy the issue with that   entry.
+
+#### initials_table 
+
+shows a table of which crew initials are entered for which activity type. You can check to make sure that crew initials are valid (ie, capitalized 2-3 letter codes), that they are correct and represent a known crew member, and that the delimiter is correct
+
+#### map_spatial 
+
+is a mapview interactive map that shows all the latitude and longitude points by both data type and site ID. You can click on the layers icon in the top left to toggle between the two layers, and you can zoom and scroll around the map to see the points. You can check if the points are located in a sensible location, that they match the data_type and that they match the side ID (ex: a LWE point in Wemindji means either the gps location is invalid or the site ID was entered wrong)
+
+```{r, results = "asis"}
+setwd("~/Documents/Pedersen2023/LTMFTN/LTMFNpackage/data-raw/")
+qc_info <- readRDS(file = "data_qc_example/qc_info.rds")
+qc_info$dates_plot
+print(qc_info$initials_table)
+qc_info$map_spatial
 ```
 
-##Data Processing 
+
+## Data Processing 
 
 
-##Yaps helper functions
+## Yaps helper functions
 This package contains helper functions to facilitate analysis using the YAPS package.
 
 Let's say we imported a raw download from the VUE software 
