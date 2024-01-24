@@ -4,7 +4,13 @@
 \alias{check_dataentry}
 \title{Performs comprehensive verification of all excel data entry files within a given folder}
 \usage{
-check_dataentry(folder_path, return_summary = TRUE, recheck = FALSE, prefix)
+check_dataentry(
+  folder_path,
+  return_summary = TRUE,
+  recheck = FALSE,
+  prefix,
+  visualize = TRUE
+)
 }
 \arguments{
 \item{folder_path}{the path of the folder in which the data entry xlsx sheets are stored. Folder must only contain the correct format of data entry sheets}
@@ -13,11 +19,11 @@ check_dataentry(folder_path, return_summary = TRUE, recheck = FALSE, prefix)
 
 \item{recheck}{whether the data is to be rechecked (TRUE) or checked for the first time (FALSE)}
 
-\item{prefix}{the prefix of the csv files to be used. in the format "YYYYMMDDHHMM_"}
+\item{prefix}{if rechecking, the prefix of the csv files to be checked. in the format "YYYYMMDDHHMM_"}
 }
 \value{
-creates a folder in which the flagged xlsx files are placed for the tester to look through them and correct data entry mistakes.
+if visualize = TRUE, this function returns a list of visuals for the data checker to go through
 }
 \description{
-Performs comprehensive verification of all excel data entry files within a given folder
+this function imports excel documents stored in the "raw" folder that need quality control. It performs a comprehensive quality control, and saves csv files output to the "flagged" folder for the QC person to go through and correct the data flags.
 }
