@@ -30,7 +30,7 @@ check_dataentry <- function(folder_path, return_summary = TRUE, recheck = FALSE,
     }
   }
   #checking file directory
-  if (getwd() != "C:/Users/PedersenLab/Documents/ltmftn_project/ltmftn_database/internal_database"){
+  if (getwd() != "C:/Users/PedersenLab/Documents/ltmftn_project/ltmftn_database"){
     message(paste0("Your working directory for data checking should be set to \"ltmftn_project/ltmftn_database/internal_database\" on the lab surface pro.
             You can do this with the following line of code: setwd(\"~/ltmftn_project/ltmftn_database/internal_database\").
             The current directory is", getwd(),  ". Please choose one of the following options by entering a number into the console (1, 2, 3):"))
@@ -59,7 +59,9 @@ check_dataentry <- function(folder_path, return_summary = TRUE, recheck = FALSE,
   #getting all file paths within the folder
   if (recheck){
     file_names <- list.files(path = flagged_folder_path, pattern = ".csv$", full.names = TRUE)
-    sheet_names <- gsub(".csv", "", gsub(substring(file_names, 1, 46), "", file_names))
+    file_names_short <- list.files(path = flagged_folder_path, pattern = ".csv$", full.names = FALSE)
+
+    sheet_names <- gsub(".csv", "", gsub(substring(file_names_short, 1, 13), "", file_names_short))
 
     database <- list()
     database <- purrr::map(.x = file_names, .f = ~tibble::as_tibble(read.csv(.x, colClasses = "character")))
