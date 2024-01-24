@@ -1,13 +1,15 @@
 ######################### Data checking flow functions ###################
 #' Performs comprehensive verification of all excel data entry files within a given folder
 #'
+#' this function imports excel documents stored in the "raw" folder that need quality control. It performs a comprehensive quality control, and saves csv files output to the "flagged" folder for the QC person to go through and correct the data flags.
+#'
 #' @param folder_path the path of the folder in which the data entry xlsx sheets are stored. Folder must only contain the correct format of data entry sheets
 #' @param return_summary whether to output a summary of data checking to the console
 #' @param recheck whether the data is to be rechecked (TRUE) or checked for the first time (FALSE)
-#' @param prefix the prefix of the csv files to be used. in the format "YYYYMMDDHHMM_"
-#' @returns creates a folder in which the flagged xlsx files are placed for the tester to look through them and correct data entry mistakes.
+#' @param prefix if rechecking, the prefix of the csv files to be checked. in the format "YYYYMMDDHHMM_"
+#' @returns if visualize = TRUE, this function returns a list of visuals for the data checker to go through
 #' @export check_dataentry
-check_dataentry <- function(folder_path, return_summary = TRUE, recheck = FALSE, prefix ){
+check_dataentry <- function(folder_path, return_summary = TRUE, recheck = FALSE, prefix , visualize = TRUE){
 
   #Checking that data entry is occurring in the right spot
   #checking device
@@ -160,6 +162,12 @@ check_dataentry <- function(folder_path, return_summary = TRUE, recheck = FALSE,
     purrr::map2(.x = database_flagged, .y = names(database_flagged), .f = ~write.csv(.x, file.path(flagged_folder_path, paste0(format(Sys.time(), "%Y%m%d%H%M"),"_", .y, ".csv")), row.names = FALSE))
     #openxlsx::write.xlsx(x = database_flagged, file = paste0(flagged_folder_path, Sys.Date(), "_database_flagged.xlsx"))
   }
+
+  #visualize data
+  if(visualize){
+    visuals <- visualize_data_check(database = database_flagged)
+  }
+
   output_message <- paste0("Data entry successfully complete. Flagged data have been output in the directory ", getwd(), flagged_folder_path, ". Make all data entry corrections in these flagged files\n\n")
 
   #creating summary report
@@ -198,7 +206,8 @@ check_dataentry <- function(folder_path, return_summary = TRUE, recheck = FALSE,
 
   output_message <- paste0("\nDATA CHECKING COMPLETE. For further data checking, please use the visualize_data_check function\n\n", output_message)
 
-  return(cat(output_message))
+  print(cat(output_message))
+  return(visuals)
 }
 
 ######################### Importing and Exporting data  ################################
@@ -233,10 +242,125 @@ append_to_database <- function(checked_database){
 
 }
 
-visualize_data_check <- function(database){
+#' Appends the checked data entry files to the relevant csv databases
+#'
+#' @param folder_path the filepath to the flagged folder where files to be examined are kept
+#' @param database the database object to be checked. Alternate to folder_path, to be used only within check_dataentry() function
+#' @returns visual inspection aids to help identify error that are not captured by quality control
+#' @export visualize_data_check
+visualize_data_check <- function(flagged_folder_path = NULL, database = NULL){
+
+  if(is.null(flagged_folder_path) & is.null(database)){
+    stop("Visualize data check has no input")
+  }
+  if(!is.null(flagged_folder_path) & !is.null(database)){
+    stop("Visualize data check has two inputs. Please choose either flagged_folder_path or database but not both")
+  }
+
+  if(!is.null(flagged_folder_path)){
+    #import data
+    file_names <- list.files(path = flagged_folder_path, pattern = ".csv$", full.names = TRUE)
+    sheet_names <- gsub(".csv", "", gsub(substring(file_names, 1, 46), "", file_names))
+
+    database <- list()
+    database <- purrr::map(.x = file_names, .f = ~tibble::as_tibble(read.csv(.x, colClasses = "character")))
+    names(database) <- sheet_names
+  }
   #check dates
+  dates <- dplyr::bind_rows(lapply(seq_along(database), function(i) {
+    tibble::tibble(
+      date = database[[i]]$date,
+      data_type = names(database)[i]
+    )
+  }))
+  dates_plot <- ggplot2::ggplot(data=dates, ggplot2::aes(x=lubridate::ymd(date), y=data_type))+
+    ggplot2::geom_point(ggplot2::aes(colour=data_type))+
+    ggplot2::labs(title = "All action dates", subtitle = "check that all dates are within the correct range, \nand that no NAs were present or introduced when converting to date", x="date", y="data type")
+
   #check initials
-  #check
+  initials <- tibble::tibble(initials = c(unique(database$equipment_log$entry_initials),
+                                          unique(unlist(stringr::str_split(database$equipment_log$crew, ", "))),
+                                          unique(unlist(stringr::str_split(database$fish$crew, ", "))),
+                                          unique(unlist(stringr::str_split(database$fykes$crew, ", "))),
+                                          unique(unlist(stringr::str_split(database$angling$crew, ", "))),
+                                          unique(unlist(stringr::str_split(database$range_test$crew, ", "))),
+                                          unique(unlist(stringr::str_split(database$gps_records$crew, ", "))),
+                                          unique(database$fish$surgeon),
+                                          unique(database$fish$assistant),
+                                          unique(database$fish$recorder)),
+                             initial_type = c(rep("data_entry", times = length(unique(database$equipment_log$entry_initials))),
+                                              rep("equipment_log_crew", times = length(unique(unlist(stringr::str_split(database$equipment_log$crew, ", "))))),
+                                              rep("fish_crew", times = length(unique(unlist(stringr::str_split(database$fish$crew, ", "))))),
+                                              rep("fykes_crew", times = length(unique(unlist(stringr::str_split(database$fykes$crew, ", "))))),
+                                              rep("angling_crew", times = length(unique(unlist(stringr::str_split(database$angling$crew, ", "))))),
+                                              rep("range_test_crew", times = length(unique(unlist(stringr::str_split(database$range_test$crew, ", "))))),
+                                              rep("gps_records_crew", times = length(unique(unlist(stringr::str_split(database$gps_records$crew, ", "))))),
+                                              rep("surgeon" ,  times = length(unique(database$fish$surgeon))),
+                                              rep("surgery_assistant", times = length(unique(database$fish$assistant))),
+                                              rep("surgery_recorder", times = length(unique(database$fish$recorder)))))
+
+  initials_table <- gt::gt(data = initials ,caption = "Ensure that all initials are indivitual initials of 2-3 capital letters only. If this is not the case, please fix it in the data",
+                           row_group_as_column = 1,
+                           groupname_col =  "initial_type")
+
+  #check maps
+
+  spatial_data <- dplyr::bind_rows(tibble::tibble(site = database$equipment_log$site,
+                                                  lat = database$equipment_log$lat,
+                                                  lon = database$equipment_log$lon,
+                                                  point_type = "equipment"),
+                                   tibble::tibble(site=database$fish$site,
+                                                     lat=database$fish$capture_lat,
+                                                     lon=database$fish$capture_lon,
+                                                     point_type="fish_capture"),
+                                   tibble::tibble(site=database$fish$site,
+                                                  lat=database$fish$release_lat,
+                                                  lon=database$fish$release_lon,
+                                                  point_type="fish_release"),
+                                   tibble::tibble(site=database$angling$site,
+                                                  lat=database$angling$start_lat,
+                                                  lon=database$angling$start_lon,
+                                                  point_type="angling_start"),
+                                   tibble::tibble(site=database$angling$site,
+                                                  lat=database$angling$end_lat,
+                                                  lon=database$angling$end_lon,
+                                                  point_type="angling_end"),
+                                   tibble::tibble(site=database$cast_netting$site,
+                                                  lat=database$cast_netting$start_lat,
+                                                  lon=database$cast_netting$start_lon,
+                                                  point_type="cast_netting_start"),
+                                   tibble::tibble(site=database$cast_netting$site,
+                                                  lat=database$cast_netting$end_lat,
+                                                  lon=database$cast_netting$end_lon,
+                                                  point_type="cast_netting_end"),
+                                   tibble::tibble(site=database$cast_netting$site,
+                                                  lat=database$cast_netting$end_lat,
+                                                  lon=database$cast_netting$end_lon,
+                                                  point_type="cast_netting_end"),
+                                   tibble::tibble(site=database$fykes$site,
+                                                  lat=database$fykes$lat,
+                                                  lon=database$fykes$lon,
+                                                  point_type="fyke"),
+                                   tibble::tibble(site=database$range_test$site,
+                                                  lat=database$range_test$lat,
+                                                  lon=database$range_test$lon,
+                                                  point_type="range_test"))
+  spatial_data <- dplyr::filter(spatial_data, !(is.na(lat)|is.na(lon)))
+  spatial_data <- sf::st_as_sf(x = spatial_data, coords=c("lon", "lat"))
+  sf::st_crs(spatial_data) <- 4326
+
+  map_spatial <- mapview::mapview(spatial_data, zcol="point_type", layer.name="All spatial by data type")+
+    mapview::mapview(spatial_data, zcol="site", layer.name = "All spatial by site")
+
+  #print to viewer
+  visual_outputs <- list(dates_plot =dates_plot,
+                         initials_table = initials_table,
+                         map_spatial = map_spatial)
+  print(dates_plot)
+  print(initials_table)
+  print(map_spatial)
+
+  return(visual_outputs)
 }
 
 ######################### Checking each sheet  ################################
@@ -282,8 +406,12 @@ check_fish <- function(fish){
 
   fish$data_flag <- fish$data_flag <- apply(fish, 1, function(row) {
 
-    if(!(is.na(row["tag_serial"])| row["tag_serial"] == "") & row["recap"] !="yes"){
-      tagging <- TRUE
+    if(!(is.na(row["tag_serial"])| row["tag_serial"] == "") & !is.na(row["recap"])){
+      if(is.na(row["recap"] != "yes")){
+        tagging <- TRUE
+      } else {
+        stop("recap is not an appropriate value")
+      }
     } else {
       tagging <- FALSE
     }
@@ -293,32 +421,32 @@ check_fish <- function(fish){
     data_flag <- paste0(data_flag, .check_site(row["site"]))
     data_flag <- paste0(data_flag, .check_capture_method(row["capture_method"]))
     data_flag <- paste0(data_flag, .check_fykeid(row["fyke_id"]))
-    data_flag <- paste0(data_flag, "capt_", .check_time(row["capture_time"], mandatory = FALSE))
-    data_flag <- paste0(data_flag, "capt", .check_lat(row["capture_lat"], mandatory = FALSE))
-    data_flag <- paste0(data_flag, "capt", .check_lon(row["capture_lon"], mandatory = FALSE))
+    data_flag <- paste0(data_flag, .check_time(row["capture_time"], mandatory = FALSE))
+    data_flag <- paste0(data_flag, .check_lat(row["capture_lat"], mandatory = FALSE))
+    data_flag <- paste0(data_flag, .check_lon(row["capture_lon"], mandatory = FALSE))
     data_flag <- paste0(data_flag, .check_species(row["species"]))
     data_flag <- paste0(data_flag, .check_temp(row["temp_c"]))
-    data_flag <- paste0(data_flag, "capt_", .check_condition(row["capture_cond"]))
+    data_flag <- paste0(data_flag, .check_condition(row["capture_cond"]))
     data_flag <- paste0(data_flag, .check_length(row["length_mm"]))
     data_flag <- paste0(data_flag, .check_weight(row["weight_g"]))
     data_flag <- paste0(data_flag, .check_dna_scale_id(row["dna_id"], row["scale_id"])) #populate fnct
     data_flag <- paste0(data_flag, .check_sex(row["sex"]))
-    data_flag <- paste0(data_flag, .check_serial(row["tag_serial"]), equip_type = "tag") #bug here
+    data_flag <- paste0(data_flag, .check_serial(row["tag_serial"], equip_type = "tag")) #bug here
     data_flag <- paste0(data_flag, .check_tag_model(row["tag_model"])) #create fnct
     data_flag <- paste0(data_flag, .check_clove_conc(row["clove_conc"], mandatory = tagging))
-    data_flag <- paste0(data_flag, "anesth_", .check_time(row["anesth_start"], mandatory = tagging))
-    data_flag <- paste0(data_flag, "surgs_", .check_time(row["surg_start"], mandatory = tagging))
-    data_flag <- paste0(data_flag, "surge_", .check_time(row["surg_end"], mandatory = tagging))
-    data_flag <- paste0(data_flag, "recov_", .check_time(row["recov_end"], mandatory = tagging))
-    data_flag <- paste0(data_flag, "rele_", .check_time(row["release_time"], mandatory = tagging))
-    data_flag <- paste0(data_flag, "rele_", .check_lat(row["release_lat"], mandatory = tagging))
-    data_flag <- paste0(data_flag, "rele_", .check_lon(row["release_lon"], mandatory = tagging))
-    data_flag <- paste0(data_flag, "rele_", .check_condition(row["release_cond"], mandatory = tagging))
+    data_flag <- paste0(data_flag, .check_time(row["anesth_start"], mandatory = tagging))
+    data_flag <- paste0(data_flag, .check_time(row["surg_start"], mandatory = tagging))
+    data_flag <- paste0(data_flag, .check_time(row["surg_end"], mandatory = tagging))
+    data_flag <- paste0(data_flag, .check_time(row["recov_end"], mandatory = tagging))
+    data_flag <- paste0(data_flag, .check_time(row["release_time"], mandatory = tagging))
+    data_flag <- paste0(data_flag, .check_lat(row["release_lat"], mandatory = tagging))
+    data_flag <- paste0(data_flag, .check_lon(row["release_lon"], mandatory = tagging))
+    data_flag <- paste0(data_flag, .check_condition(row["release_cond"], mandatory = tagging))
     data_flag <- paste0(data_flag, .check_mort(row["mort"]))
     data_flag <- paste0(data_flag, .check_recap(row["recap"], mandatory = tagging))
-    data_flag <- paste0(data_flag, "surg_",.check_single_initials(row["surgeon"], mandatory = tagging))
-    data_flag <- paste0(data_flag, "assi_",.check_single_initials(row["assistant"], mandatory = tagging))
-    data_flag <- paste0(data_flag, "reco_",.check_single_initials(row["recorder"], mandatory = tagging))
+    data_flag <- paste0(data_flag, .check_single_initials(row["surgeon"], mandatory = tagging))
+    data_flag <- paste0(data_flag, .check_single_initials(row["assistant"], mandatory = tagging))
+    data_flag <- paste0(data_flag, .check_single_initials(row["recorder"], mandatory = tagging))
 
     data_flag <- paste0(data_flag, .check_crew(row["crew"]))
 
@@ -350,8 +478,8 @@ check_fyke <- function(fyke){
     data_flag <- paste0(data_flag, .check_net_action(row["net_action"]))
     data_flag <- paste0(data_flag, .check_lat(row["lat"], mandatory = need_gps))
     data_flag <- paste0(data_flag, .check_lon(row["lon"], mandatory = need_gps))
-    data_flag <- paste0(data_flag, "out_", .check_time(row["out_time"]))
-    data_flag <- paste0(data_flag, "in_", .check_time(row["in_time"]))
+    data_flag <- paste0(data_flag, .check_time(row["out_time"], mandatory = row["net_action"] %in% c("checked", "retrieved")))
+    data_flag <- paste0(data_flag, .check_time(row["in_time"], mandatory = row["net_action"] %in% c("checked", "set")))
     data_flag <- paste0(data_flag, .check_fish_caught(row["fish_caught"]))
     data_flag <- paste0(data_flag, .check_crew(row["crew"]))
 
@@ -372,13 +500,13 @@ check_angling <- function(angling){
     data_flag <- ""
     data_flag <- paste0(data_flag, .check_date(row["date"]))
     data_flag <- paste0(data_flag, .check_site(row["site"]))
-    data_flag <- paste0(data_flag, "start_", .check_time(row["start_time"], mandatory = TRUE))
-    data_flag <- paste0(data_flag, "start_", .check_lat(row["start_lat"], mandatory = TRUE))
-    data_flag <- paste0(data_flag, "start_", .check_lon(row["start_lon"], mandatory = TRUE))
-    data_flag <- paste0(data_flag, "end_", .check_time(row["end_time"], mandatory = TRUE))
-    data_flag <- paste0(data_flag, "end_", .check_lat(row["end_lat"], mandatory = FALSE))
-    data_flag <- paste0(data_flag, "end_", .check_lon(row["end_lon"], mandatory = FALSE))
-    data_flag <- paste0(data_flag, "end_", .check_nrods_or_nets(row["n_rods"], mandatory = TRUE, fishtype = "nrods"))
+    data_flag <- paste0(data_flag, .check_time(row["start_time"], mandatory = TRUE))
+    data_flag <- paste0(data_flag, .check_lat(row["start_lat"], mandatory = TRUE))
+    data_flag <- paste0(data_flag, .check_lon(row["start_lon"], mandatory = TRUE))
+    data_flag <- paste0(data_flag, .check_time(row["end_time"], mandatory = TRUE))
+    data_flag <- paste0(data_flag, .check_lat(row["end_lat"], mandatory = FALSE))
+    data_flag <- paste0(data_flag, .check_lon(row["end_lon"], mandatory = FALSE))
+    data_flag <- paste0(data_flag, .check_nrods_or_nets(row["n_rods"], mandatory = TRUE, fishtype = "nrods"))
     #check trackid create fnct NOT NECESSARY
     data_flag <- paste0(data_flag, .check_crew(row["crew"]))
 
@@ -399,14 +527,14 @@ check_cast_netting <- function(cast_netting){
     data_flag <- ""
     data_flag <- paste0(data_flag, .check_date(row["date"]))
     data_flag <- paste0(data_flag, .check_site(row["site"]))
-    data_flag <- paste0(data_flag, "start", .check_time(row["start_time"]))
-    data_flag <- paste0(data_flag, "start", .check_lat(row["start_lat"]))
-    data_flag <- paste0(data_flag, "start", .check_lon(row["start_lon"]))
-    data_flag <- paste0(data_flag, "end", .check_time(row["end_time"]))
-    data_flag <- paste0(data_flag, "end", .check_lat(row["end_lat"]))
-    data_flag <- paste0(data_flag, "end", .check_lon(row["end_lon"]))
+    data_flag <- paste0(data_flag, .check_time(row["start_time"]))
+    data_flag <- paste0(data_flag, .check_lat(row["start_lat"]))
+    data_flag <- paste0(data_flag, .check_lon(row["start_lon"]))
+    data_flag <- paste0(data_flag, .check_time(row["end_time"]))
+    data_flag <- paste0(data_flag, .check_lat(row["end_lat"]))
+    data_flag <- paste0(data_flag, .check_lon(row["end_lon"]))
     #check trackid
-    data_flag <- paste0(data_flag, "end_", .check_nrods_or_nets(row["n_rods"], mandatory = TRUE, fishtype = "nnets"))
+    data_flag <- paste0(data_flag, .check_nrods_or_nets(row["n_rods"], mandatory = TRUE, fishtype = "nnets"))
     data_flag <- paste0(data_flag, .check_crew(row["crew"]))
 
     return(data_flag)
@@ -432,8 +560,8 @@ check_range_test <- function(range_test){
     #check wpt
     data_flag <- paste0(data_flag, .check_lat(row["lat"]))
     data_flag <- paste0(data_flag, .check_lon(row["lon"]))
-    data_flag <- paste0(data_flag, "start", .check_time(row["start_time"]))
-    data_flag <- paste0(data_flag, "end", .check_time(row["end_time"]))
+    data_flag <- paste0(data_flag, .check_time(row["start_time"]))
+    data_flag <- paste0(data_flag, .check_time(row["end_time"]))
     data_flag <- paste0(data_flag, .check_depth(row["depth_m"]))
     #check susbtrate
     #check rttag_ids?
