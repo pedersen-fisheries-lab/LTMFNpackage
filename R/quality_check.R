@@ -229,18 +229,149 @@ import_database_xl <- function(path){
 
 #' Appends the checked data entry files to the relevant csv databases
 #'
-#' @param checked_database the new data entry database that has been checked and is ready to add to the main database
+#' @param folder_path the new data entry database that has been checked and is ready to add to the main database
 #' @returns a report of the check status for the entry
 #' @export append_to_database
-append_to_database <- function(checked_database){
-  #verify that there are no duplicates
+append_to_database <- function(folder_path){
+  if (Sys.info()[6] != "PedersenLab" |
+      Sys.info()[4] != "DESKTOP-H8SPKU6"){
+    message("Data checking should be performed in the database directory of the Lab Surface Pro computer.
+            This device does not seem to be the lab surface pro (NodeName: DESKTOP-H8SPKU6), or it is not signed into the PedersenLab account.
+            If you wish to proceed, enter \"Y\" into the console. If not, enter \"N\" into the console")
 
-  #import csvs into R
-  #merge the checked ones and the orignal main csv
-  #check for duplicates (duplicated(merged_db))
-  #if duplicates exists, stop and return a message
-  # if no duplicates exists, export each to csv with the merging timestamp added
-  #return a message summarizing the merging (how many data comments remain)
+    user_decision <- readline(prompt = "Would you like to proceed? (enter Y or N): ")
+
+    if(user_decision == "N"){
+      stop("Data checking stopped")
+    } else if (user_decision == "Y") {
+      message("Data checking is proceeding")
+    } else {
+      stop("User entry is not valid, Data checking halted")
+    }
+  }
+  #checking file directory
+  if (getwd() != "C:/Users/PedersenLab/Documents/ltmftn_project/ltmftn_database"){
+    message(paste0("Your working directory for data checking should be set to \"ltmftn_project/ltmftn_database/internal_database\" on the lab surface pro.
+            You can do this with the following line of code: setwd(\"~/ltmftn_project/ltmftn_database/internal_database\").
+            The current directory is", getwd(),  ". Please choose one of the following options by entering a number into the console (1, 2, 3):"))
+
+    user_decision <- readline(prompt = "1: change the working directory to \"~/ltmftn_project/ltmftn_database/internal_database\" \n2: stop data checking\n3: proceed with the current working directory")
+
+    if(user_decision == "1"){
+      setwd("~/ltmftn_project/ltmftn_database/internal_database")
+      message(paste0("Working directory set to: ", getwd()))
+    } else if (user_decision == "2") {
+      stop("Data checking stopped")
+    } else if( user_decision == "3") {
+      message("Data checking is proceeding")
+    } else {
+      stop("User entry is not valid, Data checking halted")
+    }
+  }
+
+  if(substring(folder_path, nchar(folder_path), nchar(folder_path))!="/"){
+    stop("Please include the final / of the folder path")
+  }
+
+  flagged_folder_path <- paste0(folder_path, "flagged/")
+  clean_folder_path <- paste0(folder_path,  "clean/")
+
+  #import QC'd csv files
+  file_names <- list.files(path = flagged_folder_path, pattern = ".csv$", full.names = TRUE)
+  file_names_short <- list.files(path = flagged_folder_path, pattern = ".csv$", full.names = FALSE)
+
+  sheet_names <- gsub(".csv", "", gsub(substring(file_names_short, 1, 13), "", file_names_short))
+
+  database <- list()
+  database <- purrr::map(.x = file_names, .f = ~tibble::as_tibble(read.csv(.x, colClasses = "character")))
+  names(database) <- sheet_names
+
+  #final check
+  database_flagged <- database
+  database_flagged$equipment_log <- check_equipment_log(database$equipment_log)
+  database_flagged$fish <- check_fish(database$fish)
+  database_flagged$fykes <- check_fyke(database$fykes)
+  database_flagged$angling <- check_angling(database$angling)
+  database_flagged$cast_netting <- check_cast_netting(database$cast_netting)
+  database_flagged$range_test <- check_range_test(database$range_test)
+  database_flagged$gps_records <- check_gps_records(database$gps_records)
+
+  database_flagged <- purrr::map(database_flagged, function(.x){
+    .x$date_added <- Sys.Date()
+    .x
+  })
+
+  eq_log_dup <- which(base::duplicated(database_flagged$equipment_log[,c("date", "serial_id", "action", "time")]))
+  fish_dup <- which(base::duplicated(database_flagged$fish[,c("date", "site", "capture_method", "capture_time", "species", "length_mm", "dna_id", "tag_serial", "recap" )]))
+  fykes_dup <- which(base::duplicated(database_flagged$fykes[,c("date", "site", "fyke_id", "out_time", "in_time")]))
+  angling_dup <- which(base::duplicated(database_flagged$angling[,c("date", "site", "start_time", "start_lat", "start_lon", "end_time")]))
+  cast_dup <- which(base::duplicated(database_flagged$cast_netting[,c("date", "site", "start_time", "start_lat", "start_lon", "end_time")]))
+  rt_dup <- which(base::duplicated(database_flagged$range_test[,c("date", "site", "rt_type", "object_id", "start_time")]))
+  gps_dup <- which(base::duplicated(database_flagged$gps_records[,c("obj_name")]))
+
+  if(!(0 %in% c(eq_log_dup, fish_dup, fykes_dup, angling_dup, cast_dup, rt_dup, gps_dup))){
+    dup_report <- paste0("duplicates were detected in the flagged dataset to append to the final database. Please either remove or fix the duplicates.\n
+    The following rows are duplicates: \n",
+                         "equipment_log row id: ", paste0(eq_log_dup, collapse = ", "),
+                         "fish row id: ", paste0(fish_dup, collapse = ", "),
+                         "fykes row id: ", paste0(fykes_dup, collapse = ", "),
+                         "angling row id: ", paste0(angling_dup, collapse = ", "),
+                         "cast row id: ", paste0(cast_dup, collapse = ", "),
+                         "range_test row id: ", paste0(rt_dup, collapse = ", "),
+                         "gps row id: ", paste0(gps_dup, collapse = ", "))
+
+    stop(cat(dup_report))
+  }
+
+  #importing the clean database
+  ori_db_filenames <- list.files(path = clean_folder_path, pattern = "parquet$", full.names = TRUE)
+  ori_db_filenames_short <- list.files(path = clean_folder_path, pattern = "parquet$", full.names = FALSE)
+  ori_db_names <- gsub(pattern = ".parquet", replacement = "", x = ori_db_filenames_short)
+
+  ori_database <- purrr::map(.x = ori_db_filenames, .f =~ arrow::read_parquet(file = .x))
+  names(ori_database) <- ori_db_names
+
+  #merging the two
+  appended_database <- purrr::map2(.x = ori_database, .y = database_flagged, .f = function(.x, .y){
+    appended <- rbind(.x, .y)
+    appended
+  })
+
+  #checking for dups in appended db
+  eq_log_dup <- which(base::duplicated(appended_database$equipment_log[,c("date", "serial_id", "action", "time")]))
+  fish_dup <- which(base::duplicated(appended_database$fish[,c("date", "site", "capture_method", "capture_time", "species", "length_mm", "dna_id", "tag_serial", "recap" )]))
+  fykes_dup <- which(base::duplicated(appended_database$fykes[,c("date", "site", "fyke_id", "out_time", "in_time")]))
+  angling_dup <- which(base::duplicated(appended_database$angling[,c("date", "site", "start_time", "start_lat", "start_lon", "end_time")]))
+  cast_dup <- which(base::duplicated(appended_database$cast_netting[,c("date", "site", "start_time", "start_lat", "start_lon", "end_time")]))
+  rt_dup <- which(base::duplicated(appended_database$range_test[,c("date", "site", "rt_type", "object_id", "start_time")]))
+  gps_dup <- which(base::duplicated(appended_database$gps_records[,c("obj_name")]))
+
+  if(!(0 %in% c(eq_log_dup, fish_dup, fykes_dup, angling_dup, cast_dup, rt_dup, gps_dup))){
+    dup_report <- paste0("duplicates were detected between the newly appended flagged dataset and the final database. Please either remove or fix the duplicates.\n
+    The following rows in the flagged dataset are duplicates of rows in the final dataset: \n",
+                         "\nequipment_log row id: ", paste0(c(eq_log_dup-nrow(ori_database$equipment_log)), collapse = ", "),
+                         "\n\nfish row id: ", paste0(c(fish_dup-nrow(ori_database$fish)), collapse = ", "),
+                         "\n\nfykes row id: ", paste0(c(fykes_dup-nrow(ori_database$fykes)), collapse = ", "),
+                         "\n\nangling row id: ", paste0(c(angling_dup-nrow(ori_database$angling)), collapse = ", "),
+                         "\n\ncast row id: ", paste0(c(cast_dup-nrow(ori_database$cast_netting)), collapse = ", "),
+                         "\n\nrange_test row id: ", paste0(c(rt_dup-nrow(ori_database$range_test)), collapse = ", "),
+                         "\n\ngps row id: ", paste0(c(gps_dup-nrow(ori_database$gps_records)), collapse = ", "))
+
+    stop(cat(dup_report))
+  }
+
+  #moving curring db to archive folder
+  archive_path <- paste0(clean_folder_path, "archive/", Sys.Date())
+  dir.create(path = archive_path)
+
+  for(file in ori_db_filenames){
+    file.rename(from = file, to = file.path(archive_path, basename(file)))
+  }
+
+  #exporting updated version
+  purrr::map2(.x = appended_database, .y = ori_db_filenames, .f = function(.x, .y){
+    arrow::write_parquet(x = .x, sink = file.path(.y))})
+
 
 }
 

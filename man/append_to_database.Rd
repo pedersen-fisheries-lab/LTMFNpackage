@@ -4,10 +4,10 @@
 \alias{append_to_database}
 \title{Appends the checked data entry files to the relevant csv databases}
 \usage{
-append_to_database(checked_database)
+append_to_database(folder_path)
 }
 \arguments{
-\item{checked_database}{the new data entry database that has been checked and is ready to add to the main database}
+\item{folder_path}{the new data entry database that has been checked and is ready to add to the main database}
 }
 \value{
 a report of the check status for the entry
