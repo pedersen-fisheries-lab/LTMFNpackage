@@ -278,7 +278,7 @@ append_to_database <- function(folder_path){
 
   #import QC'd csv files
   file_names <- list.files(path = flagged_folder_path, pattern = ".csv$", full.names = TRUE)
-  file_names_short <- list.files(path = flagged_folder_path, pattern = ".csv$", full.names = FALSE)
+  file_names_short <- basename(file_names)
 
   sheet_names <- gsub(".csv", "", gsub(substring(file_names_short, 1, 13), "", file_names_short))
 
@@ -309,16 +309,16 @@ append_to_database <- function(folder_path){
   rt_dup <- which(base::duplicated(database_flagged$range_test[,c("date", "site", "rt_type", "object_id", "start_time")]))
   gps_dup <- which(base::duplicated(database_flagged$gps_records[,c("obj_name")]))
 
-  if(!(0 %in% c(eq_log_dup, fish_dup, fykes_dup, angling_dup, cast_dup, rt_dup, gps_dup))){
+  if(length( c(eq_log_dup, fish_dup, fykes_dup, angling_dup, cast_dup, rt_dup, gps_dup))>0){
     dup_report <- paste0("duplicates were detected in the flagged dataset to append to the final database. Please either remove or fix the duplicates.\n
     The following rows are duplicates: \n",
-                         "equipment_log row id: ", paste0(eq_log_dup, collapse = ", "),
-                         "fish row id: ", paste0(fish_dup, collapse = ", "),
-                         "fykes row id: ", paste0(fykes_dup, collapse = ", "),
-                         "angling row id: ", paste0(angling_dup, collapse = ", "),
-                         "cast row id: ", paste0(cast_dup, collapse = ", "),
-                         "range_test row id: ", paste0(rt_dup, collapse = ", "),
-                         "gps row id: ", paste0(gps_dup, collapse = ", "))
+                         "\nequipment_log row id: ", paste0(eq_log_dup, collapse = ", "),
+                         "\n\nfish row id: ", paste0(fish_dup, collapse = ", "),
+                         "\n\nfykes row id: ", paste0(fykes_dup, collapse = ", "),
+                         "\n\nangling row id: ", paste0(angling_dup, collapse = ", "),
+                         "\n\ncast row id: ", paste0(cast_dup, collapse = ", "),
+                         "\n\nrange_test row id: ", paste0(rt_dup, collapse = ", "),
+                         "\n\ngps row id: ", paste0(gps_dup, collapse = ", "), "\n")
 
     stop(cat(dup_report))
   }
@@ -346,7 +346,7 @@ append_to_database <- function(folder_path){
   rt_dup <- which(base::duplicated(appended_database$range_test[,c("date", "site", "rt_type", "object_id", "start_time")]))
   gps_dup <- which(base::duplicated(appended_database$gps_records[,c("obj_name")]))
 
-  if(!(0 %in% c(eq_log_dup, fish_dup, fykes_dup, angling_dup, cast_dup, rt_dup, gps_dup))){
+  if(length( c(eq_log_dup, fish_dup, fykes_dup, angling_dup, cast_dup, rt_dup, gps_dup))>0){
     dup_report <- paste0("duplicates were detected between the newly appended flagged dataset and the final database. Please either remove or fix the duplicates.\n
     The following rows in the flagged dataset are duplicates of rows in the final dataset: \n",
                          "\nequipment_log row id: ", paste0(c(eq_log_dup-nrow(ori_database$equipment_log)), collapse = ", "),
@@ -355,7 +355,7 @@ append_to_database <- function(folder_path){
                          "\n\nangling row id: ", paste0(c(angling_dup-nrow(ori_database$angling)), collapse = ", "),
                          "\n\ncast row id: ", paste0(c(cast_dup-nrow(ori_database$cast_netting)), collapse = ", "),
                          "\n\nrange_test row id: ", paste0(c(rt_dup-nrow(ori_database$range_test)), collapse = ", "),
-                         "\n\ngps row id: ", paste0(c(gps_dup-nrow(ori_database$gps_records)), collapse = ", "))
+                         "\n\ngps row id: ", paste0(c(gps_dup-nrow(ori_database$gps_records)), collapse = ", "), "/n/n")
 
     stop(cat(dup_report))
   }
@@ -371,8 +371,6 @@ append_to_database <- function(folder_path){
   #exporting updated version
   purrr::map2(.x = appended_database, .y = ori_db_filenames, .f = function(.x, .y){
     arrow::write_parquet(x = .x, sink = file.path(.y))})
-
-
 }
 
 #' Appends the checked data entry files to the relevant csv databases
@@ -393,7 +391,8 @@ visualize_data_check <- function(flagged_folder_path = NULL, database = NULL){
   if(!is.null(flagged_folder_path)){
     #import data
     file_names <- list.files(path = flagged_folder_path, pattern = ".csv$", full.names = TRUE)
-    sheet_names <- gsub(".csv", "", gsub(substring(file_names, 1, 46), "", file_names))
+    file_names_short <- basename(file_names)
+    sheet_names <- gsub(".csv", "", substring(file_names_short, 14, 100))
 
     database <- list()
     database <- purrr::map(.x = file_names, .f = ~tibble::as_tibble(read.csv(.x, colClasses = "character")))
