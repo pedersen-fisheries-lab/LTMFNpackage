@@ -6,60 +6,24 @@
 #' @param folder_path the path of the folder in which the data entry xlsx sheets are stored. Folder must only contain the correct format of data entry sheets
 #' @param return_summary whether to output a summary of data checking to the console
 #' @param recheck whether the data is to be rechecked (TRUE) or checked for the first time (FALSE)
-#' @param prefix if rechecking, the prefix of the csv files to be checked. in the format "YYYYMMDDHHMM_"
 #' @returns if visualize = TRUE, this function returns a list of visuals for the data checker to go through
 #' @export check_dataentry
-check_dataentry <- function(folder_path, return_summary = TRUE, recheck = FALSE, prefix , visualize = TRUE){
+check_dataentry <- function(folder_path, return_summary = TRUE, recheck = FALSE , visualize = TRUE){
 
-  #Checking that data entry is occurring in the right spot
-  #checking device
-  if (Sys.info()[6] != "PedersenLab" |
-      Sys.info()[4] != "DESKTOP-H8SPKU6"){
-    message("Data checking should be performed in the database directory of the Lab Surface Pro computer.
-            This device does not seem to be the lab surface pro (NodeName: DESKTOP-H8SPKU6), or it is not signed into the PedersenLab account.
-            If you wish to proceed, enter \"Y\" into the console. If not, enter \"N\" into the console")
-
-    user_decision <- readline(prompt = "Would you like to proceed? (enter Y or N): ")
-
-    if(user_decision == "N"){
-      stop("Data checking stopped")
-    } else if (user_decision == "Y") {
-      message("Data checking is proceeding")
-    } else {
-      stop("User entry is not valid, Data checking halted")
-    }
-  }
-  #checking file directory
-  if (getwd() != "C:/Users/PedersenLab/Documents/ltmftn_project/ltmftn_database"){
-    message(paste0("Your working directory for data checking should be set to \"ltmftn_project/ltmftn_database/internal_database\" on the lab surface pro.
-            You can do this with the following line of code: setwd(\"~/ltmftn_project/ltmftn_database/internal_database\").
-            The current directory is", getwd(),  ". Please choose one of the following options by entering a number into the console (1, 2, 3):"))
-
-    user_decision <- readline(prompt = "1: change the working directory to \"~/ltmftn_project/ltmftn_database/internal_database\" \n2: stop data checking\n3: proceed with the current working directory")
-
-    if(user_decision == "1"){
-      setwd("~/ltmftn_project/ltmftn_database/internal_database")
-      message(paste0("Working directory set to: ", getwd()))
-    } else if (user_decision == "2") {
-      stop("Data checking stopped")
-    } else if( user_decision == "3") {
-      message("Data checking is proceeding")
-    } else {
-      stop("User entry is not valid, Data checking halted")
-    }
-  }
+  #checking that data checking is done in the right place
+  check_folderlocation()
 
   if(substring(folder_path, nchar(folder_path), nchar(folder_path))!="/"){
     stop("Please include the final / of the folder path")
   }
 
-  flagged_folder_path <- paste0(folder_path, "flagged/")
-  raw_folder_path <- paste0(folder_path,  "raw/")
+  flagged_folder_path <- paste0(folder_path, "flagged")
+  raw_folder_path <- paste0(folder_path,  "raw")
 
   #getting all file paths within the folder
   if (recheck){
     file_names <- list.files(path = flagged_folder_path, pattern = ".csv$", full.names = TRUE)
-    file_names_short <- list.files(path = flagged_folder_path, pattern = ".csv$", full.names = FALSE)
+    file_names_short <-basename(file_names)
 
     sheet_names <- gsub(".csv", "", gsub(substring(file_names_short, 1, 13), "", file_names_short))
 
@@ -68,11 +32,17 @@ check_dataentry <- function(folder_path, return_summary = TRUE, recheck = FALSE,
     names(database) <- sheet_names
 
   } else{
-    file_names <- list.files(raw_folder_path, pattern=".xlsx")
+    file_names <- list.files(raw_folder_path, pattern=".xlsx$", full.names = TRUE)
+    filenames_short <- basename(file_names)
 
     #IMPORT AND MERGE ALL DATA ENTRY FILES
-    database_list <- lapply(file_names, FUN = function(x) import_database_xl(paste0(raw_folder_path, x)))
-    names(database_list) <- file_names
+    database_list <- lapply(file_names, FUN = function(x) import_database_xl(x))
+    names(database_list) <- filenames_short
+
+    #moving the raw files to an archive folder
+    for(file in file_names){
+      file.rename(from = file, to = file.path(raw_folder_path, "archive", basename(file)))
+    }
 
     #check that data entry information is present
     missing_entry_data <- rep(FALSE, times = length(database_list))
@@ -233,48 +203,15 @@ import_database_xl <- function(path){
 #' @returns a report of the check status for the entry
 #' @export append_to_database
 append_to_database <- function(folder_path){
-  if (Sys.info()[6] != "PedersenLab" |
-      Sys.info()[4] != "DESKTOP-H8SPKU6"){
-    message("Data checking should be performed in the database directory of the Lab Surface Pro computer.
-            This device does not seem to be the lab surface pro (NodeName: DESKTOP-H8SPKU6), or it is not signed into the PedersenLab account.
-            If you wish to proceed, enter \"Y\" into the console. If not, enter \"N\" into the console")
-
-    user_decision <- readline(prompt = "Would you like to proceed? (enter Y or N): ")
-
-    if(user_decision == "N"){
-      stop("Data checking stopped")
-    } else if (user_decision == "Y") {
-      message("Data checking is proceeding")
-    } else {
-      stop("User entry is not valid, Data checking halted")
-    }
-  }
-  #checking file directory
-  if (getwd() != "C:/Users/PedersenLab/Documents/ltmftn_project/ltmftn_database"){
-    message(paste0("Your working directory for data checking should be set to \"ltmftn_project/ltmftn_database/internal_database\" on the lab surface pro.
-            You can do this with the following line of code: setwd(\"~/ltmftn_project/ltmftn_database/internal_database\").
-            The current directory is", getwd(),  ". Please choose one of the following options by entering a number into the console (1, 2, 3):"))
-
-    user_decision <- readline(prompt = "1: change the working directory to \"~/ltmftn_project/ltmftn_database/internal_database\" \n2: stop data checking\n3: proceed with the current working directory")
-
-    if(user_decision == "1"){
-      setwd("~/ltmftn_project/ltmftn_database/internal_database")
-      message(paste0("Working directory set to: ", getwd()))
-    } else if (user_decision == "2") {
-      stop("Data checking stopped")
-    } else if( user_decision == "3") {
-      message("Data checking is proceeding")
-    } else {
-      stop("User entry is not valid, Data checking halted")
-    }
-  }
+  #checking that data entry is done in the right place
+  check_folderlocation()
 
   if(substring(folder_path, nchar(folder_path), nchar(folder_path))!="/"){
     stop("Please include the final / of the folder path")
   }
 
-  flagged_folder_path <- paste0(folder_path, "flagged/")
-  clean_folder_path <- paste0(folder_path,  "clean/")
+  flagged_folder_path <- paste0(folder_path, "flagged")
+  clean_folder_path <- paste0(folder_path,  "clean")
 
   #import QC'd csv files
   file_names <- list.files(path = flagged_folder_path, pattern = ".csv$", full.names = TRUE)
@@ -355,17 +292,20 @@ append_to_database <- function(folder_path){
                          "\n\nangling row id: ", paste0(c(angling_dup-nrow(ori_database$angling)), collapse = ", "),
                          "\n\ncast row id: ", paste0(c(cast_dup-nrow(ori_database$cast_netting)), collapse = ", "),
                          "\n\nrange_test row id: ", paste0(c(rt_dup-nrow(ori_database$range_test)), collapse = ", "),
-                         "\n\ngps row id: ", paste0(c(gps_dup-nrow(ori_database$gps_records)), collapse = ", "), "/n/n")
+                         "\n\ngps row id: ", paste0(c(gps_dup-nrow(ori_database$gps_records)), collapse = ", "), "\n\n")
 
     stop(cat(dup_report))
   }
 
   #moving curring db to archive folder
-  archive_path <- paste0(clean_folder_path, "archive/", Sys.Date())
-  dir.create(path = archive_path)
-
   for(file in ori_db_filenames){
-    file.rename(from = file, to = file.path(archive_path, basename(file)))
+    file.rename(from = file, to = file.path(paste0(clean_folder_path, "/archive"),
+                                            paste0(Sys.Date(), "_",basename(file))))
+  }
+
+  #moving flagged files to archive folder
+  for(file in file_names){
+    file.rename(from = file, to = file.path(paste0(flagged_folder_path, "/archive"),basename(file)))
   }
 
   #exporting updated version
@@ -776,6 +716,51 @@ depth_out_of_range: valid for a given site
 
 crew_invalid: the crew is not entered correctly. Make sure it is written as 2-3 letter initials unique to each person, separated by \', \'.")
 }
+
+
+###################. Helper Functions  #############################
+#' Checks that data quality control is done in the right place
+check_folderlocation <- function(){
+  #Checking that data entry is occurring in the right spot
+  #checking device
+  if (Sys.info()[6] != "PedersenLab" |
+      Sys.info()[4] != "DESKTOP-H8SPKU6"){
+    message("Data checking should be performed in the database directory of the Lab Surface Pro computer.
+            This device does not seem to be the lab surface pro (NodeName: DESKTOP-H8SPKU6), or it is not signed into the PedersenLab account.
+            If you wish to proceed, enter \"Y\" into the console. If not, enter \"N\" into the console")
+
+    user_decision <- readline(prompt = "Would you like to proceed? (enter Y or N): ")
+
+    if(user_decision == "N"){
+      stop("Data checking stopped")
+    } else if (user_decision == "Y") {
+      message("Data checking is proceeding")
+    } else {
+      stop("User entry is not valid, Data checking halted")
+    }
+  }
+  #checking file directory
+  if (getwd() != "C:/Users/PedersenLab/Documents/ltmftn_project/ltmftn_database"){
+    message(paste0("Your working directory for data checking should be set to \"ltmftn_project/ltmftn_database/internal_database\" on the lab surface pro.
+            You can do this with the following line of code: setwd(\"~/ltmftn_project/ltmftn_database/internal_database\").
+            The current directory is", getwd(),  ". Please choose one of the following options by entering a number into the console (1, 2, 3):"))
+
+    user_decision <- readline(prompt = "1: change the working directory to \"~/ltmftn_project/ltmftn_database/internal_database\" \n2: stop data checking\n3: proceed with the current working directory")
+
+    if(user_decision == "1"){
+      setwd("~/ltmftn_project/ltmftn_database/internal_database")
+      message(paste0("Working directory set to: ", getwd()))
+    } else if (user_decision == "2") {
+      stop("Data checking stopped")
+    } else if( user_decision == "3") {
+      message("Data checking is proceeding")
+    } else {
+      stop("User entry is not valid, Data checking halted")
+    }
+  }
+  return()
+}
+
 #
 #
 # #

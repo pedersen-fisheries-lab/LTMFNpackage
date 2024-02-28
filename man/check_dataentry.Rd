@@ -8,7 +8,6 @@ check_dataentry(
   folder_path,
   return_summary = TRUE,
   recheck = FALSE,
-  prefix,
   visualize = TRUE
 )
 }
@@ -18,8 +17,6 @@ check_dataentry(
 \item{return_summary}{whether to output a summary of data checking to the console}
 
 \item{recheck}{whether the data is to be rechecked (TRUE) or checked for the first time (FALSE)}
-
-\item{prefix}{if rechecking, the prefix of the csv files to be checked. in the format "YYYYMMDDHHMM_"}
 }
 \value{
 if visualize = TRUE, this function returns a list of visuals for the data checker to go through
