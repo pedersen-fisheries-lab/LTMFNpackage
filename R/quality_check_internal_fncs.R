@@ -204,6 +204,8 @@
     equip_type <- "all"
   } else if (is.null(equip_type)){
     equip_type <- "all"
+  } else if (is.na(equip_type)){
+    equip_type <- "all"
   }
 
   if(equip_type == "all"){
