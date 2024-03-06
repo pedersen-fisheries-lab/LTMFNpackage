@@ -117,7 +117,9 @@ check_dataentry <- function(folder_path, return_summary = TRUE, recheck = FALSE 
 
   #checking the data
   database_flagged <- database
-  database_flagged$equipment_log <- check_equipment_log(database$equipment_log)
+  if(nrow(database_flagged$equipment_log!=0)){
+    database_flagged$equipment_log <- check_equipment_log(database$equipment_log)
+  }
   database_flagged$fish <- check_fish(database$fish)
   database_flagged$fykes <- check_fyke(database$fykes)
   database_flagged$angling <- check_angling(database$angling)
