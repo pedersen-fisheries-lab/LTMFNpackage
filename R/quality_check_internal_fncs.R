@@ -200,7 +200,9 @@
   serial_invalid <- FALSE
   serial_equip_nomatch <- FALSE
 
-  if(missing(equip_type)){
+  if(length(equip_type) == 0){
+    equip_type <- "all"
+  } else if(missing(equip_type)){
     equip_type <- "all"
   } else if (is.null(equip_type)){
     equip_type <- "all"
