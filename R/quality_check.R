@@ -460,7 +460,7 @@ check_equipment_log <- function(equipment_log){
     data_flag <- paste0(data_flag, .check_date(row["date"]))
     data_flag <- paste0(data_flag, .check_site(row["site"]))
     data_flag <- paste0(data_flag, .check_equip(row["equip_type"]))
-    data_flag <- paste0(data_flag, .check_serial(row["serial_id"], equip_type = row["equip_type"]))
+   # data_flag <- paste0(data_flag, .check_serial(row["serial_id"], equip_type = row["equip_type"]))
     data_flag <- paste0(data_flag, .check_stnid(row["station_id"], row["deploy_type"]))
     data_flag <- paste0(data_flag, .check_action(row["action"]))
     data_flag <- paste0(data_flag, .check_deploy(deploy = row["deploy_type"], site = row["site"]))
