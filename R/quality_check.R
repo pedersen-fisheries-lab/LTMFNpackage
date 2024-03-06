@@ -185,7 +185,10 @@ check_dataentry <- function(folder_path, return_summary = TRUE, recheck = FALSE 
   output_message <- paste0("\nDATA CHECKING COMPLETE. For further data checking, please use the visualize_data_check function\n\n", output_message)
 
   print(cat(output_message))
-  return(visuals)
+
+  if (visualize){
+    return(visuals)
+  }
 }
 
 ######################### Importing and Exporting data  ################################
