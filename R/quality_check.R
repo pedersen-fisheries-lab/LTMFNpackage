@@ -342,11 +342,15 @@ visualize_data_check <- function(flagged_folder_path = NULL, database = NULL){
     database <- purrr::map(.x = file_names, .f = ~tibble::as_tibble(read.csv(.x, colClasses = "character")))
     names(database) <- sheet_names
   }
+
   #check dates
+  database$range_test$date <- database$range_test$start_date
+
   dates <- dplyr::bind_rows(lapply(seq_along(database), function(i) {
+
     tibble::tibble(
-      date = database[[i]]$date,
-      data_type = names(database)[i]
+      date =  database[[i]]$date,
+      data_type =  names(database)[i]
     )
   }))
   dates_plot <- ggplot2::ggplot(data=dates, ggplot2::aes(x=lubridate::ymd(date), y=data_type))+
