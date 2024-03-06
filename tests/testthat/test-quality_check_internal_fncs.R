@@ -286,34 +286,70 @@ test_that(".check_sex_works", {
 })
 
 test_that(".check_tag_model_works", {
-  expect_equal(object = LTMFNpackage:::.check_tag_model(), "")
+  expect_equal(object = LTMFNpackage:::.check_tag_model("V7"), "")
+  expect_equal(object = LTMFNpackage:::.check_tag_model(""), "")
+
+  expect_equal(object = LTMFNpackage:::.check_tag_model("", mandatory = TRUE), "tag_model_not_entered/")
+  expect_equal(object = LTMFNpackage:::.check_tag_model("V17"), "tag_model_invalid/")
 })
 
 test_that(".check_clove_conc_works", {
-  expect_equal(object = LTMFNpackage:::.check_clove_conc(), "")
+  expect_equal(object = LTMFNpackage:::.check_clove_conc(2, mandatory = TRUE), "")
+  expect_equal(object = LTMFNpackage:::.check_clove_conc("", mandatory = FALSE), "")
+
+  expect_equal(object = LTMFNpackage:::.check_clove_conc(6), "clove_conc_out_of_range/")
+  expect_equal(object = LTMFNpackage:::.check_clove_conc(-6), "clove_conc_out_of_range/")
+  expect_equal(object = LTMFNpackage:::.check_clove_conc("none"), "clove_conc_invalid/")
 })
 
 test_that(".check_mort_works", {
-  expect_equal(object = LTMFNpackage:::.check_mort(), "")
+  expect_equal(object = LTMFNpackage:::.check_mort(""), "")
+  expect_equal(object = LTMFNpackage:::.check_mort("yes"), "")
+  expect_equal(object = LTMFNpackage:::.check_mort("no"), "mort_invalid/")
 })
 
 test_that(".check_recap_works", {
-  expect_equal(object = LTMFNpackage:::.check_recap(), "")
-})
+  expect_equal(object = LTMFNpackage:::.check_recap(""), "")
+  expect_equal(object = LTMFNpackage:::.check_recap("yes"), "")
+  expect_equal(object = LTMFNpackage:::.check_recap("no"), "recap_invalid/")})
 
 test_that(".check_single_initials_works", {
-  expect_equal(object = LTMFNpackage:::.check_single_initials(), "")
+  expect_equal(object = LTMFNpackage:::.check_single_initials("AA"), "")
+  expect_equal(object = LTMFNpackage:::.check_single_initials("AAA"), "")
+
+  expect_equal(object = LTMFNpackage:::.check_single_initials("A!"), "intials_invalid/")
+  expect_equal(object = LTMFNpackage:::.check_single_initials("A"), "intials_invalid/")
+  expect_equal(object = LTMFNpackage:::.check_single_initials("AAAA"), "intials_invalid/")
+
+  expect_equal(object = LTMFNpackage:::.check_single_initials(""), "initials_not_entered/")
 })
 
 test_that(".check_net_action_works", {
-  expect_equal(object = LTMFNpackage:::.check_net_action(), "")
+  expect_equal(object = LTMFNpackage:::.check_net_action("set"), "")
+  expect_equal(object = LTMFNpackage:::.check_net_action("", mandatory = FALSE), "")
+
+  expect_equal(object = LTMFNpackage:::.check_net_action("", mandatory = TRUE), "net_action_not_entered/")
+  expect_equal(object = LTMFNpackage:::.check_net_action("nothing"), "net_action_invalid/")
 })
 
 test_that(".check_fish_caught_works", {
-  expect_equal(object = LTMFNpackage:::.check_fish_caught(), "")
+  expect_equal(object = LTMFNpackage:::.check_fish_caught("yes"), "")
+  expect_equal(object = LTMFNpackage:::.check_fish_caught("no"), "")
+  expect_equal(object = LTMFNpackage:::.check_fish_caught("", mandatory = FALSE), "")
+
+  expect_equal(object = LTMFNpackage:::.check_fish_caught("", mandatory = TRUE), "fish_caught_not_entered/")
+  expect_equal(object = LTMFNpackage:::.check_fish_caught("asdf"), "fish_caught_invalid/")
 })
 
 test_that(".check_nrods_or_nets_works", {
-  expect_equal(object = LTMFNpackage:::.check_nrods_or_nets(), "")
+  expect_equal(object = LTMFNpackage:::.check_nrods_or_nets(2), "")
+  expect_equal(object = LTMFNpackage:::.check_nrods_or_nets("", mandatory = FALSE), "")
+
+  expect_equal(object = LTMFNpackage:::.check_nrods_or_nets("", mandatory = TRUE, fishtype = "nrods"), "nrods_not_entered/")
+  expect_equal(object = LTMFNpackage:::.check_nrods_or_nets("", mandatory = TRUE, fishtype = "nnets"), "nnets_not_entered/")
+  expect_equal(object = LTMFNpackage:::.check_nrods_or_nets("asdfa", mandatory = TRUE, fishtype = "nrods"), "nrods_invalid/")
+  expect_equal(object = LTMFNpackage:::.check_nrods_or_nets("asdfa", mandatory = TRUE, fishtype = "nnets"), "nnets_invalid/")
+  expect_equal(object = LTMFNpackage:::.check_nrods_or_nets(1000, mandatory = TRUE, fishtype = "nrods"), "nrods_out_of_range/")
+  expect_equal(object = LTMFNpackage:::.check_nrods_or_nets(1000, mandatory = TRUE, fishtype = "nnets"), "nnets_out_of_range/")
 })
 
