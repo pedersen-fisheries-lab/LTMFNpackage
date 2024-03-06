@@ -200,6 +200,10 @@
   serial_invalid <- FALSE
   serial_equip_nomatch <- FALSE
 
+  if(is.null(equip_type)){
+    equip_type <- "all"
+  }
+
   if(equip_type == "all"){
     serial_ref <- c(reference_serial_id$serial_id, "all")
   } else {

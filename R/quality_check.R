@@ -117,9 +117,7 @@ check_dataentry <- function(folder_path, return_summary = TRUE, recheck = FALSE 
 
   #checking the data
   database_flagged <- database
-  if(nrow(database_flagged$equipment_log!=0)){
-    database_flagged$equipment_log <- check_equipment_log(database$equipment_log)
-  }
+  database_flagged$equipment_log <- check_equipment_log(database$equipment_log)
   database_flagged$fish <- check_fish(database$fish)
   database_flagged$fykes <- check_fyke(database$fykes)
   database_flagged$angling <- check_angling(database$angling)
@@ -142,10 +140,7 @@ check_dataentry <- function(folder_path, return_summary = TRUE, recheck = FALSE 
   #visualize data
   if(visualize){
     visuals <- visualize_data_check(database = database_flagged)
-  }else {
-    visuals <- NULL
   }
-
   output_message <- paste0("Data entry successfully complete. Flagged data have been output in the directory ", getwd(), flagged_folder_path, ". Make all data entry corrections in these flagged files\n\n")
 
   #creating summary report
@@ -454,6 +449,7 @@ visualize_data_check <- function(flagged_folder_path = NULL, database = NULL){
 check_equipment_log <- function(equipment_log){
   eq <- equipment_log
   eq$data_flag <- ""
+
 
   eq$data_flag <- eq$data_flag <- apply(eq, 1, function(row) {
     data_flag <- ""
