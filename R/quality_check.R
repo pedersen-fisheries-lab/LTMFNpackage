@@ -142,6 +142,8 @@ check_dataentry <- function(folder_path, return_summary = TRUE, recheck = FALSE 
   #visualize data
   if(visualize){
     visuals <- visualize_data_check(database = database_flagged)
+  }else {
+    visuals <- NULL
   }
 
   output_message <- paste0("Data entry successfully complete. Flagged data have been output in the directory ", getwd(), flagged_folder_path, ". Make all data entry corrections in these flagged files\n\n")
