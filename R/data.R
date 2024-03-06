@@ -135,3 +135,10 @@
 #'
 #' @source {tag_models <- c("V6", "V7", "V8", "V9", "V13", "V16")       usethis::use_data(tag_models)}
 "tag_models"
+
+#' Approved rt type codes
+#'
+#' @format a vector with entries "boat", "fixed_st", "fixed_lt"
+#'
+#' @source {rt_types <- c("boat", "fixed_st", "fixed_lt")           usethis::use_data(rt_types)}
+"rt_types"

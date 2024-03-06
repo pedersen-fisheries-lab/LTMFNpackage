@@ -5,7 +5,9 @@
 #'
 #' @param folder_path the path of the folder in which the data entry xlsx sheets are stored. Folder must only contain the correct format of data entry sheets
 #' @param return_summary whether to output a summary of data checking to the console
-#' @param recheck whether the data is to be rechecked (TRUE) or checked for the first time (FALSE)
+#' @param recheck TRUE/FALSE whether the data is to be rechecked (TRUE) or checked for the first time (FALSE)
+#' @param visualize whether you want to return visual items for further data checking
+#'
 #' @returns if visualize = TRUE, this function returns a list of visuals for the data checker to go through
 #' @export check_dataentry
 check_dataentry <- function(folder_path, return_summary = TRUE, recheck = FALSE , visualize = TRUE){
@@ -315,7 +317,7 @@ append_to_database <- function(folder_path){
 
 #' Appends the checked data entry files to the relevant csv databases
 #'
-#' @param folder_path the filepath to the flagged folder where files to be examined are kept
+#' @param flagged_folder_path the filepath to the flagged folder where files to be examined are kept
 #' @param database the database object to be checked. Alternate to folder_path, to be used only within check_dataentry() function
 #' @returns visual inspection aids to help identify error that are not captured by quality control
 #' @export visualize_data_check
@@ -624,15 +626,16 @@ check_range_test <- function(range_test){
 
   range_test$data_flag <- range_test$data_flag <- apply(range_test, 1, function(row) {
     data_flag <- ""
-    data_flag <- paste0(data_flag, .check_date(row["date"]))
     data_flag <- paste0(data_flag, .check_site(row["site"]))
-    #check rt type
-    #check distance
+    data_flag <- paste0(data_flag, .check_rt(row["rt_type"]))
+    data_flag <- paste0(data_flag, .check_distance(row["dist_m"]))
     #chekc object_id???
     #check wpt
     data_flag <- paste0(data_flag, .check_lat(row["lat"]))
     data_flag <- paste0(data_flag, .check_lon(row["lon"]))
+    data_flag <- paste0(data_flag, .check_date(row["start_date"]))
     data_flag <- paste0(data_flag, .check_time(row["start_time"]))
+    data_flag <- paste0(data_flag, .check_date(row["end_date"]))
     data_flag <- paste0(data_flag, .check_time(row["end_time"]))
     data_flag <- paste0(data_flag, .check_depth(row["depth_m"]))
     #check susbtrate

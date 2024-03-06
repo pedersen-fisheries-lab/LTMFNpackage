@@ -2,6 +2,8 @@
 #'
 #' @param log_data An object of the "equipment_log" class containing sequential records of equipment
 #' @param ID a character vector of IDs to load
+#' @param eventtype dunno
+#' @param type dunno
 #' @returns An equipment_log tibble containing the final recorded event for each ID, or NA if the ID did not occur in the data
 #' @export find_equipment_event
 find_equipment_event <- function(log_data, ID, eventtype = NULL,  type = c("first","last","all")){

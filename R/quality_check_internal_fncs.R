@@ -743,6 +743,7 @@
 
 #' Checks to make sure the weight is within sensible bounds
 #'
+#' @param dna_id a single dna sample ID number
 #' @param scale_id a single scale sample ID number
 #' @param mandatory TRUE/FALSE designates if the data to be checked is mandatory
 #'
@@ -880,7 +881,7 @@
   mort_invalid <- FALSE
 
   if (!(is.na(mort) | mort=="")) {
-    if(!(mort != "yes")){
+    if((mort != "yes")){
       mort_invalid <- TRUE
     }
   }
@@ -897,7 +898,7 @@
   recap_invalid <- FALSE
 
   if (!(is.na(recap) | recap=="")) {
-    if(!(recap != "yes")){
+    if((recap != "yes")){
       recap_invalid <- TRUE
     }
   }
@@ -1002,8 +1003,9 @@
 
 #' Checks to make sure the length is within sensible bounds
 #'
-#' @param length a single numeric length value
+#' @param nrods a single numeric length value
 #' @param mandatory TRUE/FALSE designates if the data to be checked is mandatory
+#' @param fishtype if cast-netting or angling were used
 #'
 #' @returns a report of the check status for the entry
 .check_nrods_or_nets <- function(nrods, mandatory = TRUE, fishtype = c("nrods", "nnets")){
@@ -1014,25 +1016,87 @@
   out_of_range <- FALSE
 
   if(is.na(nrods) | nrods==""){
-    nrods_not_entered <- TRUE
+    not_entered <- TRUE
   } else if(is.na(as.numeric(nrods))){
-    nrods_invalid <- TRUE
+    invalid <- TRUE
   } else if (as.numeric(nrods) < I(1) | as.numeric(nrods) > 20){
-    nrods_out_of_range <- TRUE
+    out_of_range <- TRUE
   }
 
   report <- ""
   if(mandatory){
     if (not_entered){
-      report <- paste0(report, fish_type, "_not_entered/")
+      report <- paste0(report, fishtype, "_not_entered/")
     }
   }
   if(invalid){
-    report <- paste0(report, fish_type, "_invalid/")
+    report <- paste0(report, fishtype, "_invalid/")
   }
   if (out_of_range){
-    report <- paste0(report, fish_type, "_out_of_range/")
+    report <- paste0(report, fishtype, "_out_of_range/")
   }
 
   return(report)
 }
+
+#' Checks to make sure the deployment type is entered and is one of the permitted entries
+#'
+#' @param rt a single rt type code
+#' @param mandatory TRUE/FALSE designates if the data to be checked is mandatory
+#'
+#' @returns a report of the check status for the entry
+.check_rt <- function(rt, mandatory = TRUE){
+  rt_not_entered <- FALSE
+  rt_invalid <- FALSE
+
+  if (is.na(rt) | rt=="") {
+    rt_not_entered <- TRUE
+  }
+
+  if(! (is.na(rt) | rt=="")) {
+    if(! (rt %in% rt_types)){
+      rt_invalid <- TRUE
+    }
+  }
+
+  #return report
+  report <- ""
+  if (mandatory){
+    if (rt_not_entered)
+      report <- paste0(report, "rt_not_entered/")
+  }
+  if(rt_invalid)
+    report <- paste0(report, "rt_invalid/")
+
+  return(report)
+}
+
+#' Checks to make sure the depth is within sensible bounds
+#'
+#' @param dist a single numeric distance value
+#' @param mandatory TRUE/FALSE designates if the data to be checked is mandatory
+#'
+#' @returns a report of the check status for the entry
+.check_distance <- function(dist, mandatory = FALSE){
+  dist_invalid <- FALSE
+  dist_out_of_range <- FALSE
+
+  if(! is.na(dist)){
+    if(is.na(as.numeric(dist))){
+      dist_invalid <- TRUE
+    } else if (as.numeric(dist) < 0 | as.numeric(dist) > 3000){
+      dist_out_of_range <- TRUE
+    }
+  }
+
+  report <- ""
+
+  if(dist_invalid){
+    report <- paste0(report, "dist_invalid/")
+  }
+  if (dist_out_of_range){
+    report <- paste0(report, "dist_out_of_range/")
+  }
+  return(report)
+}
+

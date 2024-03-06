@@ -7,9 +7,11 @@
 .check_nrods_or_nets(nrods, mandatory = TRUE, fishtype = c("nrods", "nnets"))
 }
 \arguments{
+\item{nrods}{a single numeric length value}
+
 \item{mandatory}{TRUE/FALSE designates if the data to be checked is mandatory}
 
-\item{length}{a single numeric length value}
+\item{fishtype}{if cast-netting or angling were used}
 }
 \value{
 a report of the check status for the entry

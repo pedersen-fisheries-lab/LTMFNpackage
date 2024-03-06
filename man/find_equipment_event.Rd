@@ -15,6 +15,10 @@ find_equipment_event(
 \item{log_data}{An object of the "equipment_log" class containing sequential records of equipment}
 
 \item{ID}{a character vector of IDs to load}
+
+\item{eventtype}{dunno}
+
+\item{type}{dunno}
 }
 \value{
 An equipment_log tibble containing the final recorded event for each ID, or NA if the ID did not occur in the data

@@ -7,9 +7,9 @@
 visualize_data_check(flagged_folder_path = NULL, database = NULL)
 }
 \arguments{
-\item{database}{the database object to be checked. Alternate to folder_path, to be used only within check_dataentry() function}
+\item{flagged_folder_path}{the filepath to the flagged folder where files to be examined are kept}
 
-\item{folder_path}{the filepath to the flagged folder where files to be examined are kept}
+\item{database}{the database object to be checked. Alternate to folder_path, to be used only within check_dataentry() function}
 }
 \value{
 visual inspection aids to help identify error that are not captured by quality control

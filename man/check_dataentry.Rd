@@ -16,7 +16,9 @@ check_dataentry(
 
 \item{return_summary}{whether to output a summary of data checking to the console}
 
-\item{recheck}{whether the data is to be rechecked (TRUE) or checked for the first time (FALSE)}
+\item{recheck}{TRUE/FALSE whether the data is to be rechecked (TRUE) or checked for the first time (FALSE)}
+
+\item{visualize}{whether you want to return visual items for further data checking}
 }
 \value{
 if visualize = TRUE, this function returns a list of visuals for the data checker to go through

@@ -7,6 +7,8 @@
 .check_dna_scale_id(dna_id, scale_id, mandatory = FALSE)
 }
 \arguments{
+\item{dna_id}{a single dna sample ID number}
+
 \item{scale_id}{a single scale sample ID number}
 
 \item{mandatory}{TRUE/FALSE designates if the data to be checked is mandatory}
