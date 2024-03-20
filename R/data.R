@@ -142,3 +142,17 @@
 #'
 #' @source {rt_types <- c("boat", "fixed_st", "fixed_lt")           usethis::use_data(rt_types)}
 "rt_types"
+
+#' OTN metadata tagging sheets headers
+#'
+#' @format a vector with character data for all headers in the OTN tagging metadata sheet
+#'
+#' @source {otn_tagging_metadata_headers <- c("ANIMAL_ID" , "TAG_TYPE", "TAG_MANUFACTURER", "TAG_MODEL", "TAG_SERIAL_NUMBER", "TAG_ID_CODE", "TAG_CODE_SPACE", "TAG_IMPLANT_TYPE", "TAG_IMPLANT_METHOD", "TAG_ACTIVATION_DATE", "EST_TAG_LIFE", "TAGGER", "TAG_OWNER_PI", "TAG_OWNER_ORGANIZATION", "COMMON_NAME_E", "SCIENTIFIC_NAME", "CAPTURE_LOCATION", "CAPTURE_LATITUDE", "CAPTURE_LONGITUDE", "WILD_OR_HATCHERY", "STOCK", "LENGTH", "WEIGHT", "LENGTH_TYPE", "LENGTH2", "LENGTH2_TYPE", "LIFE_STAGE", "AGE", "AGE_UNITS", "SEX", "DNA_SAMPLE_TAKEN", "TREATMENT_TYPE", "RELEASE_GROUP", "RELEASE_LOCATION", "RELEASE_LATITUDE", "RELEASE_LONGITUDE", "UTC_RELEASE_DATE_TIME", "HARVEST_DATE", "CAPTURE_DEPTH", "TEMPERATURE_CHANGE", "HOLDING_TEMPERATURE", "PREOP_HOLD_PERIOD", "POSTOP_HOLD_PERIOD", "SURGERY_LOCATION", "DATE_OF_SURGERY", "SURGERY_LATITUDE", "SURGERY_LONGITUDE", "SEDATIVE", "SEDATIVE_CONCENTRATION", "ANAESTHETIC", "BUFFER", "ANAESTHETIC_CONCENTRATION", "BUFFER_CONCENTRATION_IN_ANAESTHETIC", "ANAESTHETIC_CONCENTRATION_IN_RECIRCULATION" , "BUFFER_CONCENTRATION_IN_RECIRCULATION", "DISSOLVED_OXYGEN", "COMMENTS" )           usethis::use_data(rt_types)}
+"otn_tagging_metadata_headers"
+
+#' OTN metadata deployment sheets headers
+#'
+#' @format a vector with character data for all headers in the OTN deployment metadata sheet
+#'
+#' @source {otn_instrument_deployment_headers <- c("OTN_ARRAY",	"STATION_NO",	"DEPLOY_DATE_TIME",	"DEPLOY_LAT",	"DEPLOY_LONG",	"BOTTOM_DEPTH",	"RISER_LENGTH",	"INSTRUMENT_DEPTH",	"INS_MODEL_NO",	"INS_SERIAL_NO"	,"CODE_SET"	,"TRANSMITTER",	"TRANSMIT_MODEL",	"AR_MODEL_NO",	"AR_SERIAL_NO",	"DEPLOYED_BY" ,	"RECOVERED" ,	"RECOVER_DATE_TIME" , "RECOVER_LAT" ,	"RECOVER_LONG" ,"DATA_DOWNLOADED" ,	"DOWNLOAD_DATE_TIME" ,"FILENAME",	"COMMENTS")					usethis::use_data(otn_instrument_deployment_headers)  }
+"otn_instrument_deployment_headers"
