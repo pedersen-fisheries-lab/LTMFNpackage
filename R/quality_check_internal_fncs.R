@@ -767,13 +767,13 @@
 
   if (is.na(dna_id) | dna_id == ""){
     dna_id_not_entered <- TRUE
-  } else if(nchar(dna_id)>7){
+  } else if(nchar(dna_id)>8){
     dna_id_invalid <- TRUE
   }
 
   if (is.na(scale_id) | scale_id == ""){
     scale_id_not_entered <- TRUE
-  } else if(nchar(scale_id)>6){
+  } else if(nchar(scale_id)>8){
     scale_id_invalid <- TRUE
   }
 

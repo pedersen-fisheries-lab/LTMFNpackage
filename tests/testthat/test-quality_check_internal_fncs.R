@@ -262,7 +262,7 @@ test_that(".check_weight_works", {
 })
 
 test_that("check_dna_scale_id_works", {
-  expect_equal(object = LTMFNpackage:::.check_dna_scale_id(dna_id.check_ser = "A0110", scale_id = "A0110", mandatory = FALSE), "")
+  expect_equal(object = LTMFNpackage:::.check_dna_scale_id(dna_id = "A0110", scale_id = "A0110", mandatory = FALSE), "")
   expect_equal(object = LTMFNpackage:::.check_dna_scale_id(dna_id = "A0110", scale_id = "A0110", mandatory = TRUE), "")
   expect_equal(object = LTMFNpackage:::.check_dna_scale_id(dna_id = "", scale_id = "", mandatory = FALSE), "")
   expect_equal(object = LTMFNpackage:::.check_dna_scale_id(dna_id = NA, scale_id = NA, mandatory = FALSE), "")

@@ -5,7 +5,7 @@
 \alias{sites}
 \title{Approved work sites code}
 \format{
-A vector of the entries "JEA", "JGR", "JMA", "JRU", "JOY", "LEA", "LWE", "base", "lab", and "other"
+A vector of the entries "JEA", "JGR", "JMA", "JRU", "JOY", "LEA", "LWE", "LSW, "base", "lab", and "other"
 }
 \source{
 {manually created from the excel data validation}
