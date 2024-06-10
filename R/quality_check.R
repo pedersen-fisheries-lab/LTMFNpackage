@@ -243,7 +243,8 @@ append_to_database <- function(folder_path){
   })
 
   eq_log_dup <- which(base::duplicated(database_flagged$equipment_log[,c("date", "serial_id", "action", "time")]))
-  fish_dup <- which(base::duplicated(filter(database_flagged$fish[,c("date", "site", "capture_method", "capture_time", "species", "length_mm", "dna_id", "tag_serial", "recap" )], species !="bycatch")))
+  fish_dup <- which(base::duplicated(database_flagged$fish[,c("date", "site", "capture_method", "capture_time", "species", "length_mm", "dna_id", "tag_serial", "recap" )]))
+  fish_dup <- fish_dup[database_flagged$fish[fish_dup,]$species != "bycatch"] #filtering out bycatch
   fykes_dup <- which(base::duplicated(database_flagged$fykes[,c("date", "site", "fyke_id", "out_time", "in_time")]))
   angling_dup <- which(base::duplicated(database_flagged$angling[,c("date", "site", "start_time", "start_lat", "start_lon", "end_time")]))
   cast_dup <- which(base::duplicated(database_flagged$cast_netting[,c("date", "site", "start_time", "start_lat", "start_lon", "end_time")]))
