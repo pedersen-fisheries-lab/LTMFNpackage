@@ -41,11 +41,6 @@ check_dataentry <- function(folder_path, return_summary = TRUE, recheck = FALSE 
     database_list <- lapply(file_names, FUN = function(x) import_database_xl(x))
     names(database_list) <- filenames_short
 
-    #moving the raw files to an archive folder
-    for(file in file_names){
-      file.rename(from = file, to = file.path(raw_folder_path, "archive", basename(file)))
-    }
-
     #check that data entry information is present
     missing_entry_data <- rep(FALSE, times = length(database_list))
     entry_date_invalid <- rep(FALSE, times = length(database_list))
@@ -127,6 +122,11 @@ check_dataentry <- function(folder_path, return_summary = TRUE, recheck = FALSE 
 
   if(!recheck){
     database_flagged$entry_metadata <- NULL
+  }
+
+  #moving the raw files to an archive folder
+  for(file in file_names){
+    file.rename(from = file, to = file.path(raw_folder_path, "archive", basename(file)))
   }
 
   # export database_flagged
@@ -487,14 +487,12 @@ check_fish <- function(fish){
 
   fish$data_flag <- fish$data_flag <- apply(fish, 1, function(row) {
 
-    if(!(is.na(row["tag_serial"])| row["tag_serial"] == "") & !is.na(row["recap"])){
-      if(is.na(row["recap"] != "yes")){
-        tagging <- TRUE
-      } else {
-        stop("recap is not an appropriate value")
-      }
-    } else {
+    if(row["species"] == "bycatch" |
+       (is.na(row["tag_serial"])| row["tag_serial"] == "") |
+       row["recap"] == "yes"){
       tagging <- FALSE
+    } else{
+      tagging <- TRUE
     }
 
     data_flag <- ""
