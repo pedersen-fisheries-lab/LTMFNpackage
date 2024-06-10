@@ -64,7 +64,7 @@
 #' @source {Downloaded from https://liveconcordia-my.sharepoint.com/personal/eric_pedersen_concordia_ca/Documents/Research/projects%20-%20spatial%20community%20ecology/Quebec%20fish%20telemetry%20network/data/EquipmentSummary.xlsx:
 #'
 #' reference_serial_id <- read_excel("data-raw/EquipmentSummary.xlsx", sheet = "reference_serial_id")
-#' usethis::use_data(reference_serial_id, overwrite == TRUE)}
+#' usethis::use_data(reference_serial_id, overwrite = TRUE)}
 "reference_serial_id"
 
 #' Approved work sites code

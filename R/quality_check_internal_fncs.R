@@ -908,7 +908,7 @@
   recap_invalid <- FALSE
 
   if (!(is.na(recap) | recap=="")) {
-    if((recap != "yes")){
+    if(!(recap %in%  c("yes", "no"))){
       recap_invalid <- TRUE
     }
   }
