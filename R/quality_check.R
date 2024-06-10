@@ -247,7 +247,7 @@ append_to_database <- function(folder_path){
   fykes_dup <- which(base::duplicated(database_flagged$fykes[,c("date", "site", "fyke_id", "out_time", "in_time")]))
   angling_dup <- which(base::duplicated(database_flagged$angling[,c("date", "site", "start_time", "start_lat", "start_lon", "end_time")]))
   cast_dup <- which(base::duplicated(database_flagged$cast_netting[,c("date", "site", "start_time", "start_lat", "start_lon", "end_time")]))
-  rt_dup <- which(base::duplicated(database_flagged$range_test[,c("date", "site", "rt_type", "object_id", "start_time")]))
+  rt_dup <- which(base::duplicated(database_flagged$range_test[,c("start_date", "site", "rt_type", "object_id", "start_time")]))
   gps_dup <- which(base::duplicated(database_flagged$gps_records[,c("obj_name")]))
 
   if(length( c(eq_log_dup, fish_dup, fykes_dup, angling_dup, cast_dup, rt_dup, gps_dup))>0){
