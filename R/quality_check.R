@@ -561,7 +561,7 @@ check_fyke <- function(fyke){
     data_flag <- paste0(data_flag, .check_lon(row["lon"], mandatory = need_gps))
     data_flag <- paste0(data_flag, .check_time(row["out_time"], mandatory = row["net_action"] %in% c("checked", "retrieved")))
     data_flag <- paste0(data_flag, .check_time(row["in_time"], mandatory = row["net_action"] %in% c("checked", "set")))
-    data_flag <- paste0(data_flag, .check_fish_caught(row["fish_caught"]))
+    data_flag <- paste0(data_flag, .check_fish_caught(row["fish_caught"], mandatory = row["net_action"] %in% c("checked", "retrieved")))
     data_flag <- paste0(data_flag, .check_crew(row["crew"]))
 
     return(data_flag)
