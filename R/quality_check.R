@@ -240,15 +240,33 @@ append_to_database <- function(folder_path){
   flagged_folder_path <- paste0(folder_path, "flagged")
   clean_folder_path <- paste0(folder_path,  "clean")
 
+  # import original database
+  orig_db_filenames <- list.files(path = clean_folder_path, pattern = "parquet$", full.names = TRUE)
+  orig_names <- orig_db_filenames |>
+    gsub(pattern = ".parquet", replacement = "") |>
+    gsub(pattern = paste0(clean_folder_path, "/"), replacement = "")
+
+  orig_database <- purrr::map(.x = orig_db_filenames, .f =~ arrow::read_parquet(file = .x))
+  names(orig_database) <- orig_names
+
+  # create database frame
+  database_frame <- purrr::map(.x = orig_database, .f = function(.x) {.x[0,]})
+
   #import QC'd csv files
   file_names <- list.files(path = flagged_folder_path, pattern = ".csv$", full.names = TRUE)
   file_names_short <- basename(file_names)
 
   sheet_names <- gsub(".csv", "", gsub(substring(file_names_short, 1, 16), "", file_names_short))
 
-  database <- list()
-  database <- purrr::map(.x = file_names, .f = ~tibble::as_tibble(read.csv(.x, colClasses = "character")))
-  names(database) <- sheet_names
+  database_flag_sheets <- list()
+  database_flag_sheets <- purrr::map(.x = file_names, .f = ~tibble::as_tibble(read.csv(.x, colClasses = "character")))
+  names(database_flag_sheets) <- sheet_names
+
+  # putting the new flagged data into the empty database frame
+  database <- database_frame
+  for(x in names(database_flag_sheets)){
+    database[[x]] <- rbind(database[[x]], database_flag_sheets[[x]])
+  }
 
   #final check
   database_flagged <- database
@@ -288,16 +306,8 @@ append_to_database <- function(folder_path){
     stop(cat(dup_report))
   }
 
-  #importing the clean database
-  ori_db_filenames <- list.files(path = clean_folder_path, pattern = "parquet$", full.names = TRUE)
-  ori_db_filenames_short <- list.files(path = clean_folder_path, pattern = "parquet$", full.names = FALSE)
-  ori_db_names <- gsub(pattern = ".parquet", replacement = "", x = ori_db_filenames_short)
-
-  ori_database <- purrr::map(.x = ori_db_filenames, .f =~ arrow::read_parquet(file = .x))
-  names(ori_database) <- ori_db_names
-
   #merging the two
-  appended_database <- purrr::map2(.x = ori_database, .y = database_flagged, .f = function(.x, .y){
+  appended_database <- purrr::map2(.x = orig_database, .y = database_flagged, .f = function(.x, .y){
     appended <- rbind(.x, .y)
     appended
   })
@@ -305,7 +315,7 @@ append_to_database <- function(folder_path){
   #checking for dups in appended db
   eq_log_dup <- which(base::duplicated(appended_database$equipment_log[,c("date", "serial_id", "action", "time")]))
   fish_dup <- which(base::duplicated(appended_database$fish[,c("date", "site", "capture_method", "capture_time", "species", "length_mm", "dna_id", "tag_serial", "recap" )]))
-  fish_dup <- fish_dup[appended_database$fish[fish_dup,]$species != "bycatch" & appended_database$fish[fish_dup,]$species != "other"] #filtering out bycatch
+  fish_dup <- fish_dup[base::duplicated(appended_database$fish[fish_dup,]$species != "bycatch" & appended_database$fish[fish_dup,]$species != "other")] #filtering out bycatch
   fykes_dup <- which(base::duplicated(appended_database$fykes[,c("date", "site", "fyke_id", "out_time", "in_time")]))
   angling_dup <- which(base::duplicated(appended_database$angling[,c("date", "site", "start_time", "start_lat", "start_lon", "end_time")]))
   cast_dup <- which(base::duplicated(appended_database$cast_netting[,c("date", "site", "start_time", "start_lat", "start_lon", "end_time")]))
@@ -315,19 +325,19 @@ append_to_database <- function(folder_path){
   if(length( c(eq_log_dup, fish_dup, fykes_dup, angling_dup, cast_dup, rt_dup, gps_dup))>0){
     dup_report <- paste0("duplicates were detected between the newly appended flagged dataset and the final database. Please either remove or fix the duplicates.\n
     The following rows in the flagged dataset are duplicates of rows in the final dataset: \n",
-                         "\nequipment_log row id: ", paste0(c(eq_log_dup-nrow(ori_database$equipment_log)), collapse = ", "),
-                         "\n\nfish row id: ", paste0(c(fish_dup-nrow(ori_database$fish)), collapse = ", "),
-                         "\n\nfykes row id: ", paste0(c(fykes_dup-nrow(ori_database$fykes)), collapse = ", "),
-                         "\n\nangling row id: ", paste0(c(angling_dup-nrow(ori_database$angling)), collapse = ", "),
-                         "\n\ncast row id: ", paste0(c(cast_dup-nrow(ori_database$cast_netting)), collapse = ", "),
-                         "\n\nrange_test row id: ", paste0(c(rt_dup-nrow(ori_database$range_test)), collapse = ", "),
-                         "\n\ngps row id: ", paste0(c(gps_dup-nrow(ori_database$gps_records)), collapse = ", "), "\n\n")
+                         "\nequipment_log row id: ", paste0(c(eq_log_dup-nrow(orig_database$equipment_log)), collapse = ", "),
+                         "\n\nfish row id: ", paste0(c(fish_dup-nrow(orig_database$fish)), collapse = ", "),
+                         "\n\nfykes row id: ", paste0(c(fykes_dup-nrow(orig_database$fykes)), collapse = ", "),
+                         "\n\nangling row id: ", paste0(c(angling_dup-nrow(orig_database$angling)), collapse = ", "),
+                         "\n\ncast row id: ", paste0(c(cast_dup-nrow(orig_database$cast_netting)), collapse = ", "),
+                         "\n\nrange_test row id: ", paste0(c(rt_dup-nrow(orig_database$range_test)), collapse = ", "),
+                         "\n\ngps row id: ", paste0(c(gps_dup-nrow(orig_database$gps_records)), collapse = ", "), "\n\n")
 
     stop(cat(dup_report))
   }
 
   #moving curring db to archive folder
-  for(file in ori_db_filenames){
+  for(file in orig_db_filenames){
     file.rename(from = file, to = file.path(paste0(clean_folder_path, "/archive"),
                                             paste0(Sys.Date(), "_",basename(file))))
   }
@@ -338,7 +348,7 @@ append_to_database <- function(folder_path){
   }
 
   #exporting updated version
-  purrr::map2(.x = appended_database, .y = ori_db_filenames, .f = function(.x, .y){
+  purrr::map2(.x = appended_database, .y = orig_db_filenames, .f = function(.x, .y){
     arrow::write_parquet(x = .x, sink = file.path(.y))})
 }
 
