@@ -25,7 +25,7 @@ check_dataentry <- function(folder_path, return_summary = TRUE, recheck = FALSE 
 
   #getting all file paths within the folder
   if (recheck){
-    #creating database frame - importing database
+    #creating database frame - importing existing database
     orig_db_filenames <- list.files(path = clean_folder_path, pattern = "parquet$", full.names = TRUE)
     orig_db_filenames_short <- list.files(path = clean_folder_path, pattern = "parquet$", full.names = FALSE)
     orig_db_names <- gsub(pattern = ".parquet", replacement = "", x = orig_db_filenames_short)
