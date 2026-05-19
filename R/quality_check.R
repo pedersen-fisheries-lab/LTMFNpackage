@@ -21,17 +21,36 @@ check_dataentry <- function(folder_path, return_summary = TRUE, recheck = FALSE 
 
   flagged_folder_path <- paste0(folder_path, "flagged")
   raw_folder_path <- paste0(folder_path,  "raw")
+  clean_folder_path <- paste0(folder_path,  "clean")
 
   #getting all file paths within the folder
   if (recheck){
+    #creating database frame - importing database
+    orig_db_filenames <- list.files(path = clean_folder_path, pattern = "parquet$", full.names = TRUE)
+    orig_db_filenames_short <- list.files(path = clean_folder_path, pattern = "parquet$", full.names = FALSE)
+    orig_db_names <- gsub(pattern = ".parquet", replacement = "", x = orig_db_filenames_short)
+
+    orig_database <- purrr::map(.x = orig_db_filenames, .f =~ arrow::read_parquet(file = .x))
+    names(orig_database) <- orig_db_names
+
+    #making empty database frame
+    database_frame <- purrr::map(.x = orig_database, .f = function(.x) {.x[0,]})
+
+    # reading in flagged sheets
     file_names <- list.files(path = flagged_folder_path, pattern = ".csv$", full.names = TRUE)
     file_names_short <-basename(file_names)
 
     sheet_names <- gsub(".csv", "", gsub(substring(file_names_short, 1, 16), "", file_names_short))
 
-    database <- list()
-    database <- purrr::map(.x = file_names, .f = ~tibble::as_tibble(read.csv(.x, colClasses = "character")))
-    names(database) <- sheet_names
+    database_flag_sheets <- list()
+    database_flag_sheets <- purrr::map(.x = file_names, .f = ~tibble::as_tibble(read.csv(.x, colClasses = "character")))
+    names(database_flag_sheets) <- sheet_names
+
+    # putting the new flagged data into the empty database frame
+    database <- database_frame
+    for(x in names(database_flag_sheets)){
+      database[[x]] <- rbind(database[[x]], database_flag_sheets[[x]])
+    }
 
   } else{
     file_names <- list.files(raw_folder_path, pattern=".xlsx$", full.names = TRUE)
@@ -124,16 +143,20 @@ check_dataentry <- function(folder_path, return_summary = TRUE, recheck = FALSE 
     database_flagged$entry_metadata <- NULL
   }
 
-  #moving the raw files to an archive folder
+  # moving the raw files to an archive folder
   for(file in file_names){
     file.rename(from = file, to = file.path(raw_folder_path, "archive", basename(file)))
   }
 
+  # filtering database
+  database_dat_only <- Filter(function(x) nrow(x) > 0, database_flagged )
+  names_dat_only <- names(database_dat_only) #getting names of files with data
+
   # export database_flagged
   if(recheck) {
-    purrr::map2(.x = database_flagged, .y = file_names, .f = ~write.csv(.x, file.path(.y), row.names = FALSE))
+    purrr::map2(.x = database_dat_only, .y = file_names, .f = ~write.csv(.x, file.path(.y), row.names = FALSE))
   }else {
-    purrr::map2(.x = database_flagged, .y = names(database_flagged), .f = ~write.csv(.x, file.path(flagged_folder_path, paste0(format(Sys.time(), "%Y-%m-%d-%H%M"),"_", .y, ".csv")), row.names = FALSE))
+    purrr::map2(.x = database_dat_only, .y = names(database_dat_only), .f = ~write.csv(.x, file.path(flagged_folder_path, paste0(format(Sys.time(), "%Y-%m-%d-%H%M"),"_", .y, ".csv")), row.names = FALSE))
     #openxlsx::write.xlsx(x = database_flagged, file = paste0(flagged_folder_path, Sys.Date(), "_database_flagged.xlsx"))
   }
 
