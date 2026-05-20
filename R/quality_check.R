@@ -371,7 +371,7 @@ visualize_data_check <- function(flagged_folder_path = NULL, database = NULL){
     #import data
     file_names <- list.files(path = flagged_folder_path, pattern = ".csv$", full.names = TRUE)
     file_names_short <- basename(file_names)
-    sheet_names <- gsub(".csv", "", substring(file_names_short, 14, 100))
+    sheet_names <- gsub(".csv", "", substring(file_names_short, 17, 100))
 
     database <- list()
     database <- purrr::map(.x = file_names, .f = ~tibble::as_tibble(read.csv(.x, colClasses = "character")))
