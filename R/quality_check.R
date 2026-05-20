@@ -40,7 +40,7 @@ check_dataentry <- function(folder_path, return_summary = TRUE, recheck = FALSE 
     file_names <- list.files(path = flagged_folder_path, pattern = ".csv$", full.names = TRUE)
     file_names_short <-basename(file_names)
 
-    sheet_names <- gsub(".csv", "", gsub(substring(file_names_short, 1, 16), "", file_names_short))
+    sheet_names <- gsub(".csv", "", gsub(substring(file_names_short, 1, 16)[[1]], "", file_names_short))
 
     database_flag_sheets <- list()
     database_flag_sheets <- purrr::map(.x = file_names, .f = ~tibble::as_tibble(read.csv(.x, colClasses = "character")))
