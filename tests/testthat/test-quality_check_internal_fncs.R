@@ -133,6 +133,18 @@ test_that(".check_deploy_works", {
   expect_equal(object = LTMFNpackage:::.check_deploy(490668, site = "lab"), "deploy_invalid/")
 })
 
+test_that(".check_wpt_works", {
+  expect_equal(object = LTMFNpackage:::.check_wpt(wpt = "w325"), "")
+  expect_equal(object = LTMFNpackage:::.check_wpt(wpt = "w325, w928"), "")
+  expect_equal(object = LTMFNpackage:::.check_wpt(wpt = "D537"), "")
+  expect_equal(object = LTMFNpackage:::.check_wpt(wpt = "D537,w456"), "")
+
+  expect_equal(object = LTMFNpackage:::.check_wpt(wpt = "345"), "invalid_wpt/")
+  expect_equal(object = LTMFNpackage:::.check_wpt(wpt = "ww345"), "invalid_wpt/")
+  expect_equal(object = LTMFNpackage:::.check_wpt(wpt = "w345/w354"), "invalid_wpt/")
+
+})
+
 test_that(".check_lat_works", {
   expect_equal(object = LTMFNpackage:::.check_lat(lat = 45.9), "")
   expect_equal(object = LTMFNpackage:::.check_lat(lat = "45.9"), "")
