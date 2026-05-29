@@ -207,7 +207,7 @@ test_that(".check_fykeid_works", {
 
 test_that(".check_species_works", {
   expect_equal(object = LTMFNpackage:::.check_species(species = "COAR"), "")
-  expect_equal(object = LTMFNpackage:::.check_species(species = "bycatch"), "")
+  expect_equal(object = LTMFNpackage:::.check_species(species = "other"), "")
 
   expect_equal(object = LTMFNpackage:::.check_species(species = "brook trout"), "species_invalid/")
   expect_equal(object = LTMFNpackage:::.check_species(species = "bktr"), "species_invalid/")
@@ -310,7 +310,8 @@ test_that(".check_mort_works", {
 test_that(".check_recap_works", {
   expect_equal(object = LTMFNpackage:::.check_recap(""), "")
   expect_equal(object = LTMFNpackage:::.check_recap("yes"), "")
-  expect_equal(object = LTMFNpackage:::.check_recap("no"), "recap_invalid/")})
+  expect_equal(object = LTMFNpackage:::.check_recap("no"), "")
+  expect_equal(object = LTMFNpackage:::.check_recap("nos"), "recap_invalid/")})
 
 test_that(".check_single_initials_works", {
   expect_equal(object = LTMFNpackage:::.check_single_initials("AA"), "")
