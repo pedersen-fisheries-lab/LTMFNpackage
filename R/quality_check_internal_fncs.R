@@ -373,7 +373,8 @@
   # possible gps special characters ! " # $ % & ' ( ) * + , - . / : ; < > = ? @ [ ] \ ^ _ ` { } | ~
   report <- ""
 
-  all_wpts <- unlist(strsplit(wpt,","))
+  all_wpts <- stringr::str_remove_all(unlist(strsplit(wpt,",")), " ")
+
   if (any(stringr::str_count(all_wpts,pattern = "\\D") != 1)) {
     invalid_wpt <- TRUE
   }

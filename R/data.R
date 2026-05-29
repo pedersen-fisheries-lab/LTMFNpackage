@@ -67,7 +67,7 @@
 #' usethis::use_data(reference_serial_id, overwrite = TRUE)}
 "reference_serial_id"
 
-#' Approved work sites code
+#' @title Approved work sites code
 #'
 #' @format A vector of the entries "JEA", "JWE", "JWA", JWH", "JGR", "JMA", "JRU", "JOY", "LEA", "LWE", "LSW", "base", "lab", and "other"
 #'
@@ -83,7 +83,7 @@
 
 #' Approved deployment type codes
 #'
-#' @format A vector of the entries "GA", "GR", "RT", "other"
+#' @format A vector of the entries "GA", "GR", "RT", "other", "SE"
 #'
 #' @source {manually created from the excel data validation}
 "deploy_types"

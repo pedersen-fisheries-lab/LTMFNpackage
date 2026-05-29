@@ -209,6 +209,133 @@ check_dataentry <- function(folder_path, return_summary = TRUE, recheck = FALSE 
   }
 }
 
+######################### Importing and merging GPS waypoints ###################
+#' Merges GPS waypoints from a GPX file with waypoints input in the Equipment Log
+#'
+#' this function imports a GPX file stored in the "raw" folder and imports latitude and longitude from matching waypoints into the flagged version of the equipment_log, while adding flags to the flagged equipment_log.csv for potential issues with GPS points.
+#' This function should be run after check_dataentry once all non-GPS flags that can be addressed have been addressed.
+#'
+#' @param folder_path the path of the raw folder in which the data entry xlsx sheets and .GPX file for merging are stored.
+#' @param remerge TRUE/FALSE whether the waypoint data is to be re-merged (TRUE) after addressing waypoint flags or merged for the first time (FALSE)
+#' @export merge_waypoints
+
+merge_waypoints <- function(folder_path, remerge = F){
+
+  raw_folder_path <- paste0(folder_path, "raw")
+  flagged_folder_path <- paste0(folder_path, "flagged")
+
+  gps_file_name <- list.files(path = raw_folder_path, pattern = ".gpx$", full.names = TRUE)
+  if (length(gps_file_name) > 1){
+    stop("Multiple GPX files in raw folder. Merge only one GPX file at a time.")
+  }
+  if (length(gps_file_name) == 0){
+    stop("No GPX file found. Copy GPX file with waypoints into raw folder.")
+  }
+
+  # importing GPS points
+  gps_waypoints <- sf::st_read(gps_file_name,
+                               layer = "waypoints")
+  gps_waypoints$lat <- sf::st_coordinates(x = gps_waypoints)[,2]
+  gps_waypoints$lon <- sf::st_coordinates(x = gps_waypoints)[,1]
+
+  gps_waypoints <- gps_waypoints |>
+    dplyr::select(c(name, lat, lon)) |>
+    dplyr::rename(waypoint = name) |>
+    sf::st_drop_geometry()
+
+  # reading in flagged equipment log
+  equip_log_name <- list.files(path = flagged_folder_path, pattern = "equipment_log.csv$", full.names = TRUE)
+  equip_log <- read.csv(equip_log_name, colClasses = "character")
+  if (length(equip_log_name) == 0){
+    stop("No equipment_log.csv file in flagged folder. To merge GPS points with newly-input equipment log, first run check_dataentry() on a raw .xlsx data template file with equipment log data.")
+  }
+
+  if (remerge == T) {
+    equip_log <- equip_log |>
+      dplyr::mutate(data_flag = stringr::str_remove_all(data_flag, "mult_waypoints_\\S+/"),
+                    data_flag = stringr::str_remove_all(data_flag, "waypoint_not_found_in_GPX/"),
+                    lat = ifelse(stringr::str_detect(comment, "lat/lon_from_"), NA, lat),
+                    lon = ifelse(stringr::str_detect(comment, "lat/lon_from_"), NA, lon),
+                    lat = ifelse(stringr::str_detect(comment, "lat/lon_averaged_from_"), NA, lat),
+                    lon = ifelse(stringr::str_detect(comment, "lat/lon_averaged_from_"), NA, lon),
+                    comment = stringr::str_remove_all(comment, ",?\\s?lat/lon_from_\\S+"),
+                    comment = stringr::str_remove_all(comment, ",?\\s?lat/lon_averaged_from_\\S+"))
+  }
+
+  equip_log <- equip_log |>
+    dplyr::mutate(wpt = ifelse(wpt == "", NA, wpt))
+  equip_log_wpts <- equip_log |>
+    dplyr::mutate(waypoint = stringr::str_remove_all(wpt, pattern = " "),
+                  waypoint = tolower(waypoint), # GPS waypoints are lower case
+                  waypoint = stringr::str_split(waypoint, pattern = ","))|>
+    tidyr::unnest(waypoint) |>
+    dplyr::left_join(gps_waypoints, by = "waypoint") |>
+    dplyr::group_by(date, site, equip_type, serial_id, station_id, action, time)
+
+  # checking that the waypoints that will be averaged are very close to eachother
+  # avoids averaging waypoints that were mis-written (ex 627 and 268) and were not actually taken
+  # at the same time
+
+  equip_log_mult_wpts <- equip_log_wpts |>
+    dplyr::filter(!is.na(waypoint) & lon.y != "") |>
+    sf::st_as_sf(coords = c("lon.y","lat.y"), crs= 4326, remove = FALSE) |>
+    dplyr::filter(dplyr::n_distinct(waypoint) > 1) |>
+    dplyr::summarise(max_dist = suppressWarnings(max(sf::st_distance(geometry))),
+                     wpts = paste(waypoint, collapse = ",")) |>
+    units::drop_units() |>
+    sf::st_drop_geometry()
+
+  equip_log_wpts_mean <- equip_log_wpts |>
+    dplyr::left_join(equip_log_mult_wpts, by = c("date", "site", "equip_type", "serial_id", "station_id", "action", "time")) |>
+    dplyr::summarize(lat = mean(lat.y),
+                     lon = mean(lon.y),
+                     mult_dist = mean(max_dist),
+                     n_wpts = dplyr::n(),
+                     wpts = paste(waypoint, collapse = ",")) |>
+    dplyr::mutate(n_wpts = ifelse(wpts == "NA", 0, n_wpts))
+
+  equip_log_processed <- equip_log |>
+    dplyr::left_join(equip_log_wpts_mean, by = c("date", "site", "equip_type", "serial_id", "station_id", "action", "time")) |>
+    dplyr::mutate(lat.x = as.double(lat.x),
+                  lon.x = as.double(lon.x),
+                  lat = ifelse(is.na(lat.x) == T, lat.y, lat.x),
+                  lon = ifelse(is.na(lon.x) == T, lon.y, lon.x))|> # putting in the lat/lon from the waypoint only when none entered
+    dplyr::mutate(comment = ifelse(is.na(lat.x) == T & is.na(lat) == F & n_wpts > 1 & !is.na(comment) , paste0(comment, ", lat/lon_averaged_from_", wpts),
+                                   ifelse(is.na(lat.x) == T & is.na(lat) == F & n_wpts > 1 & is.na(comment), paste0("lat/lon_averaged_from_", wpts),
+                                          ifelse(is.na(lat.x) == T & is.na(lat) == F & n_wpts == 1 & !is.na(comment), paste0(comment, ", lat/lon_from_", wpts),
+                                                 ifelse(is.na(lat.x) == T & is.na(lat) == F & n_wpts == 1 & is.na(comment), paste0("lat/lon_from_", wpts), comment)))),
+                  data_flag = ifelse(is.na(mult_dist), data_flag,
+                                     ifelse(mult_dist >= 2, paste0(data_flag, "mult_waypoints_", round(mult_dist,2), "m_apart/"), data_flag))
+    )|>
+    dplyr::mutate(data_flag = ifelse(!is.na(wpt) & is.na(lat), paste0(data_flag, "waypoint_not_found_in_GPX/"), data_flag)) |>
+    dplyr::relocate(lat, .after = wpt) |>
+    dplyr::relocate(lon, .after = lat) |>
+    dplyr::select(-c(lat.x, lon.x, lat.y, lon.y, wpts))
+
+  far_wpts <- equip_log_mult_wpts[equip_log_mult_wpts$max_dist > 2,]
+
+  missing_wpts <- equip_log_processed |>
+    dplyr::filter(!is.na(wpt) & is.na(lat))
+
+  equip_log_final <- equip_log_processed |>
+    dplyr::select(-c(mult_dist, n_wpts))
+
+  write.csv(equip_log_final, file = equip_log_name, row.names = F)
+
+  output_message <- paste0("GPS merge successfully complete. Flagged data with merged GPS points have been output in the directory ", getwd(), "/", flagged_folder_path, ". Make all data entry corrections in these flagged files. \n\n")
+
+  print(cat(output_message))
+
+  if(nrow(far_wpts) > 0) {
+    print(far_wpts)
+    warning("The above entries have multiple waypoints >2m apart. \nSee flagged .csv and check waypoints are correct.")}
+
+  if(nrow(missing_wpts) > 0) {
+    warning(paste0("These waypoints were not found in GPX file:", missing_wpts$wpt, ".\n See flagged .csv."))}
+
+}
+
+
 ######################### Importing and Exporting data  ################################
 #' Imports the excel database into R, as a list of multiple tibbles
 #'
@@ -239,6 +366,7 @@ append_to_database <- function(folder_path){
 
   flagged_folder_path <- paste0(folder_path, "flagged")
   clean_folder_path <- paste0(folder_path,  "clean")
+  raw_folder_path <- paste0(folder_path,  "raw")
 
   # import original database
   orig_db_filenames <- list.files(path = clean_folder_path, pattern = "parquet$", full.names = TRUE)
@@ -315,7 +443,7 @@ append_to_database <- function(folder_path){
   #checking for dups in appended db
   eq_log_dup <- which(base::duplicated(appended_database$equipment_log[,c("date", "serial_id", "action", "time")]))
   fish_dup <- which(base::duplicated(appended_database$fish[,c("date", "site", "capture_method", "capture_time", "species", "length_mm", "dna_id", "tag_serial", "recap" )]))
-  fish_dup <- fish_dup[base::duplicated(appended_database$fish[fish_dup,]$species != "bycatch" & appended_database$fish[fish_dup,]$species != "other")] #filtering out bycatch
+  fish_dup <- fish_dup[appended_database$fish[fish_dup,]$species != "bycatch" & appended_database$fish[fish_dup,]$species != "other"] #filtering out bycatch
   fykes_dup <- which(base::duplicated(appended_database$fykes[,c("date", "site", "fyke_id", "out_time", "in_time")]))
   angling_dup <- which(base::duplicated(appended_database$angling[,c("date", "site", "start_time", "start_lat", "start_lon", "end_time")]))
   cast_dup <- which(base::duplicated(appended_database$cast_netting[,c("date", "site", "start_time", "start_lat", "start_lon", "end_time")]))
@@ -345,6 +473,13 @@ append_to_database <- function(folder_path){
   #moving flagged files to archive folder
   for(file in file_names){
     file.rename(from = file, to = file.path(paste0(flagged_folder_path, "/archive"),basename(file)))
+  }
+
+  # moving the gpx file to archive (if it exists)
+  gps_file_name <- list.files(path = raw_folder_path, pattern = ".gpx$", full.names = TRUE)
+  for(file in gps_file_name){
+    file.rename(from = file, to = file.path(paste0(raw_folder_path, "/archive"),
+                                          paste0(Sys.Date(), "_",basename(file))))
   }
 
   #exporting updated version
