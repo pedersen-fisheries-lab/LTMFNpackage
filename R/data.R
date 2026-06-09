@@ -71,89 +71,93 @@
 #'
 #' @format A vector of the entries "JEA", "JWE", "JWA", JWH", "JGR", "JMA", "JRU", "JOY", "LEA", "LWE", "LSW", "base", "lab", and "other"
 #'
-#' @source {manually created from the excel data validation, usethis::use_data(sites, overwrite = TRUE)}
+#' @source {Running the "make-validation-datafiles.R" script in `data-raw`}
 "sites"
 
 #' Approved equipment type codes
 #'
-#' @format A vector of the entries "VR2Tx", "VR2W",  "tag",   "RTtag", "VR100", "AMchl", "AMdo",  "AMsal", "GPS"
+#' @format A vector of the entries "VR2Tx", "VR2W",  "tag", "RTtag", "VR100", "AMchl", "AMdo",  "AMsal", "GPS", "other"
 #'
-#' @source {manually created from the excel data validation}
+#' @source {Running the "make-validation-datafiles.R" script in `data-raw`}
 "equip_types"
 
 #' Approved deployment type codes
 #'
-#' @format A vector of the entries "GA", "GR", "RT", "other", "SE"
+#' @format A vector of the entries "GA", "GR", "RT","SE", and  "other"
 #'
-#' @source {manually created from the excel data validation}
+#' @source {Running the "make-validation-datafiles.R" script in `data-raw`}
 "deploy_types"
 
 #' Approved fish capture method codes
 #'
 #' @format A vector of the entries "fyke", "angling", "castNet", "other"
 #'
-#' @source {manually created from the excel data validation}
+#' @source {Running the "make-validation-datafiles.R" script in `data-raw`}
 "capture_methods"
 
-#' Approved fish species codes
+#' Approved fish species codes '
 #'
-#' @format A vector of the entries 'c("COAR",  "COCL", "ESLU",  "MOHU",  "MOSA" , "OSMO", "PEFL", "SAFO", "SANA", "SAVI",  "TITI", "bycatch")
+#' @format A vector of the entries 'c("COAR",  "COCL", "ESLU",
+#"MOHU",  "MOSA" , "OSMO", "PEFL", "SAFO", "SANA", "SAVI",  "TITI", "other")
 #
-#' @source {manually created from the excel data validation}
+#' @source {Running the "make-validation-datafiles.R" script in `data-raw`}
 "species_codes"
 
 #' Approved fish sex and maturity codes
 #'
 #' @format A vector of the entries "MM", "IM", "MF", "IF", "unk"
 #'
-#' @source {manually created from the excel data validation}
+#' @source {Running the "make-validation-datafiles.R" script in `data-raw`}
 "sex_options"
 
 #' Approved equipment action codes
 #'
-#' @format A vector of the entries "On", "Off", "deployed", "retrieved", "moved" , "dataDownload", "checked", "configure", "recharge", "other"
+#' @format A vector of the entries "On", "Off", "deployed", "retrieved", "moved","notLocated", "notRetrieved", "located",
+#'  "dataDownload", "checked", "configure", "recharge",  "anchorMid", "anchorEnd",
+#'  "repairSent", "repairReturn", and
+#'   "other"
 #'
-#' @source {manually created from the excel data validation}
+#' @source {Running the "make-validation-datafiles.R" script in `data-raw`}
 "equipment_actions"
 
 #' Approved fyke action codes
 #'
 #' @format A vector of the entries "set", "retrieved", "checked", "moved"
 #'
-#' @source {manually created from the excel data validation}
+#' @source {Running the "make-validation-datafiles.R" script in `data-raw`}
 "fyke_actions"
 
 #' Approved fish condition codes
 #'
 #' @format a vector with entries "vigorous", "normal", "weak"
 #'
-#' @source {condition_codes <- c("vigorous", "normal", "weak")     usethis::use_data(condition_codes)}
+#' @source {Running the "make-validation-datafiles.R" script in `data-raw`}
 "condition_codes"
 
 #' Approved tag model codes
 #'
 #' @format a vector with entries "V6", "V7", "V8", "V9", "V13", "V16"
 #'
-#' @source {tag_models <- c("V6", "V7", "V8", "V9", "V13", "V16")       usethis::use_data(tag_models)}
+#' @source {Running the "make-validation-datafiles.R" script in `data-raw`}
 "tag_models"
 
 #' Approved rt type codes
 #'
 #' @format a vector with entries "boat", "fixed_st", "fixed_lt"
 #'
-#' @source {rt_types <- c("boat", "fixed_st", "fixed_lt")           usethis::use_data(rt_types)}
+#' @source {Running the "make-validation-datafiles.R" script in `data-raw`}
 "rt_types"
 
 #' OTN metadata tagging sheets headers
 #'
 #' @format a vector with character data for all headers in the OTN tagging metadata sheet
 #'
-#' @source {otn_tagging_metadata_headers <- c("ANIMAL_ID" , "TAG_TYPE", "TAG_MANUFACTURER", "TAG_MODEL", "TAG_SERIAL_NUMBER", "TAG_ID_CODE", "TAG_CODE_SPACE", "TAG_IMPLANT_TYPE", "TAG_IMPLANT_METHOD", "TAG_ACTIVATION_DATE", "EST_TAG_LIFE", "TAGGER", "TAG_OWNER_PI", "TAG_OWNER_ORGANIZATION", "COMMON_NAME_E", "SCIENTIFIC_NAME", "CAPTURE_LOCATION", "CAPTURE_LATITUDE", "CAPTURE_LONGITUDE", "WILD_OR_HATCHERY", "STOCK", "LENGTH", "WEIGHT", "LENGTH_TYPE", "LENGTH2", "LENGTH2_TYPE", "LIFE_STAGE", "AGE", "AGE_UNITS", "SEX", "DNA_SAMPLE_TAKEN", "TREATMENT_TYPE", "RELEASE_GROUP", "RELEASE_LOCATION", "RELEASE_LATITUDE", "RELEASE_LONGITUDE", "UTC_RELEASE_DATE_TIME", "HARVEST_DATE", "CAPTURE_DEPTH", "TEMPERATURE_CHANGE", "HOLDING_TEMPERATURE", "PREOP_HOLD_PERIOD", "POSTOP_HOLD_PERIOD", "SURGERY_LOCATION", "DATE_OF_SURGERY", "SURGERY_LATITUDE", "SURGERY_LONGITUDE", "SEDATIVE", "SEDATIVE_CONCENTRATION", "ANAESTHETIC", "BUFFER", "ANAESTHETIC_CONCENTRATION", "BUFFER_CONCENTRATION_IN_ANAESTHETIC", "ANAESTHETIC_CONCENTRATION_IN_RECIRCULATION" , "BUFFER_CONCENTRATION_IN_RECIRCULATION", "DISSOLVED_OXYGEN", "COMMENTS" )           usethis::use_data(rt_types)}
+#' @source {Running the "make-validation-datafiles.R" script in `data-raw`. Based off Tag Metadata data sheet provided by OTN: https://members.oceantrack.org/data/data-collection.}
 "otn_tagging_metadata_headers"
 
 #' OTN metadata deployment sheets headers
 #'
 #' @format a vector with character data for all headers in the OTN deployment metadata sheet
 #'
-#' @source {otn_instrument_deployment_headers <- c("OTN_ARRAY",	"STATION_NO",	"DEPLOY_DATE_TIME",	"DEPLOY_LAT",	"DEPLOY_LONG",	"BOTTOM_DEPTH",	"RISER_LENGTH",	"INSTRUMENT_DEPTH",	"INS_MODEL_NO",	"INS_SERIAL_NO"	,"CODE_SET"	,"TRANSMITTER",	"TRANSMIT_MODEL",	"AR_MODEL_NO",	"AR_SERIAL_NO",	"DEPLOYED_BY" ,	"RECOVERED" ,	"RECOVER_DATE_TIME" , "RECOVER_LAT" ,	"RECOVER_LONG" ,"DATA_DOWNLOADED" ,	"DOWNLOAD_DATE_TIME" ,"FILENAME",	"COMMENTS")					usethis::use_data(otn_instrument_deployment_headers)  }
+#' @source {Running the "make-validation-datafiles.R" script in `data-raw`. Based off Instrument Deployment Metadata data sheet provided by OTN: https://members.oceantrack.org/data/data-collection.}
 "otn_instrument_deployment_headers"
