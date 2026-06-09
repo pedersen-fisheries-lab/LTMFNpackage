@@ -273,9 +273,9 @@
     } else if (as.numeric(st_id_num) <1 | as.numeric(st_id_num) >99){
       stnid_invalid <- TRUE
       #checking id_let based on unicode order
-    } else if ( !(st_id_let %in% LETTERS)) {
+    } else if ( st_deploy != "SE" & !(st_id_let %in% LETTERS)) {
       stnid_invalid <- TRUE
-    } else if(any(st_dash != "-")){
+    } else if(st_deploy != "SE" & any(st_dash != "-")){
       stnid_invalid <- TRUE
     }
 
@@ -372,6 +372,18 @@
 
   # possible gps special characters ! " # $ % & ' ( ) * + , - . / : ; < > = ? @ [ ] \ ^ _ ` { } | ~
   report <- ""
+
+  all_wpts <- stringr::str_remove_all(unlist(strsplit(wpt,",")), " ")
+
+  if (any(stringr::str_count(all_wpts,pattern = "\\D") != 1)) {
+    invalid_wpt <- TRUE
+  }
+  if (any(! substring(all_wpts,1,1) %in% c("d", "D", "w", "W"))) {
+    invalid_wpt <- TRUE
+  }
+  if (any(stringr::str_count(all_wpts, pattern = "\\d") < 3) | any(stringr::str_count(all_wpts, pattern = "\\d") > 4)) {
+    invalid_wpt <- TRUE
+  }
   if(invalid_wpt){
     report <- paste0(report, "invalid_wpt/")
   }

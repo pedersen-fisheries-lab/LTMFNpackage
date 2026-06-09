@@ -5,7 +5,7 @@
 \alias{deploy_types}
 \title{Approved deployment type codes}
 \format{
-A vector of the entries "GA", "GR", "RT", "other"
+A vector of the entries "GA", "GR", "RT", "other", "SE"
 }
 \source{
 {manually created from the excel data validation}

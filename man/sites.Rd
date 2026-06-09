@@ -5,10 +5,10 @@
 \alias{sites}
 \title{Approved work sites code}
 \format{
-A vector of the entries "JEA", "JGR", "JMA", "JRU", "JOY", "LEA", "LWE", "LSW, "base", "lab", and "other"
+A vector of the entries "JEA", "JWE", "JWA", JWH", "JGR", "JMA", "JRU", "JOY", "LEA", "LWE", "LSW", "base", "lab", and "other"
 }
 \source{
-{manually created from the excel data validation}
+{manually created from the excel data validation, usethis::use_data(sites, overwrite = TRUE)}
 }
 \usage{
 sites

@@ -21,17 +21,36 @@ check_dataentry <- function(folder_path, return_summary = TRUE, recheck = FALSE 
 
   flagged_folder_path <- paste0(folder_path, "flagged")
   raw_folder_path <- paste0(folder_path,  "raw")
+  clean_folder_path <- paste0(folder_path,  "clean")
 
   #getting all file paths within the folder
   if (recheck){
+    #creating database frame - importing existing database
+    orig_db_filenames <- list.files(path = clean_folder_path, pattern = "parquet$", full.names = TRUE)
+    orig_db_filenames_short <- list.files(path = clean_folder_path, pattern = "parquet$", full.names = FALSE)
+    orig_db_names <- gsub(pattern = ".parquet", replacement = "", x = orig_db_filenames_short)
+
+    orig_database <- purrr::map(.x = orig_db_filenames, .f =~ arrow::read_parquet(file = .x))
+    names(orig_database) <- orig_db_names
+
+    #making empty database frame
+    database_frame <- purrr::map(.x = orig_database, .f = function(.x) {.x[0,]})
+
+    # reading in flagged sheets
     file_names <- list.files(path = flagged_folder_path, pattern = ".csv$", full.names = TRUE)
     file_names_short <-basename(file_names)
 
-    sheet_names <- gsub(".csv", "", gsub(substring(file_names_short, 1, 13), "", file_names_short))
+    sheet_names <- gsub(".csv", "", gsub(substring(file_names_short, 1, 16)[[1]], "", file_names_short))
 
-    database <- list()
-    database <- purrr::map(.x = file_names, .f = ~tibble::as_tibble(read.csv(.x, colClasses = "character")))
-    names(database) <- sheet_names
+    database_flag_sheets <- list()
+    database_flag_sheets <- purrr::map(.x = file_names, .f = ~tibble::as_tibble(read.csv(.x, colClasses = "character")))
+    names(database_flag_sheets) <- sheet_names
+
+    # putting the new flagged data into the empty database frame
+    database <- database_frame
+    for(x in names(database_flag_sheets)){
+      database[[x]] <- rbind(database[[x]], database_flag_sheets[[x]])
+    }
 
   } else{
     file_names <- list.files(raw_folder_path, pattern=".xlsx$", full.names = TRUE)
@@ -124,16 +143,20 @@ check_dataentry <- function(folder_path, return_summary = TRUE, recheck = FALSE 
     database_flagged$entry_metadata <- NULL
   }
 
-  #moving the raw files to an archive folder
+  # moving the raw files to an archive folder
   for(file in file_names){
     file.rename(from = file, to = file.path(raw_folder_path, "archive", basename(file)))
   }
 
+  # filtering database
+  database_dat_only <- Filter(function(x) nrow(x) > 0, database_flagged )
+  names_dat_only <- names(database_dat_only) #getting names of files with data
+
   # export database_flagged
   if(recheck) {
-    purrr::map2(.x = database_flagged, .y = file_names, .f = ~write.csv(.x, file.path(.y), row.names = FALSE))
+    purrr::map2(.x = database_dat_only, .y = file_names, .f = ~write.csv(.x, file.path(.y), row.names = FALSE))
   }else {
-    purrr::map2(.x = database_flagged, .y = names(database_flagged), .f = ~write.csv(.x, file.path(flagged_folder_path, paste0(format(Sys.time(), "%Y%m%d%H%M"),"_", .y, ".csv")), row.names = FALSE))
+    purrr::map2(.x = database_dat_only, .y = names(database_dat_only), .f = ~write.csv(.x, file.path(flagged_folder_path, paste0(format(Sys.time(), "%Y-%m-%d-%H%M"),"_", .y, ".csv")), row.names = FALSE))
     #openxlsx::write.xlsx(x = database_flagged, file = paste0(flagged_folder_path, Sys.Date(), "_database_flagged.xlsx"))
   }
 
@@ -186,6 +209,133 @@ check_dataentry <- function(folder_path, return_summary = TRUE, recheck = FALSE 
   }
 }
 
+######################### Importing and merging GPS waypoints ###################
+#' Merges GPS waypoints from a GPX file with waypoints input in the Equipment Log
+#'
+#' this function imports a GPX file stored in the "raw" folder and imports latitude and longitude from matching waypoints into the flagged version of the equipment_log, while adding flags to the flagged equipment_log.csv for potential issues with GPS points.
+#' This function should be run after check_dataentry once all non-GPS flags that can be addressed have been addressed.
+#'
+#' @param folder_path the path of the raw folder in which the data entry xlsx sheets and .GPX file for merging are stored.
+#' @param remerge TRUE/FALSE whether the waypoint data is to be re-merged (TRUE) after addressing waypoint flags or merged for the first time (FALSE)
+#' @export merge_waypoints
+
+merge_waypoints <- function(folder_path, remerge = F){
+
+  raw_folder_path <- paste0(folder_path, "raw")
+  flagged_folder_path <- paste0(folder_path, "flagged")
+
+  gps_file_name <- list.files(path = raw_folder_path, pattern = ".gpx$", full.names = TRUE)
+  if (length(gps_file_name) > 1){
+    stop("Multiple GPX files in raw folder. Merge only one GPX file at a time.")
+  }
+  if (length(gps_file_name) == 0){
+    stop("No GPX file found. Copy GPX file with waypoints into raw folder.")
+  }
+
+  # importing GPS points
+  gps_waypoints <- sf::st_read(gps_file_name,
+                               layer = "waypoints")
+  gps_waypoints$lat <- sf::st_coordinates(x = gps_waypoints)[,2]
+  gps_waypoints$lon <- sf::st_coordinates(x = gps_waypoints)[,1]
+
+  gps_waypoints <- gps_waypoints |>
+    dplyr::select(c(name, lat, lon)) |>
+    dplyr::rename(waypoint = name) |>
+    sf::st_drop_geometry()
+
+  # reading in flagged equipment log
+  equip_log_name <- list.files(path = flagged_folder_path, pattern = "equipment_log.csv$", full.names = TRUE)
+  equip_log <- read.csv(equip_log_name, colClasses = "character")
+  if (length(equip_log_name) == 0){
+    stop("No equipment_log.csv file in flagged folder. To merge GPS points with newly-input equipment log, first run check_dataentry() on a raw .xlsx data template file with equipment log data.")
+  }
+
+  if (remerge == T) {
+    equip_log <- equip_log |>
+      dplyr::mutate(data_flag = stringr::str_remove_all(data_flag, "mult_waypoints_\\S+/"),
+                    data_flag = stringr::str_remove_all(data_flag, "waypoint_not_found_in_GPX/"),
+                    lat = ifelse(stringr::str_detect(comment, "lat/lon_from_"), NA, lat),
+                    lon = ifelse(stringr::str_detect(comment, "lat/lon_from_"), NA, lon),
+                    lat = ifelse(stringr::str_detect(comment, "lat/lon_averaged_from_"), NA, lat),
+                    lon = ifelse(stringr::str_detect(comment, "lat/lon_averaged_from_"), NA, lon),
+                    comment = stringr::str_remove_all(comment, ",?\\s?lat/lon_from_\\S+"),
+                    comment = stringr::str_remove_all(comment, ",?\\s?lat/lon_averaged_from_\\S+"))
+  }
+
+  equip_log <- equip_log |>
+    dplyr::mutate(wpt = ifelse(wpt == "", NA, wpt))
+  equip_log_wpts <- equip_log |>
+    dplyr::mutate(waypoint = stringr::str_remove_all(wpt, pattern = " "),
+                  waypoint = tolower(waypoint), # GPS waypoints are lower case
+                  waypoint = stringr::str_split(waypoint, pattern = ","))|>
+    tidyr::unnest(waypoint) |>
+    dplyr::left_join(gps_waypoints, by = "waypoint") |>
+    dplyr::group_by(date, site, equip_type, serial_id, station_id, action, time)
+
+  # checking that the waypoints that will be averaged are very close to eachother
+  # avoids averaging waypoints that were mis-written (ex 627 and 268) and were not actually taken
+  # at the same time
+
+  equip_log_mult_wpts <- equip_log_wpts |>
+    dplyr::filter(!is.na(waypoint) & lon.y != "") |>
+    sf::st_as_sf(coords = c("lon.y","lat.y"), crs= 4326, remove = FALSE) |>
+    dplyr::filter(dplyr::n_distinct(waypoint) > 1) |>
+    dplyr::summarise(max_dist = suppressWarnings(max(sf::st_distance(geometry))),
+                     wpts = paste(waypoint, collapse = ",")) |>
+    units::drop_units() |>
+    sf::st_drop_geometry()
+
+  equip_log_wpts_mean <- equip_log_wpts |>
+    dplyr::left_join(equip_log_mult_wpts, by = c("date", "site", "equip_type", "serial_id", "station_id", "action", "time")) |>
+    dplyr::summarize(lat = mean(lat.y),
+                     lon = mean(lon.y),
+                     mult_dist = mean(max_dist),
+                     n_wpts = dplyr::n(),
+                     wpts = paste(waypoint, collapse = ",")) |>
+    dplyr::mutate(n_wpts = ifelse(wpts == "NA", 0, n_wpts))
+
+  equip_log_processed <- equip_log |>
+    dplyr::left_join(equip_log_wpts_mean, by = c("date", "site", "equip_type", "serial_id", "station_id", "action", "time")) |>
+    dplyr::mutate(lat.x = as.double(lat.x),
+                  lon.x = as.double(lon.x),
+                  lat = ifelse(is.na(lat.x) == T, lat.y, lat.x),
+                  lon = ifelse(is.na(lon.x) == T, lon.y, lon.x))|> # putting in the lat/lon from the waypoint only when none entered
+    dplyr::mutate(comment = ifelse(is.na(lat.x) == T & is.na(lat) == F & n_wpts > 1 & !is.na(comment) , paste0(comment, ", lat/lon_averaged_from_", wpts),
+                                   ifelse(is.na(lat.x) == T & is.na(lat) == F & n_wpts > 1 & is.na(comment), paste0("lat/lon_averaged_from_", wpts),
+                                          ifelse(is.na(lat.x) == T & is.na(lat) == F & n_wpts == 1 & !is.na(comment), paste0(comment, ", lat/lon_from_", wpts),
+                                                 ifelse(is.na(lat.x) == T & is.na(lat) == F & n_wpts == 1 & is.na(comment), paste0("lat/lon_from_", wpts), comment)))),
+                  data_flag = ifelse(is.na(mult_dist), data_flag,
+                                     ifelse(mult_dist >= 2, paste0(data_flag, "mult_waypoints_", round(mult_dist,2), "m_apart/"), data_flag))
+    )|>
+    dplyr::mutate(data_flag = ifelse(!is.na(wpt) & is.na(lat), paste0(data_flag, "waypoint_not_found_in_GPX/"), data_flag)) |>
+    dplyr::relocate(lat, .after = wpt) |>
+    dplyr::relocate(lon, .after = lat) |>
+    dplyr::select(-c(lat.x, lon.x, lat.y, lon.y, wpts))
+
+  far_wpts <- equip_log_mult_wpts[equip_log_mult_wpts$max_dist > 2,]
+
+  missing_wpts <- equip_log_processed |>
+    dplyr::filter(!is.na(wpt) & is.na(lat))
+
+  equip_log_final <- equip_log_processed |>
+    dplyr::select(-c(mult_dist, n_wpts))
+
+  write.csv(equip_log_final, file = equip_log_name, row.names = F)
+
+  output_message <- paste0("GPS merge successfully complete. Flagged data with merged GPS points have been output in the directory ", getwd(), "/", flagged_folder_path, ". Make all data entry corrections in these flagged files. \n\n")
+
+  print(cat(output_message))
+
+  if(nrow(far_wpts) > 0) {
+    print(far_wpts)
+    warning("The above entries have multiple waypoints >2m apart. \nSee flagged .csv and check waypoints are correct.")}
+
+  if(nrow(missing_wpts) > 0) {
+    warning(paste0("These waypoints were not found in GPX file:", missing_wpts$wpt, ".\n See flagged .csv."))}
+
+}
+
+
 ######################### Importing and Exporting data  ################################
 #' Imports the excel database into R, as a list of multiple tibbles
 #'
@@ -216,16 +366,35 @@ append_to_database <- function(folder_path){
 
   flagged_folder_path <- paste0(folder_path, "flagged")
   clean_folder_path <- paste0(folder_path,  "clean")
+  raw_folder_path <- paste0(folder_path,  "raw")
+
+  # import original database
+  orig_db_filenames <- list.files(path = clean_folder_path, pattern = "parquet$", full.names = TRUE)
+  orig_names <- orig_db_filenames |>
+    gsub(pattern = ".parquet", replacement = "") |>
+    gsub(pattern = paste0(clean_folder_path, "/"), replacement = "")
+
+  orig_database <- purrr::map(.x = orig_db_filenames, .f =~ arrow::read_parquet(file = .x))
+  names(orig_database) <- orig_names
+
+  # create database frame
+  database_frame <- purrr::map(.x = orig_database, .f = function(.x) {.x[0,]})
 
   #import QC'd csv files
   file_names <- list.files(path = flagged_folder_path, pattern = ".csv$", full.names = TRUE)
   file_names_short <- basename(file_names)
 
-  sheet_names <- gsub(".csv", "", gsub(substring(file_names_short, 1, 13), "", file_names_short))
+  sheet_names <- gsub(".csv", "", gsub(substring(file_names_short, 1, 16), "", file_names_short))
 
-  database <- list()
-  database <- purrr::map(.x = file_names, .f = ~tibble::as_tibble(read.csv(.x, colClasses = "character")))
-  names(database) <- sheet_names
+  database_flag_sheets <- list()
+  database_flag_sheets <- purrr::map(.x = file_names, .f = ~tibble::as_tibble(read.csv(.x, colClasses = "character")))
+  names(database_flag_sheets) <- sheet_names
+
+  # putting the new flagged data into the empty database frame
+  database <- database_frame
+  for(x in names(database_flag_sheets)){
+    database[[x]] <- rbind(database[[x]], database_flag_sheets[[x]])
+  }
 
   #final check
   database_flagged <- database
@@ -244,7 +413,7 @@ append_to_database <- function(folder_path){
 
   eq_log_dup <- which(base::duplicated(database_flagged$equipment_log[,c("date", "serial_id", "action", "time")]))
   fish_dup <- which(base::duplicated(database_flagged$fish[,c("date", "site", "capture_method", "capture_time", "species", "length_mm", "dna_id", "tag_serial", "recap" )]))
-  fish_dup <- fish_dup[database_flagged$fish[fish_dup,]$species != "bycatch"] #filtering out bycatch
+  fish_dup <- fish_dup[database_flagged$fish[fish_dup,]$species != "bycatch" & database_flagged$fish[fish_dup,]$species != "other"] #filtering out bycatch
   fykes_dup <- which(base::duplicated(database_flagged$fykes[,c("date", "site", "fyke_id", "out_time", "in_time")]))
   angling_dup <- which(base::duplicated(database_flagged$angling[,c("date", "site", "start_time", "start_lat", "start_lon", "end_time")]))
   cast_dup <- which(base::duplicated(database_flagged$cast_netting[,c("date", "site", "start_time", "start_lat", "start_lon", "end_time")]))
@@ -265,16 +434,8 @@ append_to_database <- function(folder_path){
     stop(cat(dup_report))
   }
 
-  #importing the clean database
-  ori_db_filenames <- list.files(path = clean_folder_path, pattern = "parquet$", full.names = TRUE)
-  ori_db_filenames_short <- list.files(path = clean_folder_path, pattern = "parquet$", full.names = FALSE)
-  ori_db_names <- gsub(pattern = ".parquet", replacement = "", x = ori_db_filenames_short)
-
-  ori_database <- purrr::map(.x = ori_db_filenames, .f =~ arrow::read_parquet(file = .x))
-  names(ori_database) <- ori_db_names
-
   #merging the two
-  appended_database <- purrr::map2(.x = ori_database, .y = database_flagged, .f = function(.x, .y){
+  appended_database <- purrr::map2(.x = orig_database, .y = database_flagged, .f = function(.x, .y){
     appended <- rbind(.x, .y)
     appended
   })
@@ -282,7 +443,7 @@ append_to_database <- function(folder_path){
   #checking for dups in appended db
   eq_log_dup <- which(base::duplicated(appended_database$equipment_log[,c("date", "serial_id", "action", "time")]))
   fish_dup <- which(base::duplicated(appended_database$fish[,c("date", "site", "capture_method", "capture_time", "species", "length_mm", "dna_id", "tag_serial", "recap" )]))
-  fish_dup <- fish_dup[appended_database$fish[fish_dup,]$species != "bycatch"] #filtering out bycatch
+  fish_dup <- fish_dup[appended_database$fish[fish_dup,]$species != "bycatch" & appended_database$fish[fish_dup,]$species != "other"] #filtering out bycatch
   fykes_dup <- which(base::duplicated(appended_database$fykes[,c("date", "site", "fyke_id", "out_time", "in_time")]))
   angling_dup <- which(base::duplicated(appended_database$angling[,c("date", "site", "start_time", "start_lat", "start_lon", "end_time")]))
   cast_dup <- which(base::duplicated(appended_database$cast_netting[,c("date", "site", "start_time", "start_lat", "start_lon", "end_time")]))
@@ -292,19 +453,19 @@ append_to_database <- function(folder_path){
   if(length( c(eq_log_dup, fish_dup, fykes_dup, angling_dup, cast_dup, rt_dup, gps_dup))>0){
     dup_report <- paste0("duplicates were detected between the newly appended flagged dataset and the final database. Please either remove or fix the duplicates.\n
     The following rows in the flagged dataset are duplicates of rows in the final dataset: \n",
-                         "\nequipment_log row id: ", paste0(c(eq_log_dup-nrow(ori_database$equipment_log)), collapse = ", "),
-                         "\n\nfish row id: ", paste0(c(fish_dup-nrow(ori_database$fish)), collapse = ", "),
-                         "\n\nfykes row id: ", paste0(c(fykes_dup-nrow(ori_database$fykes)), collapse = ", "),
-                         "\n\nangling row id: ", paste0(c(angling_dup-nrow(ori_database$angling)), collapse = ", "),
-                         "\n\ncast row id: ", paste0(c(cast_dup-nrow(ori_database$cast_netting)), collapse = ", "),
-                         "\n\nrange_test row id: ", paste0(c(rt_dup-nrow(ori_database$range_test)), collapse = ", "),
-                         "\n\ngps row id: ", paste0(c(gps_dup-nrow(ori_database$gps_records)), collapse = ", "), "\n\n")
+                         "\nequipment_log row id: ", paste0(c(eq_log_dup-nrow(orig_database$equipment_log)), collapse = ", "),
+                         "\n\nfish row id: ", paste0(c(fish_dup-nrow(orig_database$fish)), collapse = ", "),
+                         "\n\nfykes row id: ", paste0(c(fykes_dup-nrow(orig_database$fykes)), collapse = ", "),
+                         "\n\nangling row id: ", paste0(c(angling_dup-nrow(orig_database$angling)), collapse = ", "),
+                         "\n\ncast row id: ", paste0(c(cast_dup-nrow(orig_database$cast_netting)), collapse = ", "),
+                         "\n\nrange_test row id: ", paste0(c(rt_dup-nrow(orig_database$range_test)), collapse = ", "),
+                         "\n\ngps row id: ", paste0(c(gps_dup-nrow(orig_database$gps_records)), collapse = ", "), "\n\n")
 
     stop(cat(dup_report))
   }
 
   #moving curring db to archive folder
-  for(file in ori_db_filenames){
+  for(file in orig_db_filenames){
     file.rename(from = file, to = file.path(paste0(clean_folder_path, "/archive"),
                                             paste0(Sys.Date(), "_",basename(file))))
   }
@@ -314,8 +475,15 @@ append_to_database <- function(folder_path){
     file.rename(from = file, to = file.path(paste0(flagged_folder_path, "/archive"),basename(file)))
   }
 
+  # moving the gpx file to archive (if it exists)
+  gps_file_name <- list.files(path = raw_folder_path, pattern = ".gpx$", full.names = TRUE)
+  for(file in gps_file_name){
+    file.rename(from = file, to = file.path(paste0(raw_folder_path, "/archive"),
+                                          paste0(Sys.Date(), "_",basename(file))))
+  }
+
   #exporting updated version
-  purrr::map2(.x = appended_database, .y = ori_db_filenames, .f = function(.x, .y){
+  purrr::map2(.x = appended_database, .y = orig_db_filenames, .f = function(.x, .y){
     arrow::write_parquet(x = .x, sink = file.path(.y))})
 }
 
@@ -338,7 +506,7 @@ visualize_data_check <- function(flagged_folder_path = NULL, database = NULL){
     #import data
     file_names <- list.files(path = flagged_folder_path, pattern = ".csv$", full.names = TRUE)
     file_names_short <- basename(file_names)
-    sheet_names <- gsub(".csv", "", substring(file_names_short, 14, 100))
+    sheet_names <- gsub(".csv", "", substring(file_names_short, 17, 100))
 
     database <- list()
     database <- purrr::map(.x = file_names, .f = ~tibble::as_tibble(read.csv(.x, colClasses = "character")))
@@ -489,7 +657,7 @@ check_fish <- function(fish){
 
   fish$data_flag <- fish$data_flag <- apply(fish, 1, function(row) {
 
-    if(row["species"] == "bycatch" |
+    if(row["species"] == "other" |
        (is.na(row["tag_serial"])| row["tag_serial"] == "") |
        row["recap"] == "yes"){
       tagging <- FALSE
