@@ -8,7 +8,7 @@
 a vector with entries "vigorous", "normal", "weak"
 }
 \source{
-{condition_codes <- c("vigorous", "normal", "weak")     usethis::use_data(condition_codes)}
+{Running the "make-validation-datafiles.R" script in \code{data-raw}}
 }
 \usage{
 condition_codes

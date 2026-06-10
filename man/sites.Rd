@@ -8,7 +8,7 @@
 A vector of the entries "JEA", "JWE", "JWA", JWH", "JGR", "JMA", "JRU", "JOY", "LEA", "LWE", "LSW", "base", "lab", and "other"
 }
 \source{
-{manually created from the excel data validation, usethis::use_data(sites, overwrite = TRUE)}
+{Running the "make-validation-datafiles.R" script in \code{data-raw}}
 }
 \usage{
 sites

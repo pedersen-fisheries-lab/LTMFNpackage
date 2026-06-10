@@ -8,7 +8,7 @@
 A vector of the entries "fyke", "angling", "castNet", "other"
 }
 \source{
-{manually created from the excel data validation}
+{Running the "make-validation-datafiles.R" script in \code{data-raw}}
 }
 \usage{
 capture_methods

@@ -5,10 +5,10 @@
 \alias{deploy_types}
 \title{Approved deployment type codes}
 \format{
-A vector of the entries "GA", "GR", "RT", "other", "SE"
+A vector of the entries "GA", "GR", "RT","SE", and  "other"
 }
 \source{
-{manually created from the excel data validation}
+{Running the "make-validation-datafiles.R" script in \code{data-raw}}
 }
 \usage{
 deploy_types

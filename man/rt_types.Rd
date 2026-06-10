@@ -8,7 +8,7 @@
 a vector with entries "boat", "fixed_st", "fixed_lt"
 }
 \source{
-{rt_types <- c("boat", "fixed_st", "fixed_lt")           usethis::use_data(rt_types)}
+{Running the "make-validation-datafiles.R" script in \code{data-raw}}
 }
 \usage{
 rt_types

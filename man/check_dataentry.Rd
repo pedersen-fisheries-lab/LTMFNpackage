@@ -8,7 +8,8 @@ check_dataentry(
   folder_path,
   return_summary = TRUE,
   recheck = FALSE,
-  visualize = TRUE
+  visualize = TRUE,
+  testing_mode = FALSE
 )
 }
 \arguments{
@@ -19,6 +20,8 @@ check_dataentry(
 \item{recheck}{TRUE/FALSE whether the data is to be rechecked (TRUE) or checked for the first time (FALSE)}
 
 \item{visualize}{whether you want to return visual items for further data checking}
+
+\item{testing_mode}{When in testing mode, all checks to ensure that data entry is only occurring on the lab computer are removed.}
 }
 \value{
 if visualize = TRUE, this function returns a list of visuals for the data checker to go through

@@ -7,13 +7,19 @@
 #' @param return_summary whether to output a summary of data checking to the console
 #' @param recheck TRUE/FALSE whether the data is to be rechecked (TRUE) or checked for the first time (FALSE)
 #' @param visualize whether you want to return visual items for further data checking
-#'
+#' @param testing_mode When in testing mode, all checks to ensure that data entry is only occurring on the lab computer are removed.
 #' @returns if visualize = TRUE, this function returns a list of visuals for the data checker to go through
 #' @export check_dataentry
-check_dataentry <- function(folder_path, return_summary = TRUE, recheck = FALSE , visualize = TRUE){
+check_dataentry <- function(
+    folder_path,
+    return_summary = TRUE,
+    recheck = FALSE,
+    visualize = TRUE,
+    testing_mode = FALSE
+    ){
 
   #checking that data checking is done in the right place
-  check_folderlocation()
+  check_folderlocation(testing_mode)
 
   if(substring(folder_path, nchar(folder_path), nchar(folder_path))!="/"){
     stop("Please include the final / of the folder path")
@@ -69,27 +75,39 @@ check_dataentry <- function(folder_path, return_summary = TRUE, recheck = FALSE 
       if(is.null(database_list[[i]]$entry_metadata$date[1]) |
          is.null(database_list[[i]]$entry_metadata$enterer_initials[1])){
         missing_entry_data[i] <- TRUE
-      }else{ if(.check_date(as.character(database_list[[i]]$entry_metadata$date[1])) != ""){
+      }else if(.check_date(as.character(database_list[[i]]$entry_metadata$date[1])) != ""){
         entry_date_invalid[i] <- TRUE
-      }
-
-        if(.check_single_initials(database_list[[i]]$entry_metadata$enterer_initials[1]) != ""){
-          entry_initials_invalid[i] <- TRUE
-        }
+      } else if(.check_single_initials(database_list[[i]]$entry_metadata$enterer_initials[1]) != ""){
+        entry_initials_invalid[i] <- TRUE
       }
     }
 
     if(any(missing_entry_data) ){
-      stop(paste0("The following files have missing data entry data: ", paste0(file_names[missing_entry_data], collapse = ", "),
-                  ". both the date and initials of the data enterer are necessary. Please add this data in the entry_metadata sheet"))
+      stop(
+        paste0(
+          "The following files have missing data entry data: ",
+          paste0(file_names[missing_entry_data], collapse = ", "),
+          ". both the date and initials of the data enterer are necessary. Please add this data in the entry_metadata sheet"
+          )
+        )
     }
     if(any(entry_date_invalid)){
-      stop(paste0("The following files have an invalid date for data entry metadata: ", paste0(file_names[entry_date_invalid], collapse = ", "),
-                  ". Please follow the YYYY-MM-DD format for the date in the entry_metadata sheet"))
+      stop(
+        paste0(
+          "The following files have an invalid date for data entry metadata: ",
+          paste0(file_names[entry_date_invalid], collapse = ", "),
+          ". Please follow the YYYY-MM-DD format for the date in the entry_metadata sheet"
+          )
+        )
     }
     if(any(entry_initials_invalid)){
-      stop(paste0("The following files have invalid initials for data entry metadata: ", paste0(file_names[entry_initials_invalid], collapse = ", "),
-                  ". Please write the data enterer's initials as 2 or 3 letters in the entry_metadata sheet"))
+      stop(
+        paste0(
+          "The following files have invalid initials for data entry metadata: ",
+          paste0(file_names[entry_initials_invalid], collapse = ", "),
+                  ". Please write the data enterer's initials as 2 or 3 letters in the entry_metadata sheet"
+          )
+        )
     }
 
     database_list <- purrr::map2(file_names, database_list, function(name, df){
@@ -140,7 +158,9 @@ check_dataentry <- function(folder_path, return_summary = TRUE, recheck = FALSE 
   database_flagged$gps_records <- check_gps_records(database$gps_records)
 
   if(!recheck){
+    #removing metadata and valid_levels sheet.
     database_flagged$entry_metadata <- NULL
+    database_flagged$valid_levels <- NULL
   }
 
   # moving the raw files to an archive folder
@@ -154,9 +174,24 @@ check_dataentry <- function(folder_path, return_summary = TRUE, recheck = FALSE 
 
   # export database_flagged
   if(recheck) {
-    purrr::map2(.x = database_dat_only, .y = file_names, .f = ~write.csv(.x, file.path(.y), row.names = FALSE))
+    purrr::map2(
+      .x = database_dat_only,
+      .y = file_names,
+      .f = ~write.csv(.x, file.path(.y), row.names = FALSE)
+      )
   }else {
-    purrr::map2(.x = database_dat_only, .y = names(database_dat_only), .f = ~write.csv(.x, file.path(flagged_folder_path, paste0(format(Sys.time(), "%Y-%m-%d-%H%M"),"_", .y, ".csv")), row.names = FALSE))
+    purrr::map2(
+      .x = database_dat_only,
+      .y = names(database_dat_only),
+      .f = ~write.csv(
+        .x,
+        file.path(
+          flagged_folder_path,
+          paste0(format(Sys.time(), "%Y-%m-%d-%H%M"),"_", .y, ".csv")
+        ),
+        row.names = FALSE
+        )
+      )
     #openxlsx::write.xlsx(x = database_flagged, file = paste0(flagged_folder_path, Sys.Date(), "_database_flagged.xlsx"))
   }
 
@@ -233,8 +268,9 @@ merge_waypoints <- function(folder_path, remerge = F){
   }
 
   # importing GPS points
-  gps_waypoints <- sf::st_read(gps_file_name,
-                               layer = "waypoints")
+  gps_waypoints <- sf::st_read(
+    gps_file_name,
+    layer = "waypoints")
   gps_waypoints$lat <- sf::st_coordinates(x = gps_waypoints)[,2]
   gps_waypoints$lon <- sf::st_coordinates(x = gps_waypoints)[,1]
 
@@ -322,7 +358,10 @@ merge_waypoints <- function(folder_path, remerge = F){
 
   write.csv(equip_log_final, file = equip_log_name, row.names = F)
 
-  output_message <- paste0("GPS merge successfully complete. Flagged data with merged GPS points have been output in the directory ", getwd(), "/", flagged_folder_path, ". Make all data entry corrections in these flagged files. \n\n")
+  output_message <- paste0(
+    "GPS merge successfully complete. Flagged data with merged GPS points have been output in the directory ",
+    getwd(), "/", flagged_folder_path,
+    ". Make all data entry corrections in these flagged files. \n\n")
 
   print(cat(output_message))
 
@@ -356,9 +395,9 @@ import_database_xl <- function(path){
 #' @param folder_path the new data entry database that has been checked and is ready to add to the main database
 #' @returns a report of the check status for the entry
 #' @export append_to_database
-append_to_database <- function(folder_path){
+append_to_database <- function(folder_path, testing_mode = FALSE){
   #checking that data entry is done in the right place
-  check_folderlocation()
+  check_folderlocation(testing_mode)
 
   if(substring(folder_path, nchar(folder_path), nchar(folder_path))!="/"){
     stop("Please include the final / of the folder path")
@@ -898,11 +937,14 @@ crew_invalid: the crew is not entered correctly. Make sure it is written as 2-3 
 
 ###################. Helper Functions  #############################
 #' Checks that data quality control is done in the right place
-check_folderlocation <- function(){
-  #Checking that data entry is occurring in the right spot
-  #checking device
-  if (Sys.info()[6] != "PedersenLab" |
-      Sys.info()[4] != "DESKTOP-H8SPKU6"){
+check_folderlocation <- function(testing_mode = FALSE){
+
+    #Checking that data entry is occurring in the right spot
+    #checking device
+  if (
+    (Sys.info()[[6]] != "PedersenLab" | Sys.info()[[4]] != "DESKTOP-H8SPKU6") &
+    !testing_mode #when in testing mode, the device used does not matter
+      ){
     message("Data checking should be performed in the database directory of the Lab Surface Pro computer.
             This device does not seem to be the lab surface pro (NodeName: DESKTOP-H8SPKU6), or it is not signed into the PedersenLab account.
             If you wish to proceed, enter \"Y\" into the console. If not, enter \"N\" into the console")
@@ -917,8 +959,13 @@ check_folderlocation <- function(){
       stop("User entry is not valid, Data checking halted")
     }
   }
+
+
+  database_path <- "C:/Users/PedersenLab/Documents/ltmftn_project/ltmftn_database"
   #checking file directory
-  if (getwd() != "C:/Users/PedersenLab/Documents/ltmftn_project/ltmftn_database"){
+  if(getwd() == database_path & testing_mode) {
+   stop("Testing qc functionality should not be done in the main database folder. Switch to a testing environment before proceeding")
+  } else if ((getwd() != database_path) & !testing_mode){
     message(paste0("Your working directory for data checking should be set to \"ltmftn_project/ltmftn_database/internal_database\" on the lab surface pro.
             You can do this with the following line of code: setwd(\"~/ltmftn_project/ltmftn_database/internal_database\").
             The current directory is", getwd(),  ". Please choose one of the following options by entering a number into the console (1, 2, 3):"))
@@ -939,49 +986,3 @@ check_folderlocation <- function(){
   return()
 }
 
-#
-#
-# #
-# #
-# # database <- list(equipment_log=NULL
-# #                  , fish=NULL)
-# # for (i in names.tables) {
-# #   for (j in 1:length(database_list)) {
-# #     temp_data <- database_list[[j]][i]
-# #
-# #     record_list[[i]] <- rbind(record_list[[i]], data.frame(temp_data))
-# #   }
-# # }
-# #
-# # result_df <- do.call(rbind, lapply(names(database_list), function(name) {
-# #   data <- database_list[[name]]$data
-# #   data$df_name <- name
-# #   return(data)
-# # }))
-#
-#
-#
-#
-#
-#
-# for (current_file in file_names){
-#   #importing database
-#   database <- import_database_xl(paste0(folder_path, current_file))
-#
-#   #cheking database
-#   database_flagged <- list()
-#
-#   database_flagged$equipment_log <- check_equipment_log(database$equipment_log)
-#
-#   database_flagged$fish <- check_fish(database$fish)
-#
-#   #the same for all the other sheets "fykes"         "angling"       "cast_netting"  "range_test"    "gps_records"
-#
-#   #exporting flagged database to excel
-#   openxlsx::write.xlsx(x = database_flagged, file = paste0(flagged_folder_path, "/", substring(current_file, 1, I(nchar(current_file)-5)), "_flagged.xlsx"))
-# }
-#
-# #if no comments flagged, immediately append to main database
-# #if( original data_flag column in each sheets is all NA )
-# #append immediately to final database and announce that this was done
-#

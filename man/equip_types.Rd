@@ -5,10 +5,10 @@
 \alias{equip_types}
 \title{Approved equipment type codes}
 \format{
-A vector of the entries "VR2Tx", "VR2W",  "tag",   "RTtag", "VR100", "AMchl", "AMdo",  "AMsal", "GPS"
+A vector of the entries "VR2Tx", "VR2W",  "tag", "RTtag", "VR100", "AMchl", "AMdo",  "AMsal", "GPS", "other"
 }
 \source{
-{manually created from the excel data validation}
+{Running the "make-validation-datafiles.R" script in \code{data-raw}}
 }
 \usage{
 equip_types

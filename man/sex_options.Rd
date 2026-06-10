@@ -8,7 +8,7 @@
 A vector of the entries "MM", "IM", "MF", "IF", "unk"
 }
 \source{
-{manually created from the excel data validation}
+{Running the "make-validation-datafiles.R" script in \code{data-raw}}
 }
 \usage{
 sex_options

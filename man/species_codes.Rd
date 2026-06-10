@@ -3,17 +3,17 @@
 \docType{data}
 \name{species_codes}
 \alias{species_codes}
-\title{Approved fish species codes}
+\title{Approved fish species codes '}
 \format{
-A vector of the entries 'c("COAR",  "COCL", "ESLU",  "MOHU",  "MOSA" , "OSMO", "PEFL", "SAFO", "SANA", "SAVI",  "TITI", "bycatch")
+A vector of the entries 'c("COAR",  "COCL", "ESLU",
 }
 \source{
-{manually created from the excel data validation}
+{Running the "make-validation-datafiles.R" script in \code{data-raw}}
 }
 \usage{
 species_codes
 }
 \description{
-Approved fish species codes
+Approved fish species codes '
 }
 \keyword{datasets}

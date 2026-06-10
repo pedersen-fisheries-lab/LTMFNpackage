@@ -8,7 +8,7 @@
 a vector with entries "V6", "V7", "V8", "V9", "V13", "V16"
 }
 \source{
-{tag_models <- c("V6", "V7", "V8", "V9", "V13", "V16")       usethis::use_data(tag_models)}
+{Running the "make-validation-datafiles.R" script in \code{data-raw}}
 }
 \usage{
 tag_models

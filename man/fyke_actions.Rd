@@ -8,7 +8,7 @@
 A vector of the entries "set", "retrieved", "checked", "moved"
 }
 \source{
-{manually created from the excel data validation}
+{Running the "make-validation-datafiles.R" script in \code{data-raw}}
 }
 \usage{
 fyke_actions

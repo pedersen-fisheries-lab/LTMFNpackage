@@ -5,10 +5,13 @@
 \alias{equipment_actions}
 \title{Approved equipment action codes}
 \format{
-A vector of the entries "On", "Off", "deployed", "retrieved", "moved" , "dataDownload", "checked", "configure", "recharge", "other"
+A vector of the entries "On", "Off", "deployed", "retrieved", "moved","notLocated", "notRetrieved", "located",
+"dataDownload", "checked", "configure", "recharge",  "anchorMid", "anchorEnd",
+"repairSent", "repairReturn", and
+"other"
 }
 \source{
-{manually created from the excel data validation}
+{Running the "make-validation-datafiles.R" script in \code{data-raw}}
 }
 \usage{
 equipment_actions

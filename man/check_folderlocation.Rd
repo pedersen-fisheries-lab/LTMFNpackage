@@ -4,7 +4,7 @@
 \alias{check_folderlocation}
 \title{Checks that data quality control is done in the right place}
 \usage{
-check_folderlocation()
+check_folderlocation(testing_mode = FALSE)
 }
 \description{
 Checks that data quality control is done in the right place

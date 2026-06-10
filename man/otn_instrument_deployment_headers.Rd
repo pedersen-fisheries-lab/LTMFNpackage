@@ -8,7 +8,7 @@
 a vector with character data for all headers in the OTN deployment metadata sheet
 }
 \source{
-{otn_instrument_deployment_headers <- c("OTN_ARRAY",	"STATION_NO",	"DEPLOY_DATE_TIME",	"DEPLOY_LAT",	"DEPLOY_LONG",	"BOTTOM_DEPTH",	"RISER_LENGTH",	"INSTRUMENT_DEPTH",	"INS_MODEL_NO",	"INS_SERIAL_NO"	,"CODE_SET"	,"TRANSMITTER",	"TRANSMIT_MODEL",	"AR_MODEL_NO",	"AR_SERIAL_NO",	"DEPLOYED_BY" ,	"RECOVERED" ,	"RECOVER_DATE_TIME" , "RECOVER_LAT" ,	"RECOVER_LONG" ,"DATA_DOWNLOADED" ,	"DOWNLOAD_DATE_TIME" ,"FILENAME",	"COMMENTS")					usethis::use_data(otn_instrument_deployment_headers)  }
+{Running the "make-validation-datafiles.R" script in \code{data-raw}. Based off Instrument Deployment Metadata data sheet provided by OTN: https://members.oceantrack.org/data/data-collection.}
 }
 \usage{
 otn_instrument_deployment_headers

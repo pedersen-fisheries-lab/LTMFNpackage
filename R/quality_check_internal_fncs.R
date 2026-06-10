@@ -216,7 +216,9 @@
     serial_ref <- c(reference_serial_id$serial_id[reference_serial_id$type == equip_type], "all")
   }
 
-  if (equip_type %in% equip_types |equip_type == "all" ){
+  #if equipment_type is type "other" it does not need a serial number; otherwise
+  #it should have one.
+  if ((equip_type %in% c(equip_types, "all")) & equip_type != "other" ){
     if (is.na(serial)|serial=="") {
       serial_not_entered <- TRUE
     } else if(!(serial %in% c(reference_serial_id$serial_id, "all"))){
@@ -251,7 +253,7 @@
   stnid_deploy_nomatch <- FALSE
   stnid_site_nomatch <- FALSE
 
-  if(! (is.na(stnid) | stnid=="" )){
+  if(! (is.na(stnid) | stnid=="")){
     st_deploy <- substring(stnid, 1, 2)
     st_site <- substring(stnid, 4, 6)
     st_id_num <- substring(stnid, 8, 9)
@@ -373,16 +375,35 @@
   # possible gps special characters ! " # $ % & ' ( ) * + , - . / : ; < > = ? @ [ ] \ ^ _ ` { } | ~
   report <- ""
 
-  all_wpts <- stringr::str_remove_all(unlist(strsplit(wpt,",")), " ")
+  #splits a comma-separated list of waypoints into a vector of waypoints, and
+  #removes whitespace
 
-  if (any(stringr::str_count(all_wpts,pattern = "\\D") != 1)) {
-    invalid_wpt <- TRUE
-  }
-  if (any(! substring(all_wpts,1,1) %in% c("d", "D", "w", "W"))) {
-    invalid_wpt <- TRUE
-  }
-  if (any(stringr::str_count(all_wpts, pattern = "\\d") < 3) | any(stringr::str_count(all_wpts, pattern = "\\d") > 4)) {
-    invalid_wpt <- TRUE
+  all_wpts <- wpt |>
+    strsplit(",") |>
+    unlist() |>
+    stringr::str_remove_all( " ")
+
+  #if the waypoint is missing, it is not an invalid waypoint.
+
+  #TODO: add a check here (in combination with equipment action) to flag key
+  #actions (deploy, retrieve, locate) that should always have an associated
+  #waypoint
+  if(all(is.na(all_wpts))) {
+    invalid_wpt <- FALSE
+  } else{
+    #checks to see if any of the waypoints is an empty string.
+    if (any(stringr::str_count(all_wpts,pattern = "\\D") != 1)) {
+      invalid_wpt <- TRUE
+    }
+    #checks that waypoint names start with the letter d (for Darwin) or w (for Wallace)
+    #These are the field GPS units.
+    if (any(! substring(all_wpts,1,1) %in% c("d", "D", "w", "W"))) {
+      invalid_wpt <- TRUE
+    }
+    #all waypoints in the database should be 3 or 4 digits long.
+    if (any(stringr::str_count(all_wpts, pattern = "\\d") < 3) | any(stringr::str_count(all_wpts, pattern = "\\d") > 4)) {
+      invalid_wpt <- TRUE
+    }
   }
   if(invalid_wpt){
     report <- paste0(report, "invalid_wpt/")
