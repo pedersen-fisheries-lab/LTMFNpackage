@@ -1099,7 +1099,7 @@
     not_entered <- TRUE
   } else if(!is_numeric_like(nrods)){
     invalid <- TRUE
-  } else if (nrods < I(1) | nrods > 20){
+  } else if (as.numeric(nrods) < I(1) | as.numeric(nrods) > 20){
     out_of_range <- TRUE
   }
 
