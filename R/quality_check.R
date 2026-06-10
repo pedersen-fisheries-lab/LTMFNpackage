@@ -271,20 +271,26 @@ merge_waypoints <- function(folder_path, remerge = F){
   gps_waypoints <- sf::st_read(
     gps_file_name,
     layer = "waypoints")
-  gps_waypoints$lat <- sf::st_coordinates(x = gps_waypoints)[,2]
-  gps_waypoints$lon <- sf::st_coordinates(x = gps_waypoints)[,1]
 
-  gps_waypoints <- gps_waypoints |>
-    dplyr::select(c(name, lat, lon)) |>
-    dplyr::rename(waypoint = name) |>
+  gps_waypoints <- sf::st_read(
+    gps_file_name,
+    layer = "waypoints"
+    ) |>
+    dplyr::mutate(
+      lat_wpt = sf::st_coordinates(geometry)[,2],
+      lon_wpt = sf::st_coordinates(geometry)[,1],
+      wpt = name
+    ) |>
+    dplyr::select(wpt, lat_wpt, lon_wpt) |>
     sf::st_drop_geometry()
 
   # reading in flagged equipment log
   equip_log_name <- list.files(path = flagged_folder_path, pattern = "equipment_log.csv$", full.names = TRUE)
-  equip_log <- read.csv(equip_log_name, colClasses = "character")
+
   if (length(equip_log_name) == 0){
     stop("No equipment_log.csv file in flagged folder. To merge GPS points with newly-input equipment log, first run check_dataentry() on a raw .xlsx data template file with equipment log data.")
   }
+  equip_log <- read.csv(equip_log_name, colClasses = "character")
 
   if (remerge == T) {
     equip_log <- equip_log |>
@@ -694,15 +700,16 @@ check_equipment_log <- function(equipment_log){
 check_fish <- function(fish){
   fish$data_flag <- ""
 
-  fish$data_flag <- fish$data_flag <- apply(fish, 1, function(row) {
+  fish$data_flag <- apply(fish, 1, function(row) {
 
-    if(row["species"] == "other" |
-       (is.na(row["tag_serial"])| row["tag_serial"] == "") |
-       row["recap"] == "yes"){
-      tagging <- FALSE
-    } else{
-      tagging <- TRUE
+    if(is.na(row["capture_outcome"])){
+      stop(paste(
+      "cannot proceed with data checking; at least one fish is missing 'capture_outcome' values"
+      ))
     }
+
+    #checks to see if the fish was tagged (
+    tagging <- row["capture_outcome"] == "tagged"
 
     data_flag <- ""
     data_flag <- paste0(data_flag, .check_date(row["date"]))
@@ -710,9 +717,11 @@ check_fish <- function(fish){
     data_flag <- paste0(data_flag, .check_capture_method(row["capture_method"]))
     data_flag <- paste0(data_flag, .check_fykeid(row["fyke_id"]))
     data_flag <- paste0(data_flag, .check_time(row["capture_time"], mandatory = FALSE))
+    data_flag <- paste0(data_flag, .check_wpt(row["capture_wpt"], wpt_type = "capture", mandatory = FALSE))
     data_flag <- paste0(data_flag, .check_lat(row["capture_lat"], mandatory = FALSE))
     data_flag <- paste0(data_flag, .check_lon(row["capture_lon"], mandatory = FALSE))
     data_flag <- paste0(data_flag, .check_species(row["species"]))
+    data_flag <- paste0(data_flag, .check_capture_outcome(row["capture_outcome"], mandatory = TRUE))
     data_flag <- paste0(data_flag, .check_temp(row["temp_c"]))
     data_flag <- paste0(data_flag, .check_condition(row["capture_cond"]))
     data_flag <- paste0(data_flag, .check_length(row["length_mm"]))
@@ -727,6 +736,7 @@ check_fish <- function(fish){
     data_flag <- paste0(data_flag, .check_time(row["surg_end"], mandatory = tagging))
     data_flag <- paste0(data_flag, .check_time(row["recov_end"], mandatory = tagging))
     data_flag <- paste0(data_flag, .check_time(row["release_time"], mandatory = tagging))
+    data_flag <- paste0(data_flag, .check_wpt(row["release_wpt"], wpt_type = "release", mandatory = FALSE))
     data_flag <- paste0(data_flag, .check_lat(row["release_lat"], mandatory = tagging))
     data_flag <- paste0(data_flag, .check_lon(row["release_lon"], mandatory = tagging))
     data_flag <- paste0(data_flag, .check_condition(row["release_cond"], mandatory = tagging))

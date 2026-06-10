@@ -4,7 +4,11 @@
 \alias{.check_wpt}
 \title{Checks to make sure the waypoints are entered in an acceptable format}
 \usage{
-.check_wpt(wpt, mandatory = FALSE)
+.check_wpt(
+  wpt,
+  wpt_type = c("equipment", "capture", "release"),
+  mandatory = FALSE
+)
 }
 \arguments{
 \item{wpt}{a single entry of waypoint names as a comma-separated string}
@@ -15,5 +19,10 @@
 a report of the check status for the entry
 }
 \description{
-CURRENTLY NOT CHECKING ANYTHING> POSSIBLE OPTIONS: checking for the presence of special cahracters, checking from proper comma delimitations
+Currently checks the following info:
+\enumerate{
+\item if waypoints are given by a comma-separated list, are there any missing values?
+\item do waypoints start with a lower-case 'd' or 'w' (corresponding to Darwin or Wallace units)
+\item waypoints should be 3-4 characters long
+}
 }

@@ -8,6 +8,16 @@
 #tab of the Excel sheet
 capture_methods <- c("fyke", "angling", "castNet", "other")
 
+capture_outcomes <- c(
+  "released",
+  "tagged",
+  "euthenizedCapture",
+  "euthenizedSurgery",
+  "euthenizedRecovery",
+  "mortalityCapture",
+  "mortalitySurgery",
+  "mortalityRecovery")
+
 condition_codes <- c("vigorous", "normal", "weak")
 
 deploy_types <- c("GA", "GR", "RT", "SE", "other")
@@ -72,7 +82,8 @@ tag_models <- c("V6", "V7", "V8", "V9", "V13", "V16")
 
 ## Write all valid codes to the data folder ####
 usethis::use_data(
-  capture_methods, condition_codes, deploy_types, equip_types, equipment_actions, fyke_actions,
+  capture_methods, capture_outcomes, condition_codes,
+  deploy_types, equip_types, equipment_actions, fyke_actions,
   otn_tagging_metadata_headers, rt_types, sex_options, sites, species_codes, tag_models,
   overwrite = TRUE
   )

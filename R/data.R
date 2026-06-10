@@ -88,12 +88,24 @@
 #' @source {Running the "make-validation-datafiles.R" script in `data-raw`}
 "deploy_types"
 
+
 #' Approved fish capture method codes
 #'
 #' @format A vector of the entries "fyke", "angling", "castNet", "other"
 #'
 #' @source {Running the "make-validation-datafiles.R" script in `data-raw`}
 "capture_methods"
+
+
+#' Approved fish capture outcome codes
+#'
+#' @format A vector of the entries "released", "tagged",
+#' "euthenizedCapture", "euthenizedSurgery","euthenizedRecovery",
+#' "mortalityCapture" "mortalitySurgery", "mortalityRecovery"
+#'
+#' @source {Running the "make-validation-datafiles.R" script in `data-raw`}
+"capture_outcomes"
+
 
 #' Approved fish species codes '
 #'

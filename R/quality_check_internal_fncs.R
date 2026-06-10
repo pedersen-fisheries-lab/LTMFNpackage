@@ -364,12 +364,19 @@
 
 #' Checks to make sure the waypoints are entered in an acceptable format
 #'
-#' CURRENTLY NOT CHECKING ANYTHING> POSSIBLE OPTIONS: checking for the presence of special cahracters, checking from proper comma delimitations
+#' @description
+#'  Currently checks the following info:
+#'
+#' 1. if waypoints are given by a comma-separated list, are there any missing values?
+#' 2. do waypoints start with a lower-case 'd' or 'w' (corresponding to Darwin or Wallace units)
+#' 3. waypoints should be 3-4 characters long
+#'
 #' @param wpt a single entry of waypoint names as a comma-separated string
 #' @param mandatory TRUE/FALSE designates if the data to be checked is mandatory
 #'
 #' @returns a report of the check status for the entry
-.check_wpt <- function(wpt, mandatory = FALSE){
+.check_wpt <- function(wpt, wpt_type = c("equipment", "capture", "release"), mandatory = FALSE){
+  wpt_type <- match.arg(wpt_type)
   invalid_wpt <- FALSE
 
   # possible gps special characters ! " # $ % & ' ( ) * + , - . / : ; < > = ? @ [ ] \ ^ _ ` { } | ~
@@ -383,30 +390,31 @@
     unlist() |>
     stringr::str_remove_all( " ")
 
-  #if the waypoint is missing, it is not an invalid waypoint.
 
-  #TODO: add a check here (in combination with equipment action) to flag key
-  #actions (deploy, retrieve, locate) that should always have an associated
-  #waypoint
   if(all(is.na(all_wpts))) {
+    #if the waypoint is missing, it is not an invalid waypoint.
+
+    #TODO: add a check here (in combination with equipment action) to flag key
+    #actions (deploy, retrieve, locate) that should always have an associated
+    #waypoint
     invalid_wpt <- FALSE
   } else{
     #checks to see if any of the waypoints is an empty string.
-    if (any(stringr::str_count(all_wpts,pattern = "\\D") != 1)) {
+    if (any(stringr::str_count(all_wpts, pattern = "\\D") != 1)) {
       invalid_wpt <- TRUE
     }
     #checks that waypoint names start with the letter d (for Darwin) or w (for Wallace)
     #These are the field GPS units.
-    if (any(! substring(all_wpts,1,1) %in% c("d", "D", "w", "W"))) {
+    if (any(! substring(all_wpts,1,1) %in% c("d", "w"))) {
       invalid_wpt <- TRUE
     }
-    #all waypoints in the database should be 3 or 4 digits long.
+    #all waypoints in the database should be 3 or 4 characters long.
     if (any(stringr::str_count(all_wpts, pattern = "\\d") < 3) | any(stringr::str_count(all_wpts, pattern = "\\d") > 4)) {
       invalid_wpt <- TRUE
     }
   }
   if(invalid_wpt){
-    report <- paste0(report, "invalid_wpt/")
+    report <- paste0(report, "invalid_", wpt_type, "_wpt/")
   }
 
   return(report)
@@ -428,7 +436,7 @@
   }
 
   if(! is.na(lat)) {
-    if(is.na(as.numeric(lat))){
+    if(!is_numeric_like(lat)){
       lat_invalid <- TRUE
     } else if (as.numeric(lat) < 45.3 | as.numeric(lat) > 55.5 ){
       lat_out_of_range <- TRUE
@@ -463,7 +471,7 @@
   lon_out_of_range <- FALSE
 
   if(!(is.na(lon) | lon == "")){
-    if(is.na(as.numeric(lon))){
+    if(!is_numeric_like(lon)){
       lon_invalid <- TRUE
     } else if (as.numeric(lon) < -79.5 | as.numeric(lon) > -72.5 ){
       lon_out_of_range <- TRUE
@@ -499,7 +507,7 @@
   depth_out_of_range <- FALSE
 
   if(! is.na(depth)){
-    if(is.na(as.numeric(depth))){
+    if(!is_numeric_like(depth)){
       depth_invalid <- TRUE
     } else if (as.numeric(depth) < 0 | as.numeric(depth) > 30){
       depth_out_of_range <- TRUE
@@ -643,6 +651,35 @@
   return(report)
 }
 
+#' Checks outcome of fish capture
+#'
+#' @param outcome a single equipment entry (as a character string)
+#' @param mandatory TRUE/FALSE designates if the data to be checked is mandatory
+#'
+#' @returns a report of the check status for each entry
+.check_capture_outcome <-  function(outcome, mandatory = TRUE){
+  outcome_not_entered <- FALSE
+  outcome_invalid <- FALSE
+
+  if (is.na(outcome) | outcome == "") {
+    outcome_not_entered <- TRUE
+  } else if(!(outcome %in% capture_outcomes)){
+    outcome_invalid <- TRUE
+  }
+
+  #return report
+  report <- ""
+  if (mandatory){
+    if (outcome_not_entered)
+      report <- paste0(report, "capture_outcome_not_entered/")
+  }
+  if(outcome_invalid)
+    report <- paste0(report, "capture_outcome_invalid/")
+
+  return(report)
+}
+
+
 #' Checks to make sure the temp is within sensible bounds
 #'
 #' @param temp a single numeric temp value
@@ -656,7 +693,7 @@
 
   if(is.na(temp) | temp==""){
     temp_not_entered <- TRUE
-  } else if(is.na(as.numeric(temp))){
+  } else if(!is_numeric_like(temp)){
     temp_invalid <- TRUE
   } else if (as.numeric(temp) < I(-4) | as.numeric(temp) > 25){
     temp_out_of_range <- TRUE
@@ -722,7 +759,7 @@
 
   if(is.na(length) | length==""){
     length_not_entered <- TRUE
-  } else if(is.na(as.numeric(length))){
+  } else if(!is_numeric_like(length)){
     length_invalid <- TRUE
   } else if (as.numeric(length) < I(150) | as.numeric(length) > 1500){
     length_out_of_range <- TRUE
@@ -758,7 +795,7 @@
 
   if(is.na(weight) | weight==""){
     weight_not_entered <- TRUE
-  } else if(is.na(as.numeric(weight))){
+  } else if(!is_numeric_like(weight)){
     weight_invalid <- TRUE
   } else if (as.numeric(weight) < I(85) | as.numeric(weight) > 30000){
     weight_out_of_range <- TRUE
@@ -897,9 +934,9 @@
 
   if(is.na(clove_conc) | clove_conc==""){
     clove_conc_not_entered <- TRUE
-  } else if(is.na(as.numeric(clove_conc))){
+  } else if(!is_numeric_like(clove_conc)){
     clove_conc_invalid <- TRUE
-  } else if (as.numeric(clove_conc) < I(0) | as.numeric(clove_conc) > 5){
+  } else if (clove_conc < I(0) | clove_conc > 5){
     #range max set to 5ml/L, based on MFFP eugenol dose of 60mg/L, with a density of 1.0652 g/mL, *100%
     clove_conc_out_of_range <- TRUE
   }
@@ -1060,9 +1097,9 @@
 
   if(is.na(nrods) | nrods==""){
     not_entered <- TRUE
-  } else if(is.na(as.numeric(nrods))){
+  } else if(!is_numeric_like(nrods)){
     invalid <- TRUE
-  } else if (as.numeric(nrods) < I(1) | as.numeric(nrods) > 20){
+  } else if (nrods < I(1) | nrods > 20){
     out_of_range <- TRUE
   }
 
@@ -1125,7 +1162,7 @@
   dist_out_of_range <- FALSE
 
   if(! is.na(dist)){
-    if(is.na(as.numeric(dist))){
+    if(!is_numeric_like(dist)){
       dist_invalid <- TRUE
     } else if (as.numeric(dist) < 0 | as.numeric(dist) > 3000){
       dist_out_of_range <- TRUE

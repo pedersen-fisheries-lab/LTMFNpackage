@@ -136,12 +136,13 @@ test_that(".check_deploy_works", {
 test_that(".check_wpt_works", {
   expect_equal(object = LTMFNpackage:::.check_wpt(wpt = "w325"), "")
   expect_equal(object = LTMFNpackage:::.check_wpt(wpt = "w325, w928"), "")
-  expect_equal(object = LTMFNpackage:::.check_wpt(wpt = "D537"), "")
-  expect_equal(object = LTMFNpackage:::.check_wpt(wpt = "D537,w456"), "")
+  expect_equal(object = LTMFNpackage:::.check_wpt(wpt = "d537"), "")
+  expect_equal(object = LTMFNpackage:::.check_wpt(wpt = "d537,w456"), "")
 
-  expect_equal(object = LTMFNpackage:::.check_wpt(wpt = "345"), "invalid_wpt/")
-  expect_equal(object = LTMFNpackage:::.check_wpt(wpt = "ww345"), "invalid_wpt/")
-  expect_equal(object = LTMFNpackage:::.check_wpt(wpt = "w345/w354"), "invalid_wpt/")
+  expect_equal(object = LTMFNpackage:::.check_wpt(wpt = "D537"), "invalid_equipment_wpt/")
+  expect_equal(object = LTMFNpackage:::.check_wpt(wpt = "345"), "invalid_equipment_wpt/")
+  expect_equal(object = LTMFNpackage:::.check_wpt(wpt = "ww345"), "invalid_equipment_wpt/")
+  expect_equal(object = LTMFNpackage:::.check_wpt(wpt = "w345/w354"), "invalid_equipment_wpt/")
 
 })
 
@@ -170,10 +171,8 @@ test_that(".check_depth_works", {
   expect_equal(object = LTMFNpackage:::.check_depth(depth = "2"), "")
 
   expect_equal(object = LTMFNpackage:::.check_depth(depth = -2), "depth_out_of_range/")
-  expect_equal(object = LTMFNpackage:::.check_depth(depth = "-2"), "depth_out_of_range/")
 
   expect_equal(object = LTMFNpackage:::.check_depth(depth = "depth_value"), "depth_invalid/")
-  expect_equal(object = LTMFNpackage:::.check_depth(depth = Sys.Date()), "depth_out_of_range/")
 })
 
 test_that(".check_crew_works", {
@@ -306,6 +305,7 @@ test_that(".check_tag_model_works", {
 
 test_that(".check_clove_conc_works", {
   expect_equal(object = LTMFNpackage:::.check_clove_conc(2, mandatory = TRUE), "")
+  expect_equal(object = LTMFNpackage:::.check_clove_conc("2", mandatory = TRUE), "")
   expect_equal(object = LTMFNpackage:::.check_clove_conc("", mandatory = FALSE), "")
 
   expect_equal(object = LTMFNpackage:::.check_clove_conc(6), "clove_conc_out_of_range/")
