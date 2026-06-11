@@ -253,7 +253,6 @@ check_dataentry <- function(
 #' @param folder_path the path of the raw folder in which the data entry xlsx sheets and .GPX file for merging are stored.
 #' @param remerge TRUE/FALSE whether the waypoint data is to be re-merged (TRUE) after addressing waypoint flags or merged for the first time (FALSE)
 #' @export merge_waypoints
-
 merge_waypoints <- function(folder_path, remerge = F){
 
   raw_folder_path <- paste0(folder_path, "raw")
@@ -267,116 +266,176 @@ merge_waypoints <- function(folder_path, remerge = F){
     stop("No GPX file found. Copy GPX file with waypoints into raw folder.")
   }
 
+  #TODO: replace this with a step where waypoints are entered into the database and checked,
+  #then this data is loaded to work with GPS data.
+
   # importing GPS points
-  gps_waypoints <- sf::st_read(
-    gps_file_name,
-    layer = "waypoints")
+  gps_waypoints <- load_gps_file(gps_file_name, type = "waypoints")
+
 
   gps_waypoints <- sf::st_read(
     gps_file_name,
     layer = "waypoints"
     ) |>
     dplyr::mutate(
-      lat_wpt = sf::st_coordinates(geometry)[,2],
-      lon_wpt = sf::st_coordinates(geometry)[,1],
+      lat = sf::st_coordinates(geometry)[,2],
+      lon = sf::st_coordinates(geometry)[,1],
       wpt = name
     ) |>
-    dplyr::select(wpt, lat_wpt, lon_wpt) |>
+    dplyr::select(wpt, lat, lon) |>
     sf::st_drop_geometry()
+
 
   # reading in flagged equipment log
-  equip_log_name <- list.files(path = flagged_folder_path, pattern = "equipment_log.csv$", full.names = TRUE)
+  equip_log_files <- list.files(
+    path = flagged_folder_path,
+    pattern = "equipment_log.csv$",
+    full.names = TRUE
+    )
 
-  if (length(equip_log_name) == 0){
+  if (length(equip_log_files) == 0){
     stop("No equipment_log.csv file in flagged folder. To merge GPS points with newly-input equipment log, first run check_dataentry() on a raw .xlsx data template file with equipment log data.")
   }
-  equip_log <- read.csv(equip_log_name, colClasses = "character")
 
-  if (remerge == T) {
-    equip_log <- equip_log |>
-      dplyr::mutate(data_flag = stringr::str_remove_all(data_flag, "mult_waypoints_\\S+/"),
-                    data_flag = stringr::str_remove_all(data_flag, "waypoint_not_found_in_GPX/"),
-                    lat = ifelse(stringr::str_detect(comment, "lat/lon_from_"), NA, lat),
-                    lon = ifelse(stringr::str_detect(comment, "lat/lon_from_"), NA, lon),
-                    lat = ifelse(stringr::str_detect(comment, "lat/lon_averaged_from_"), NA, lat),
-                    lon = ifelse(stringr::str_detect(comment, "lat/lon_averaged_from_"), NA, lon),
-                    comment = stringr::str_remove_all(comment, ",?\\s?lat/lon_from_\\S+"),
-                    comment = stringr::str_remove_all(comment, ",?\\s?lat/lon_averaged_from_\\S+"))
+  missing_wpts_list <- list()
+  far_wpts_list <- list()
+  for(equip_file in equip_log_files){
+
+    equip_log <- read.csv(equip_file, colClasses = "character")  |>
+      dplyr::mutate(
+        row = 1:dplyr::n(),
+        wpt = ifelse(wpt == "", NA, wpt)
+        )
+
+    if (remerge) {
+      equip_log <- equip_log |>
+        dplyr::mutate(
+          data_flag = stringr::str_remove_all(data_flag, "max_waypoint_dist_\\S+/"),
+          data_flag = stringr::str_remove_all(data_flag, "waypoint_not_found_in_GPX/"),
+          lat = ifelse(stringr::str_detect(comment, "lat/lon_from_"), NA, lat),
+          lon = ifelse(stringr::str_detect(comment, "lat/lon_from_"), NA, lon),
+          comment = stringr::str_remove_all(comment, ",?\\s?lat/lon_from_\\S+"),
+          comment = stringr::str_remove_all(comment, ",?\\s?lat/lon_from_\\S+"),
+          comment = stringr::str_remove_all(comment, ",?\\lat/lon_entered_manually")
+          )
+    }
+
+    equip_log_wpts <- equip_log |>
+      dplyr::mutate(
+        wpt_original = wpt,
+        wpt = stringr::str_remove_all(wpt, pattern = " "),
+        wpt = stringr::str_split(wpt, pattern = ",")
+        )|>
+      tidyr::unnest(wpt) |>
+      dplyr::left_join(gps_waypoints, by = "wpt")
+    # checking that the way points that will be averaged are very close to each other
+    # avoids averaging way points that were mis-written (ex 627 and 268) and were not actually taken
+    # at the same time
+
+    equip_log_mult_wpts <- equip_log_wpts |>
+      dplyr::filter(!is.na(wpt) & lon.y != "") |>
+      sf::st_as_sf(coords = c("lon.y","lat.y"), crs= 4326, remove = FALSE) |>
+      dplyr::filter(dplyr::n_distinct(wpt) > 1) |>
+      dplyr::summarise(
+        max_dist_m = suppressWarnings(max(sf::st_distance(geometry))),
+        .by = row
+        ) |>
+      units::drop_units() |>
+      sf::st_drop_geometry()
+
+    equip_log_wpts_mean <- equip_log_wpts |>
+      dplyr::left_join(
+        equip_log_mult_wpts,
+        by = "row"
+        ) |>
+      dplyr::summarize(
+        lat = mean(lat.y),
+        lon = mean(lon.y),
+        max_dist_m = round(mean(max_dist_m),1),
+        n_wpts = dplyr::n(),
+        n_wpts_missing = sum(is.na(lat.y)),
+        .by = row
+        )
+
+    equip_log_processed <- equip_log |>
+      dplyr::left_join(
+        equip_log_wpts_mean,
+        by = "row") |>
+      # putting in the lat/lon from the waypoint only when none entered
+      dplyr::mutate(
+        n_wpts = ifelse(is.na(n_wpts),0,n_wpts),
+        n_wpts_missing = ifelse(is.na(n_wpts_missing)|is.na(wpt), 0, n_wpts_missing),
+        lat.x = as.double(lat.x),
+        lon.x = as.double(lon.x),
+        lat = ifelse(is.na(lat.x) == T, lat.y, lat.x),
+        lon = ifelse(is.na(lon.x) == T, lon.y, lon.x)
+        )|>
+      dplyr::mutate(
+        wpt_comment = dplyr::case_when(
+          !is.na(lat.x)               ~ "lat/lon_entered_manually",
+          !is.na(lat.y) & n_wpts > 1  ~ paste0("lat/lon_from_mean_of", n_wpts,"_wpts"),
+          !is.na(lat.y) & n_wpts == 1 ~ "lat/lon_from_waypoint",
+          n_wpts > 0                  ~ paste0("lat/long_not_available"),
+          TRUE                        ~ ""),
+        comment = ifelse(is.na(comment), "", comment),
+        comment = dplyr::case_when(
+          comment == "" ~ wpt_comment,
+          wpt_comment == "" ~ comment,
+          TRUE  ~ paste0(comment, ", ", wpt_comment)
+        ),
+        wpt_flag = dplyr::case_when(
+          n_wpts == 0        ~ "",
+          n_wpts_missing > 0 ~ "waypoint_not_found_in_GPX/",
+          max_dist_m >= 4     ~  paste0("max_waypoint_dist_", round(max_dist_m,2), "m_apart/"),
+          TRUE               ~ ""),
+        data_flag = paste0(data_flag, wpt_flag)
+      )|>
+      dplyr::relocate(lat, lon, .after = wpt) |>
+      dplyr::select(-c(lat.x, lon.x, lat.y, lon.y, wpt_comment, wpt_flag))
+
+    far_wpts_list[[equip_file]] <- equip_log_processed |>
+      dplyr::filter(max_dist_m > 0 & n_wpts >0) |>
+      dplyr::select(row, wpt, max_dist_m) |>
+      dplyr::mutate(file = equip_file,.before = row)
+
+    missing_wpts_list[[equip_file]] <- equip_log_processed |>
+      dplyr::filter(!is.na(wpt) & is.na(lat)) |>
+      dplyr::select(row, wpt) |>
+      dplyr::mutate(file = equip_file,.before = row)
+
+    equip_log_final <- equip_log_processed |>
+      dplyr::select(-c(max_dist_m, n_wpts, row, n_wpts_missing))
+
+    write.csv(equip_log_final, file = equip_file, row.names = F)
+
+
   }
 
-  equip_log <- equip_log |>
-    dplyr::mutate(wpt = ifelse(wpt == "", NA, wpt))
-  equip_log_wpts <- equip_log |>
-    dplyr::mutate(waypoint = stringr::str_remove_all(wpt, pattern = " "),
-                  waypoint = tolower(waypoint), # GPS waypoints are lower case
-                  waypoint = stringr::str_split(waypoint, pattern = ","))|>
-    tidyr::unnest(waypoint) |>
-    dplyr::left_join(gps_waypoints, by = "waypoint") |>
-    dplyr::group_by(date, site, equip_type, serial_id, station_id, action, time)
-
-  # checking that the waypoints that will be averaged are very close to eachother
-  # avoids averaging waypoints that were mis-written (ex 627 and 268) and were not actually taken
-  # at the same time
-
-  equip_log_mult_wpts <- equip_log_wpts |>
-    dplyr::filter(!is.na(waypoint) & lon.y != "") |>
-    sf::st_as_sf(coords = c("lon.y","lat.y"), crs= 4326, remove = FALSE) |>
-    dplyr::filter(dplyr::n_distinct(waypoint) > 1) |>
-    dplyr::summarise(max_dist = suppressWarnings(max(sf::st_distance(geometry))),
-                     wpts = paste(waypoint, collapse = ",")) |>
-    units::drop_units() |>
-    sf::st_drop_geometry()
-
-  equip_log_wpts_mean <- equip_log_wpts |>
-    dplyr::left_join(equip_log_mult_wpts, by = c("date", "site", "equip_type", "serial_id", "station_id", "action", "time")) |>
-    dplyr::summarize(lat = mean(lat.y),
-                     lon = mean(lon.y),
-                     mult_dist = mean(max_dist),
-                     n_wpts = dplyr::n(),
-                     wpts = paste(waypoint, collapse = ",")) |>
-    dplyr::mutate(n_wpts = ifelse(wpts == "NA", 0, n_wpts))
-
-  equip_log_processed <- equip_log |>
-    dplyr::left_join(equip_log_wpts_mean, by = c("date", "site", "equip_type", "serial_id", "station_id", "action", "time")) |>
-    dplyr::mutate(lat.x = as.double(lat.x),
-                  lon.x = as.double(lon.x),
-                  lat = ifelse(is.na(lat.x) == T, lat.y, lat.x),
-                  lon = ifelse(is.na(lon.x) == T, lon.y, lon.x))|> # putting in the lat/lon from the waypoint only when none entered
-    dplyr::mutate(comment = ifelse(is.na(lat.x) == T & is.na(lat) == F & n_wpts > 1 & !is.na(comment) , paste0(comment, ", lat/lon_averaged_from_", wpts),
-                                   ifelse(is.na(lat.x) == T & is.na(lat) == F & n_wpts > 1 & is.na(comment), paste0("lat/lon_averaged_from_", wpts),
-                                          ifelse(is.na(lat.x) == T & is.na(lat) == F & n_wpts == 1 & !is.na(comment), paste0(comment, ", lat/lon_from_", wpts),
-                                                 ifelse(is.na(lat.x) == T & is.na(lat) == F & n_wpts == 1 & is.na(comment), paste0("lat/lon_from_", wpts), comment)))),
-                  data_flag = ifelse(is.na(mult_dist), data_flag,
-                                     ifelse(mult_dist >= 2, paste0(data_flag, "mult_waypoints_", round(mult_dist,2), "m_apart/"), data_flag))
-    )|>
-    dplyr::mutate(data_flag = ifelse(!is.na(wpt) & is.na(lat), paste0(data_flag, "waypoint_not_found_in_GPX/"), data_flag)) |>
-    dplyr::relocate(lat, .after = wpt) |>
-    dplyr::relocate(lon, .after = lat) |>
-    dplyr::select(-c(lat.x, lon.x, lat.y, lon.y, wpts))
-
-  far_wpts <- equip_log_mult_wpts[equip_log_mult_wpts$max_dist > 2,]
-
-  missing_wpts <- equip_log_processed |>
-    dplyr::filter(!is.na(wpt) & is.na(lat))
-
-  equip_log_final <- equip_log_processed |>
-    dplyr::select(-c(mult_dist, n_wpts))
-
-  write.csv(equip_log_final, file = equip_log_name, row.names = F)
 
   output_message <- paste0(
-    "GPS merge successfully complete. Flagged data with merged GPS points have been output in the directory ",
-    getwd(), "/", flagged_folder_path,
-    ". Make all data entry corrections in these flagged files. \n\n")
+    "\n\nWaypoints merged successfully for all equipment files.\n",
+    "Flagged data with merged GPS points have been output in the directory ",
+    getwd(), "/",
+    flagged_folder_path,
+    ".\n Make all data entry corrections in these flagged files. \n\n"
+    )
 
   print(cat(output_message))
 
+  far_wpts <- dplyr::bind_rows(far_wpts_list)
+  missing_wpts <- dplyr::bind_rows(missing_wpts_list)
+
   if(nrow(far_wpts) > 0) {
+    cat("\nWARNING: The following entries have a maximum distance of >4m between waypoints.\nSee flagged .csv and check waypoints are correct.\n\n")
     print(far_wpts)
-    warning("The above entries have multiple waypoints >2m apart. \nSee flagged .csv and check waypoints are correct.")}
+  }
 
   if(nrow(missing_wpts) > 0) {
-    warning(paste0("These waypoints were not found in GPX file:", missing_wpts$wpt, ".\n See flagged .csv."))}
+    paste0("\nWARNING: The following entries include waypoints missing from the GPX file.\n See flagged .csv.\n\n") |>
+      cat()
+    print(missing_wpts)
+  }
+
 
 }
 

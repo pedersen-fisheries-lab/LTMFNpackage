@@ -57,3 +57,21 @@ is_numeric_like <- function(x) {
   x <- suppressWarnings(as.numeric(x))
   !any(is.na(x))
 }
+
+load_gps_file <- function(file_path, type =  c("waypoints", "tracks")){
+  type <- match.arg(type)
+  gps_data <-   sf::st_read(
+    file_path,
+    layer = type
+  ) |>
+    dplyr::mutate(
+      lat = sf::st_coordinates(geometry)[,2],
+      lon = sf::st_coordinates(geometry)[,1],
+      wpt = name,
+      date_downloaded = lubridate::as_date(time)
+    ) |>
+    dplyr::select(wpt, lat, lon, date_downloaded) |>
+    sf::st_drop_geometry()
+
+  gps_data
+}
