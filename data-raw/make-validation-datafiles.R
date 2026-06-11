@@ -87,3 +87,21 @@ usethis::use_data(
   otn_tagging_metadata_headers, rt_types, sex_options, sites, species_codes, tag_models,
   overwrite = TRUE
   )
+
+# Current package version to the data template ####
+version <- desc::description$new("DESCRIPTION")$get_version()
+version <- as.character(version)
+template_sheet <- openxlsx::loadWorkbook("inst/extdata/LTMFTN_template_datasheet.xlsx")
+
+openxlsx::writeData(
+  wb = template_sheet,
+  sheet = "entry_metadata",
+  x = version,
+  startCol = 1, startRow = 2,
+  rowNames = FALSE)
+
+
+saveWorkbook(template_sheet, "inst/extdata/LTMFTN_template_datasheet.xlsx", overwrite = TRUE)
+
+#TODO: add code to check lists of data validation levels in the spreadsheet against the ones in the
+#package
