@@ -76,6 +76,22 @@ load_gps_file <- function(file_path, type =  c("waypoints", "tracks")){
   gps_data
 }
 
+template_location <- function(){
+  system.file("extdata", "LTMFTN_template_datasheet.xlsx", package = "LTMFNpackage")
+}
+
+template_version <- function(dat = NULL, file_path = NULL){
+  if(is.null(file_path)){
+    file_path <- template_location()
+  }
+  entry_metadata <- readxl::read_excel(file_path,sheet = "entry_metadata")
+  v <- suppressWarnings(entry_metadata$template_version)
+  if(is.null(v)){
+    warning("Template version missing from current sheet. Treating as V0.1.0")
+    v <- "0.1.0"
+  }
+  v
+}
 
 #' Downloads the most recent template file to use for data entry
 #'
@@ -88,7 +104,7 @@ download_current_template <- function(folder_path) {
   if(file.exists(file.path(folder_path, "LTMFTN_template_datasheet.xlsx"))){
     stop("Template file already exists at selected location. Delete old template or choose a new folder before proceeding")
 }
-  current_version <- readxl::read_excel(template_file,sheet = "entry_metadata")$template_version
+  current_version <- get_template_version(template_file)
 
   message(paste0(
   "You will be downloading version ",

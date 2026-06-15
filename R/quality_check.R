@@ -49,7 +49,10 @@ check_dataentry <- function(
     sheet_names <- gsub(".csv", "", gsub(substring(file_names_short, 1, 16)[[1]], "", file_names_short))
 
     database_flag_sheets <- list()
-    database_flag_sheets <- purrr::map(.x = file_names, .f = ~tibble::as_tibble(read.csv(.x, colClasses = "character")))
+    database_flag_sheets <- purrr::map(
+      .x = file_names,
+      .f = ~tibble::as_tibble(read.csv(.x, colClasses = "character"))
+      )
     names(database_flag_sheets) <- sheet_names
 
     # putting the new flagged data into the empty database frame
@@ -64,6 +67,7 @@ check_dataentry <- function(
 
     #IMPORT AND MERGE ALL DATA ENTRY FILES
     database_list <- lapply(file_names, FUN = function(x) import_database_xl(x))
+    version_list <- lapply(file_names, FUN = get_template_version)
     names(database_list) <- filenames_short
 
     #check that data entry information is present
@@ -128,11 +132,16 @@ check_dataentry <- function(
       #Extracting the data entry data from the sheet for each database being checked
       date <- list_entry$entry_metadata$date[1]
       enterer <- list_entry$entry_metadata$enterer_initials[1]
+      template_version <- suppressWarnings(list_entry$entry_metadata$template_version[1])
+      if(is.null(template_version)) {
+        template_version <- "0.1.0"
+      }
 
       #Adding the data entry data to each sheet for each database being checked
       list_entry <- lapply(list_entry, function(list_entry) {
         list_entry$entry_date <- date
         list_entry$entry_initials <- enterer
+        list_entry$template_version <- template_version
         return(list_entry)
       })
       return(list_entry)
@@ -497,6 +506,7 @@ append_to_database <- function(folder_path, testing_mode = FALSE){
   # putting the new flagged data into the empty database frame
   database <- database_frame
   for(x in names(database_flag_sheets)){
+
     database[[x]] <- rbind(database[[x]], database_flag_sheets[[x]])
   }
 
